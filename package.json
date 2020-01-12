@@ -1,0 +1,19 @@
+{
+  "name": "game-project",
+  "version": "1.0.0",
+  "description": "",
+  "author": "zimberzimber",
+  "license": "ISC",
+  "scripts": {
+    "build-main": "browserify src/main/Main.ts -p [ tsify tinyify ] > dist/main.js",
+    "build-worker": "browserify src/workers/TestWorker.ts -p [ tsify tinyify ] > dist/worker.js",
+    "build": "npm run build-main"
+  },
+  "devDependencies": {
+    "browserify": "^16.5.0",
+    "tinyify": "^2.5.2",
+    "tsify": "^4.0.1",
+    "typescript": "^3.7.3"
+  },
+  "dependencies": {}
+}

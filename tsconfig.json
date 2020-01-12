@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "preserveConstEnums": true,
+    "isolatedModules": false,
+    "removeComments": true,
+    "noImplicitAny": false,
+    "declaration": false,
+    "noLib": false,
+    // "lib": [
+    // 	"webworker",
+    // 	"es5",
+    // 	"scripthost"
+    // ],
+    "target": "es5"
+  },
+  "exclude": [
+    //   "src/main"
+    "src/workers"
+  ]
+}
