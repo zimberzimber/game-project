@@ -15,7 +15,7 @@ export class ToDrawLayerContainer {
 
     DrawAll(context: any): void {
         for (let layer = 0; layer < this.maxLayers; layer++) {
-            this[layer].map(dd => dd.Draw(context));
+            this[layer].forEach(dd => dd.Draw(context));
         }
     }
 }

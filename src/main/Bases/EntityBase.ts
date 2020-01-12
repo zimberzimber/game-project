@@ -7,7 +7,7 @@ export class EntityBase {
     enabled: boolean = true;
 
     Update(): void {
-        this.components.map(c => c.Update());
+        this.components.forEach(c => c.Update());
     }
 
     AddComponent(component: ComponentBase): void {

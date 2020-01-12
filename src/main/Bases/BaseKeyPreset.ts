@@ -21,11 +21,11 @@ export abstract class BaseKeyPreset {
     }
 
     private NotifyObserversKeyDown(key: KeyNames): void {
-        this.observers.map(o => o.OnKeyDown(key));
+        this.observers.forEach(o => o.OnKeyDown(key));
     }
 
     private NotifyObserversKeyUp(key: KeyNames): void {
-        this.observers.map(o => o.OnKeyUp(key));
+        this.observers.forEach(o => o.OnKeyUp(key));
     }
 
     private GetKeyName(keyCode: number): KeyNames | null {

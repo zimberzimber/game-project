@@ -16,7 +16,7 @@ export class HitboxPolygon extends HitboxBase {
     }
 
     protected CalculateOverallHitboxRadius() {
-        this.Polyline.map(p => {
+        this.Polyline.forEach(p => {
             let distance = Util.GetDistanceFrom00(p);
             if (distance > this.HitboxOverallRadius)
                 this.HitboxOverallRadius = distance;

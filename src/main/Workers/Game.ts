@@ -55,7 +55,7 @@ export class Game implements IDOMDependant {
 
     GetAllComponentsOfType(type: any) {
         let returned: ComponentBase[] = [];
-        this.entities.map(e => returned = returned.concat(e.GetComponentsOfType(type)));
+        this.entities.forEach(e => returned = returned.concat(e.GetComponentsOfType(type)));
         return returned;
     }
 
@@ -68,12 +68,12 @@ export class Game implements IDOMDependant {
         if (this.paused) return;
 
         // Update all entities
-        this.entities.map(e => e.Update());
+        this.entities.forEach(e => e.Update());
 
         let triggers: HitboxBase[] = this.GetAllComponentsOfType(HitboxBase).filter(c => (c as HitboxBase).GetTriggerState() != TriggerState.NotTrigger) as HitboxBase[];
         let colliders: HitboxBase[] = this.GetAllComponentsOfType(HitboxBase).filter(c => (c as HitboxBase).GetTriggerState() == TriggerState.NotTrigger) as HitboxBase[];
 
-        triggers.map(t => colliders.map(c => {
+        triggers.forEach(t => colliders.forEach(c => {
             if (CheckCollision(t, c)) {
                 t.OnCollision(c);
             }
@@ -82,7 +82,7 @@ export class Game implements IDOMDependant {
         // Draw all drawables
         const dd = new ToDrawLayerContainer();
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.GetAllComponentsOfType(DrawDirectiveBase).map(c => {
+        this.GetAllComponentsOfType(DrawDirectiveBase).forEach(c => {
             const layer = (c as DrawDirectiveBase).DrawLayer;
             dd[layer] = dd[layer].concat(c);
         })
@@ -90,7 +90,7 @@ export class Game implements IDOMDependant {
 
         // Draw collisions if the option is enabled
         if (_G.DrawPolygons)
-            this.GetAllComponentsOfType(HitboxBase).map(c => (c as HitboxBase).DrawHitbox(this.context))
+            this.GetAllComponentsOfType(HitboxBase).forEach(c => (c as HitboxBase).DrawHitbox(this.context))
     }
 
     // Entities need a collision class
