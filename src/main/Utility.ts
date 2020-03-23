@@ -15,7 +15,7 @@ export class Util {
     }
 
     static FPSReletive(number: number): number {
-        return number / _G.FPS;
+        return number * _G.Game.frameDelta;
     }
 
     // https://www.gamefromscratch.com/post/2012/11/24/GameDev-math-recipes-Rotating-one-point-around-another-point.aspx

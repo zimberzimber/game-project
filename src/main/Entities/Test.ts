@@ -15,7 +15,7 @@ export class TestEntity extends EntityBase {
         super();
         this.AddComponent(new ImageDrawDirective(this, DrawLayer.Midground, "player"));
 
-        const hitbox = new HitboxPolygon(this, new Vec2(-15, 0), new Vec2(0, 15), new Vec2(15, 0), new Vec2(0, -15));
+        const hitbox = new HitboxPolygon(this, new Vec2(-25, 0), new Vec2(0, 25), new Vec2(25, 0), new Vec2(0, -25));
 
         hitbox.SetTriggerState(TriggerState.OnEnterTrigger);
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => {

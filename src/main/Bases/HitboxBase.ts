@@ -19,8 +19,7 @@ export abstract class HitboxBase extends ComponentBase {
 
     Update() {
         // Yes yes, ugly double code and all that
-        // But I'm calling the 'if' only once instead of n times :>
-
+        // But I'm calling the 'if' only once instead of N times :>
         if (this.TriggerState == TriggerState.OnEnterTrigger) {
             if (this.UncollisionScript == undefined) {
                 for (let i = 0; i < this.PreviousCollisions.length; i++) {
@@ -73,7 +72,7 @@ export abstract class HitboxBase extends ComponentBase {
     // Script called when a trigger collides with this object
     CollisionScript: CollisionDelegate | undefined;
 
-    
+
     OnCollision(collidedWith: HitboxBase): void {
         if (this.TriggerState == TriggerState.OnEnterTrigger || this.TriggerState == TriggerState.OneTimeTrigger) {
             if (this.PreviousCollisions.indexOf(collidedWith) != -1)

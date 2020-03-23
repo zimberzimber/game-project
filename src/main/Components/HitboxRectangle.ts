@@ -32,10 +32,6 @@ export class HitboxRectangle extends HitboxBase {
         this.CalculateOverallHitboxRadius();
     }
 
-    Update(): void {
-
-    }
-
     DrawHitbox(context: any): void {
         if (!this.CollisionEnabled) return;
 

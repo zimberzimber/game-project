@@ -11,6 +11,7 @@ export abstract class DrawDirectiveBase extends ComponentBase {
         this.DrawLayer = drawLayer;
     }
 
-    abstract Draw(context: any): void;
+    abstract GetWebGlData(): number[];
+    // abstract Draw(context: any): void;
     Update() { }
 }

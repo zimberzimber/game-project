@@ -1,20 +1,16 @@
 import { Game } from "./Workers/Game";
 import { InputHandler } from "./Workers/InputHandler";
-import { ISpriteAtlas } from "./Bases/SpriteAtlas";
-import { LocalSpriteAtlas } from "./Workers/SpriteAtlas";
+import { ISpriteAtlas } from "./Bases/MiscInterfaces";
 
 export class _G {
-    static FPS: number = 30;
     static InputHandler: InputHandler = new InputHandler()
-    static Game: Game = new Game(document.getElementById("game-canvas"));
+    static Game: Game = new Game();
     static SpriteAtlas: ISpriteAtlas;
-    static DrawPolygons: boolean = true;
+    static DebugDraw: boolean = true;
     static EnableDebugControlls: boolean = false;
 }
 
-window.addEventListener('DOMContentLoaded', (event) => {
-    _G.SpriteAtlas = new LocalSpriteAtlas();
-    _G.SpriteAtlas.OnDomLoaded();
+window.addEventListener('DOMContentLoaded', (e) => {
     _G.Game.OnDomLoaded();
 });
 
@@ -29,9 +25,6 @@ window.Freeze = function (): void {
     _G.Game.paused = !_G.Game.paused;
 };
 
-window.SetFPS = function (fps: number): void {
-    _G.FPS = fps;
-}
 
 // let entity = new EntityBase();
 // entity.transform.position.Set(100, 100);
