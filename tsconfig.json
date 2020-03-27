@@ -6,6 +6,7 @@
     "removeComments": true,
     "noImplicitAny": false,
     "declaration": false,
+    "strictNullChecks": true,
     "noLib": false,
     // "lib": [
     // 	"webworker",

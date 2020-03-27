@@ -3,7 +3,6 @@ import { DrawLayer } from "../Models/DrawLayer";
 import { EntityBase } from "./EntityBase";
 
 export abstract class DrawDirectiveBase extends ComponentBase {
-
     DrawLayer: DrawLayer;
 
     constructor(parent: EntityBase, drawLayer: DrawLayer) {
@@ -12,6 +11,5 @@ export abstract class DrawDirectiveBase extends ComponentBase {
     }
 
     abstract GetWebGlData(): number[];
-    // abstract Draw(context: any): void;
     Update() { }
 }

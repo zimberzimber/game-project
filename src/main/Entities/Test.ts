@@ -2,20 +2,16 @@ import { _G } from "../Main";
 import { EntityBase } from "../Bases/EntityBase";
 import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";
 import { HitboxPolygon } from "../Components/HitboxPolygon";
-import { Vec2 } from "../Models/Vec2";
 import { DrawLayer } from "../Models/DrawLayer";
-import { Util } from "../Utility";
 import { HitboxBase } from "../Bases/HitboxBase";
 import { TriggerState } from "../Models/TriggerState";
-import { HitboxRectangle } from "../Components/HitboxRectangle";
-import { HitboxCircle } from "../Components/HitboxCircle";
 
 export class TestEntity extends EntityBase {
     constructor() {
         super();
-        this.AddComponent(new ImageDrawDirective(this, DrawLayer.Midground, "player"));
+        this.AddComponent(new ImageDrawDirective(this, DrawLayer.Midground, "ass", [10, 10]));
 
-        const hitbox = new HitboxPolygon(this, new Vec2(-25, 0), new Vec2(0, 25), new Vec2(25, 0), new Vec2(0, -25));
+        const hitbox = new HitboxPolygon(this, [0, 10], [-10, 0], [0, -10], [10, 0]);
 
         hitbox.SetTriggerState(TriggerState.OnEnterTrigger);
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => {

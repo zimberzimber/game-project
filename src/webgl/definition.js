@@ -1,4 +1,4 @@
-export default {
+shaderSources = {
     vertex: `
 precision mediump float;
 

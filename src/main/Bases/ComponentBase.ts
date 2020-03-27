@@ -1,5 +1,4 @@
 import { EntityBase } from "./EntityBase";
-import { UpdateDelegate } from "./Delegates";
 
 export abstract class ComponentBase {
     parent: EntityBase;

@@ -62,7 +62,7 @@ class SpriteAtlas {
     }
 }
 
-const atlas = new SpriteAtlas();
+const atlas: SpriteAtlas = new SpriteAtlas();
 export default atlas;
 
 // import { ISpriteAtlas } from "../Bases/SpriteAtlas";

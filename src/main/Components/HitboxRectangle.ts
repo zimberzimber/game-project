@@ -3,6 +3,7 @@ import { HitboxType } from "../Models/HitboxType";
 import { EntityBase } from "../Bases/EntityBase";
 import { _G } from "../Main";
 import { TriggerState } from "../Models/TriggerState";
+import { WebglDrawData } from "../Models/WebglDrawData";
 
 export class HitboxRectangle extends HitboxBase {
     HitboxType: HitboxType = HitboxType.Rectangular;
@@ -35,8 +36,8 @@ export class HitboxRectangle extends HitboxBase {
     DrawHitbox(context: any): void {
         if (!this.CollisionEnabled) return;
 
-        const x = this.parent.transform.position.x;
-        const y = this.parent.transform.position.y;
+        const x = this.parent.transform.position[0];
+        const y = this.parent.transform.position[1];
 
         if (this.GetTriggerState() != TriggerState.NotTrigger)
             context.strokeStyle = HitboxBase.DebugHitboxColor;
@@ -45,4 +46,6 @@ export class HitboxRectangle extends HitboxBase {
 
         context.strokeRect(x - this.width / 2, y - this.height / 2, this.width, this.height);
     }
+
+    GetDebugDrawData(): WebglDrawData | null { return null; }
 }

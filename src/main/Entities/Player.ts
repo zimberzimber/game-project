@@ -5,15 +5,14 @@ import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";
 import { DrawLayer } from "../Models/DrawLayer";
 import { TriggerState } from "../Models/TriggerState";
 import { HitboxPolygon } from "../Components/HitboxPolygon";
-import { Vec2 } from "../Models/Vec2";
 
 export class PlayerEntity extends EntityBase {
     constructor() {
         super();
         this.AddComponent(new PlayerMovementComponent(this));
-        this.AddComponent(new ImageDrawDirective(this, DrawLayer.Midground, "player"));
+        this.AddComponent(new ImageDrawDirective(this, DrawLayer.Midground, "heart", [10, 10]));
 
-        const hitbox = new HitboxPolygon(this, new Vec2(0, 10), new Vec2(9, 0), new Vec2(9, -9), new Vec2(-9, -9), new Vec2(-9, 0));
+        const hitbox = new HitboxPolygon(this, [0, 10], [-10, 0], [0, -10], [10, 0]);
         hitbox.SetTriggerState(TriggerState.NotTrigger);
         this.AddComponent(hitbox);
     }

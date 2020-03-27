@@ -4,6 +4,7 @@ import { CollisionDelegate } from "./Delegates";
 import { _G } from "../Main";
 import { TriggerState } from "../Models/TriggerState";
 import CheckCollision from "../Workers/HitboxCollisionChecker";
+import { WebglDrawData } from "../Models/WebglDrawData";
 
 export abstract class HitboxBase extends ComponentBase {
     static DebugHitboxColor = "#FFFF00";
@@ -20,22 +21,28 @@ export abstract class HitboxBase extends ComponentBase {
     Update() {
         // Yes yes, ugly double code and all that
         // But I'm calling the 'if' only once instead of N times :>
-        if (this.TriggerState == TriggerState.OnEnterTrigger) {
+        if (this.PreviousCollisions && this.TriggerState == TriggerState.OnEnterTrigger) {
+
+            const markedIndexes: number[] = [];
+
             if (this.UncollisionScript == undefined) {
                 for (let i = 0; i < this.PreviousCollisions.length; i++) {
                     if (!CheckCollision(this, this.PreviousCollisions[i]))
-                        this.PreviousCollisions[i] = null;
+                        markedIndexes.push(i);
                 }
             } else {
                 for (let i = 0; i < this.PreviousCollisions.length; i++) {
                     if (!CheckCollision(this, this.PreviousCollisions[i])) {
                         this.UncollisionScript(this.PreviousCollisions[i]);
-                        this.PreviousCollisions[i] = null;
+                        markedIndexes.push(i);
                     }
                 }
             }
 
-            this.PreviousCollisions = this.PreviousCollisions.filter(h => h != null);
+            for (let i = markedIndexes.length - 1; i >= 0; i--) {
+                this.PreviousCollisions.splice(markedIndexes[i], 1);
+            }
+
         }
     };
 
@@ -74,7 +81,7 @@ export abstract class HitboxBase extends ComponentBase {
 
 
     OnCollision(collidedWith: HitboxBase): void {
-        if (this.TriggerState == TriggerState.OnEnterTrigger || this.TriggerState == TriggerState.OneTimeTrigger) {
+        if (this.PreviousCollisions && (this.TriggerState == TriggerState.OnEnterTrigger || this.TriggerState == TriggerState.OneTimeTrigger)) {
             if (this.PreviousCollisions.indexOf(collidedWith) != -1)
                 return;
             else
@@ -92,5 +99,6 @@ export abstract class HitboxBase extends ComponentBase {
     }
 
     protected abstract CalculateOverallHitboxRadius(): void;
+    abstract GetDebugDrawData(): WebglDrawData | null;
     abstract DrawHitbox(context: any): void;
 }
