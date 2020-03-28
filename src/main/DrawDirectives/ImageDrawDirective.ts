@@ -18,8 +18,8 @@ export class ImageDrawDirective extends DrawDirectiveBase {
         const ox = this.size[0] / 2;
         const oy = this.size[1] / 2;
 
-        const rx = Math.sin(this.parent.transform.GetRotation());
-        const ry = Math.cos(this.parent.transform.GetRotation());
+        const rx = Math.sin(this.parent.transform.GetRotationRadian());
+        const ry = Math.cos(this.parent.transform.GetRotationRadian());
 
         const sd = SpriteAtlas.GetStaticSprite(this.spriteName);
 
