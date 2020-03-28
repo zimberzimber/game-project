@@ -9,6 +9,8 @@ import { IDOMDependant } from "../Bases/MiscInterfaces";
 import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";
 import { TestEntity } from "../Entities/Test";
 import { WebglDrawData } from "../Models/WebglDrawData";
+import WebglProxy from "../Proxies/WebglProxy";
+import ShaderSourcesProxy from "../Proxies/ShaderSourcesProxy";
 
 export class Game implements IDOMDependant {
     canvas: any;
@@ -30,20 +32,13 @@ export class Game implements IDOMDependant {
         this.canvas.width = 600;
         this.canvas.height = 500;
 
-
-
-        //@ts-ignore
-        window.webglDef.init(window.shaderSources.vertex, window.shaderSources.fragment, this.canvas, document.getElementById('sprites'))
-
-
+        WebglProxy.Init(ShaderSourcesProxy.GetVertexShader(), ShaderSourcesProxy.GetFragmentShader(), this.canvas, document.getElementById('sprites'))
 
         this.entities = [];
-
         this.playerEntity = new PlayerEntity();
         this.AddEntity(this.playerEntity);
 
-
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 10; i++) {
             const p = new TestEntity();
             p.transform.position = [-300 * Math.random(), -250 * Math.random()];
             this.AddEntity(p);
@@ -97,23 +92,23 @@ export class Game implements IDOMDependant {
         }));
 
         // Collect all drawing data:
-
-        let triangleVertexes: number[] = [];
-        let triangleIndexes: number[] = [];
-
         const dds = this.GetAllComponentsOfType(ImageDrawDirective);
+        const triangleData: WebglDrawData = {
+            vertexes: [],
+            indexes: [],
+        };
+
         for (let i = 0; i < dds.length; i++) {
-            triangleVertexes = triangleVertexes.concat((dds[i] as ImageDrawDirective).GetWebGlData());
+            triangleData.vertexes = triangleData.vertexes.concat((dds[i] as ImageDrawDirective).GetWebGlData());
 
             const s = i * 4;
-            triangleIndexes = triangleIndexes.concat([
+            triangleData.indexes = triangleData.indexes.concat([
                 s, s + 1, s + 2,
                 s, s + 2, s + 3
             ]);
         }
 
-        //@ts-ignore
-        window.webglDef.setTriangleData(triangleVertexes, triangleIndexes);
+        WebglProxy.SetTriangleData(triangleData);
 
         // Draw collisions if the option is enabled
         if (_G.DebugDraw) {
@@ -126,52 +121,26 @@ export class Game implements IDOMDependant {
             //     this.fpsCounter = 0;
             // }
 
-            let indexOffset = triangleIndexes[triangleIndexes.length - 1] + 1;
-            const lineData: any[] = [];
+            let indexOffset = triangleData.indexes[triangleData.indexes.length - 1] + 1;
+            const lineData: WebglDrawData[] = [];
             const hitboxes = this.GetAllComponentsOfType(HitboxBase) as HitboxBase[];
 
             for (let i = 0; i < hitboxes.length; i++) {
-                const data: WebglDrawData | null = hitboxes[i].GetDebugDrawData()
-                if (data) {
-                    for (let j = 0; j < data.indexes.length; j++)
-                        data.indexes[j] += indexOffset;
+                const hData: WebglDrawData | null = hitboxes[i].GetDebugDrawData()
+                if (hData) {
+                    for (let j = 0; j < hData.indexes.length; j++)
+                        hData.indexes[j] += indexOffset;
 
-                    indexOffset += data.indexes.length - 2;
-                    lineData.push({ v: data.vertexes, i: data.indexes });
+                    indexOffset += hData.indexes.length - 2;
+                    lineData.push(hData);
                 }
                 indexOffset += 1;
             }
 
-            //@ts-ignore
-            window.webglDef.setLineData(lineData);
+            WebglProxy.SetLineData(lineData);
         }
 
-        //@ts-ignore
-        window.webglDef.draw();
-
-        // Draw all drawables
-        // const dd = new ToDrawLayerContainer();
-        // this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        // this.GetAllComponentsOfType(DrawDirectiveBase).forEach(c => {
-        //     const layer = (c as DrawDirectiveBase).DrawLayer;
-        //     dd[layer] = dd[layer].concat(c);
-        // })
-        // dd.DrawAll(this.context);
-
-        // Draw collisions if the option is enabled
-        // if (_G.DebugDraw) {
-        //     this.fpsCounter++;
-        //     this.GetAllComponentsOfType(HitboxBase).forEach(c => (c as HitboxBase).DrawHitbox(this.context))
-        //     const time = new Date().getTime();
-
-        //     if (time - this.oldTime >= 250) {
-        //         this.fpsDisplay = Math.floor(this.fpsCounter / (time - this.oldTime) * 1000);
-        //         this.oldTime = time;
-        //         this.fpsCounter = 0;
-        //     }
-
-        //     this.context.fillText(this.fpsDisplay, 10, 10);
-        // }
+        WebglProxy.Draw();
     }
 
     // Entities need a collision class

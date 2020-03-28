@@ -56,22 +56,4 @@ export class HitboxPolygon extends HitboxBase {
 
         return { vertexes, indexes };
     };
-
-    DrawHitbox(context: any): void {
-        if (!this.CollisionEnabled) return;
-        if (this.Polyline.length < 2) return;
-
-        const polyline = this.GetCanvasReletivePolyline();
-
-        context.strokeStyle = this.GetTriggerState() != TriggerState.NotTrigger ? HitboxBase.DebugHitboxColor : HitboxBase.DebugTriggerColor
-        context.beginPath();
-        context.moveTo(polyline[0][0], polyline[0][1]);
-
-        for (let i = 1; i <= polyline.length; i++) {
-            const point = polyline[i % polyline.length];
-            context.lineTo(point[0], point[1]);
-        }
-
-        context.stroke();
-    }
 }

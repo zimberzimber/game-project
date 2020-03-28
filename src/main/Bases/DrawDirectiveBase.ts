@@ -1,13 +1,9 @@
 import { ComponentBase } from "./ComponentBase";
-import { DrawLayer } from "../Models/DrawLayer";
 import { EntityBase } from "./EntityBase";
 
 export abstract class DrawDirectiveBase extends ComponentBase {
-    DrawLayer: DrawLayer;
-
-    constructor(parent: EntityBase, drawLayer: DrawLayer) {
+    constructor(parent: EntityBase) {
         super(parent);
-        this.DrawLayer = drawLayer;
     }
 
     abstract GetWebGlData(): number[];

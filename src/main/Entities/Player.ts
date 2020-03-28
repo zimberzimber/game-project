@@ -2,7 +2,6 @@ import { _G } from "../Main";
 import { EntityBase } from "../Bases/EntityBase";
 import { PlayerMovementComponent } from "../Components/PlayerMovementComponent";
 import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";
-import { DrawLayer } from "../Models/DrawLayer";
 import { TriggerState } from "../Models/TriggerState";
 import { HitboxPolygon } from "../Components/HitboxPolygon";
 
@@ -10,9 +9,9 @@ export class PlayerEntity extends EntityBase {
     constructor() {
         super();
         this.AddComponent(new PlayerMovementComponent(this));
-        this.AddComponent(new ImageDrawDirective(this, DrawLayer.Midground, "heart", [10, 10]));
+        this.AddComponent(new ImageDrawDirective(this, "heart", [10, 10]));
 
-        const hitbox = new HitboxPolygon(this, [0, 10], [-10, 0], [0, -10], [10, 0]);
+        const hitbox = new HitboxPolygon(this, [0, 30], [-10, 0], [0, -10], [10, 0]);
         hitbox.SetTriggerState(TriggerState.NotTrigger);
         this.AddComponent(hitbox);
     }

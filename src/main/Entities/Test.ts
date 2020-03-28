@@ -2,14 +2,13 @@ import { _G } from "../Main";
 import { EntityBase } from "../Bases/EntityBase";
 import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";
 import { HitboxPolygon } from "../Components/HitboxPolygon";
-import { DrawLayer } from "../Models/DrawLayer";
 import { HitboxBase } from "../Bases/HitboxBase";
 import { TriggerState } from "../Models/TriggerState";
 
 export class TestEntity extends EntityBase {
     constructor() {
         super();
-        this.AddComponent(new ImageDrawDirective(this, DrawLayer.Midground, "ass", [10, 10]));
+        this.AddComponent(new ImageDrawDirective(this, "ass", [50, 50]));
 
         const hitbox = new HitboxPolygon(this, [0, 10], [-10, 0], [0, -10], [10, 0]);
 

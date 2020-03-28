@@ -1,15 +1,12 @@
 import { ComponentBase } from "./ComponentBase";
 import { HitboxType } from "../Models/HitboxType";
-import { CollisionDelegate } from "./Delegates";
+import { CollisionDelegate } from "../Models/Delegates";
 import { _G } from "../Main";
 import { TriggerState } from "../Models/TriggerState";
 import CheckCollision from "../Workers/HitboxCollisionChecker";
 import { WebglDrawData } from "../Models/WebglDrawData";
 
 export abstract class HitboxBase extends ComponentBase {
-    static DebugHitboxColor = "#FFFF00";
-    static DebugTriggerColor = "#FF0000";
-
     HitboxType: HitboxType = HitboxType.Base;
     HitboxOverallRadius: number = 0;
     CollisionEnabled: boolean = true;
@@ -100,5 +97,4 @@ export abstract class HitboxBase extends ComponentBase {
 
     protected abstract CalculateOverallHitboxRadius(): void;
     abstract GetDebugDrawData(): WebglDrawData | null;
-    abstract DrawHitbox(context: any): void;
 }

@@ -2,8 +2,8 @@ import { HitboxBase } from "../Bases/HitboxBase";
 import { HitboxType } from "../Models/HitboxType";
 import { EntityBase } from "../Bases/EntityBase";
 import { _G } from "../Main";
-import { TriggerState } from "../Models/TriggerState";
 import { WebglDrawData } from "../Models/WebglDrawData";
+import { TriggerState } from "../Models/TriggerState";
 
 export class HitboxRectangle extends HitboxBase {
     HitboxType: HitboxType = HitboxType.Rectangular;
@@ -33,19 +33,21 @@ export class HitboxRectangle extends HitboxBase {
         this.CalculateOverallHitboxRadius();
     }
 
-    DrawHitbox(context: any): void {
-        if (!this.CollisionEnabled) return;
+    // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
+    GetDebugDrawData(): WebglDrawData | null {
+        if (!this.CollisionEnabled) return null;
 
-        const x = this.parent.transform.position[0];
-        const y = this.parent.transform.position[1];
+        const colorY = this.GetTriggerState() == TriggerState.NotTrigger ? 0 : 0.01
 
-        if (this.GetTriggerState() != TriggerState.NotTrigger)
-            context.strokeStyle = HitboxBase.DebugHitboxColor;
-        else
-            context.strokeStyle = HitboxBase.DebugTriggerColor;
+        const vertexes: number[] = [
+            this.parent.transform.position[0] + this.width / 2, this.parent.transform.position[1] + this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
+            this.parent.transform.position[0] - this.width / 2, this.parent.transform.position[1] + this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
+            this.parent.transform.position[0] - this.width / 2, this.parent.transform.position[1] - this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
+            this.parent.transform.position[0] + this.width / 2, this.parent.transform.position[1] - this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
+        ];
 
-        context.strokeRect(x - this.width / 2, y - this.height / 2, this.width, this.height);
-    }
+        const indexes: number[] = [0, 1, 2, 3, 0];
 
-    GetDebugDrawData(): WebglDrawData | null { return null; }
+        return { vertexes, indexes };
+    };
 }
