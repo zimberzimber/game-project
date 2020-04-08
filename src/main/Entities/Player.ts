@@ -6,13 +6,15 @@ import { TriggerState } from "../Models/TriggerState";
 import { HitboxPolygon } from "../Components/HitboxPolygon";
 import Vec2Utils from "../Utility/Vec2";
 import ScalarUtil from "../Utility/Scalar";
+import { HitboxCircle } from "../Components/HitboxCircle";
 
 export class PlayerEntity extends EntityBase {
-    constructor() {
-        super();
+    constructor(parent: EntityBase | void) {
+        super(parent);
         this.AddComponent(new PlayerMovementComponent(this));
         this.AddComponent(new ImageDrawDirective(this, "heart", [10, 10]));
 
+        // const hitbox = new HitboxCircle(this, 10);
         const hitbox = new HitboxPolygon(this, [0, 30], [-10, 0], [0, -10], [10, 0]);
         hitbox.SetTriggerState(TriggerState.NotTrigger);
         this.AddComponent(hitbox);

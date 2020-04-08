@@ -4,15 +4,19 @@ import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";
 import { HitboxPolygon } from "../Components/HitboxPolygon";
 import { HitboxBase } from "../Bases/HitboxBase";
 import { TriggerState } from "../Models/TriggerState";
+import Vec2Utils from "../Utility/Vec2";
+import ScalarUtil from "../Utility/Scalar";
+import { HitboxCircle } from "../Components/HitboxCircle";
 
 export class TestEntity extends EntityBase {
-    constructor() {
-        super();
-        this.AddComponent(new ImageDrawDirective(this, "ass", [50, 50]));
+    constructor(parent: EntityBase | void) {
+        super(parent);
+        this.AddComponent(new ImageDrawDirective(this, "ass", [10, 10]));
 
-        const hitbox = new HitboxPolygon(this, [0, 10], [-10, 0], [0, -10], [10, 0]);
+        // const hitbox = new HitboxPolygon(this, [0, 10], [-10, 0], [0, -10], [10, 0]);
+        const hitbox = new HitboxCircle(this, 10);
 
-        hitbox.SetTriggerState(TriggerState.OnEnterTrigger);
+        hitbox.SetTriggerState(TriggerState.ContinuousTrigger);
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => {
             console.log('Ding!');
         }
@@ -26,7 +30,5 @@ export class TestEntity extends EntityBase {
 
     Update() {
         super.Update();
-        // this.transform.RotateTowardsEntity(_G.Game.playerEntity, Util.FPSReletive(180));
-        // this.transform.MoveForward(Util.FPSReletive(300));
     }
 }

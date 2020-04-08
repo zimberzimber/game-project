@@ -47,11 +47,13 @@ class Vec2Utils {
         ];
 
     // Derived from the RotatePointAroundCenter method
-    static RotatePoint = (point: Vec2, radian: number): Vec2 =>
-        [
+    static RotatePoint = (point: Vec2, radian: number): Vec2 => {
+        if (radian == 0) return point;
+        return [
             Math.cos(-radian) * point[0] - Math.sin(-radian) * point[1],
             Math.sin(-radian) * point[0] + Math.cos(-radian) * point[1],
         ];
+    }
 }
 
 export default Vec2Utils;

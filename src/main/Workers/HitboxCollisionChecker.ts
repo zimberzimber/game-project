@@ -60,8 +60,10 @@ export default function CheckCollision(trigger: HitboxBase, collision: HitboxBas
 // Initial check - Checks whether the distance between the two colliders is small enough to before performing more complex checks
 // Basically checks if the distance between the center of two colliders is not greater than the sum of their HitboxOverallRadius
 function IsInCollisionRange(a: HitboxBase, b: HitboxBase): boolean {
-    const distance = Vec2Utils.Distance(a.parent.transform.position, b.parent.transform.position);
-    return distance <= a.HitboxOverallRadius + b.HitboxOverallRadius;
+    const aTrans = a.parent.GetWorldRelativeTransform();
+    const bTrans = b.parent.GetWorldRelativeTransform();
+    const distance = Vec2Utils.Distance(aTrans.position, bTrans.position);
+    return distance <= a.HitboxOverallRadius * Math.max(aTrans.scale[0], aTrans.scale[1]) + b.HitboxOverallRadius * Math.max(bTrans.scale[0], bTrans.scale[1]);
 }
 
 function IsPointInPolygon(point: Vec2, polyline: Vec2[]): boolean {
@@ -163,19 +165,23 @@ function Rectangle_Polygon(a: HitboxRectangle, b: HitboxPolygon): boolean {
 
 // Circle vs Circle, Polygon
 function Circle_Circle(a: HitboxCircle, b: HitboxCircle): boolean {
-    return Vec2Utils.Distance(a.parent.transform.position, b.parent.transform.position) <= a.GetRadius() + b.GetRadius();
+    const aTrans = a.parent.GetWorldRelativeTransform();
+    const bTrans = b.parent.GetWorldRelativeTransform();
+    const collisionDistance = a.GetRadius() * ((aTrans.scale[0] + aTrans.scale[1]) / 2) + b.GetRadius() * ((bTrans.scale[0] + bTrans.scale[1]) / 2)
+    return Vec2Utils.Distance(aTrans.position, bTrans.position) <= collisionDistance;
 }
 
 // This doesn't cover some edge cases... but it should... maybe one day...
 function Circle_Polygon(a: HitboxCircle, b: HitboxPolygon): boolean {
     const polyline = b.GetCanvasReletivePolyline();
+    const circleTransform = a.parent.GetWorldRelativeTransform();
 
     for (let i = 0; i < polyline.length; i++)
-        if (Vec2Utils.Distance(a.parent.transform.position, polyline[i]) <= a.GetRadius())
+        if (Vec2Utils.Distance(circleTransform.position, polyline[i]) <= a.GetRadius())
             return true;
 
     // EDGE CASE: Polygons origin might not be inside the actual polygon
-    const closestPointToPolygonOrigin = Vec2Utils.MoveTowards(a.parent.transform.position, b.parent.transform.position, a.GetRadius(), false)
+    const closestPointToPolygonOrigin = Vec2Utils.MoveTowards(circleTransform.position, b.parent.GetWorldRelativeTransform().position, a.GetRadius(), false)
     if (IsPointInPolygon(closestPointToPolygonOrigin, polyline))
         return true;
 

@@ -3,6 +3,9 @@ import { HitboxType } from "../Models/HitboxType";
 import { EntityBase } from "../Bases/EntityBase";
 import { _G } from "../Main";
 import { WebglDrawData } from "../Models/WebglDrawData";
+import { TriggerState } from "../Models/TriggerState";
+import Vec2Utils from "../Utility/Vec2";
+import ScalarUtil from "../Utility/Scalar";
 
 export class HitboxCircle extends HitboxBase {
     HitboxType: HitboxType = HitboxType.Circular;
@@ -24,5 +27,23 @@ export class HitboxCircle extends HitboxBase {
         this.CalculateOverallHitboxRadius();
     }
 
-    GetDebugDrawData(): WebglDrawData | null { return null; }
+    GetDebugDrawData(): WebglDrawData | null {
+        if (!this.CollisionEnabled) return null;
+
+        const colorY = this.GetTriggerState() == TriggerState.NotTrigger ? 0 : 0.01
+        const absTransform = this.parent.GetWorldRelativeTransform();
+        const radius = (absTransform.scale[0] + absTransform.scale[1]) / 2 * this.radius;
+
+        let vertexes: number[] = [];
+        let indexes: number[] = [];
+
+        for (let i = 0; i < 180; i++) {
+            const pos = Vec2Utils.Sum(absTransform.position, Vec2Utils.RotatePoint([radius, 0], ScalarUtil.ToRadian(i * 2)));
+            vertexes = vertexes.concat([pos[0], pos[1], 1, 0, 0, 0, 0, 1, colorY])
+            indexes.push(i);
+        }
+        indexes.push(0);
+
+        return { vertexes, indexes };
+    }
 }

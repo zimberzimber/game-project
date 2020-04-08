@@ -15,20 +15,22 @@ export class ImageDrawDirective extends DrawDirectiveBase {
     }
 
     GetWebGlData(): number[] {
-        const ox = this.size[0] / 2;
-        const oy = this.size[1] / 2;
+        const absTransform = this.parent.GetWorldRelativeTransform();
 
-        const rx = Math.sin(this.parent.transform.GetRotationRadian());
-        const ry = Math.cos(this.parent.transform.GetRotationRadian());
+        const ox = this.size[0] / 2 * absTransform.scale[0];
+        const oy = this.size[1] / 2 * absTransform.scale[1];
+
+        const rx = Math.sin(absTransform.GetRotationRadian());
+        const ry = Math.cos(absTransform.GetRotationRadian());
 
         const sd = SpriteAtlas.GetStaticSprite(this.spriteName);
 
         // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
         return [
-            this.parent.transform.position[0], this.parent.transform.position[1], 0, ox, oy, rx, ry, sd.coords[0] + sd.size[0], sd.coords[1],
-            this.parent.transform.position[0], this.parent.transform.position[1], 0, -ox, oy, rx, ry, sd.coords[0], sd.coords[1],
-            this.parent.transform.position[0], this.parent.transform.position[1], 0, -ox, -oy, rx, ry, sd.coords[0], sd.coords[1] + sd.size[1],
-            this.parent.transform.position[0], this.parent.transform.position[1], 0, ox, -oy, rx, ry, sd.coords[0] + sd.size[0], sd.coords[1] + sd.size[1],
+            absTransform.position[0], absTransform.position[1], 0, ox, oy, rx, ry, sd.coords[0] + sd.size[0], sd.coords[1],
+            absTransform.position[0], absTransform.position[1], 0, -ox, oy, rx, ry, sd.coords[0], sd.coords[1],
+            absTransform.position[0], absTransform.position[1], 0, -ox, -oy, rx, ry, sd.coords[0], sd.coords[1] + sd.size[1],
+            absTransform.position[0], absTransform.position[1], 0, ox, -oy, rx, ry, sd.coords[0] + sd.size[0], sd.coords[1] + sd.size[1],
         ];
     }
 }

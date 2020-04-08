@@ -17,7 +17,6 @@ export class Game implements IDOMDependant {
     interval: any;
     entities: EntityBase[];
     FPSInterval: number;
-    playerEntity: EntityBase;
     paused: boolean = false;
 
     frameDelta: number = 0;
@@ -35,18 +34,35 @@ export class Game implements IDOMDependant {
         WebglProxy.Init(ShaderSourcesProxy.GetVertexShader(), ShaderSourcesProxy.GetFragmentShader(), this.canvas, document.getElementById('sprites'))
 
         this.entities = [];
-        this.playerEntity = new PlayerEntity();
-        this.AddEntity(this.playerEntity);
+        let p = new PlayerEntity();
+        this.AddEntity(p);
 
-        for (let i = 0; i < 10; i++) {
-            const p = new TestEntity();
-            p.transform.position = [-300 * Math.random(), -250 * Math.random()];
-            this.AddEntity(p);
+        const count = 2;
+        for (let i = 0; i < count; i++) {
+            let newE: EntityBase;
+
+            if (i % 2 == 0)
+                newE = new TestEntity();
+            else
+                newE = new PlayerEntity();
+
+            newE.transform.scale = [0.5, 1.5];
+            newE.transform.position[0] = 30;
+            p.AddChildEntity(newE);
+            p = newE;
         }
 
-        const p2 = new PlayerEntity();
-        p2.transform.position = [300 * Math.random(), 250 * Math.random()];
-        this.AddEntity(p2);
+
+        // for (let i = 0; i < 100; i++) {
+        //     const p = new TestEntity();
+        //     p.transform.position = [-300 * Math.random(), -250 * Math.random()];
+        //     this.AddEntity(p);
+
+        //     const p2 = new PlayerEntity();
+        //     p2.transform.position = [300 * Math.random(), 250 * Math.random()];
+        //     this.AddEntity(p2);
+        // }
+
 
         this.Start();
     }
@@ -59,13 +75,72 @@ export class Game implements IDOMDependant {
         requestAnimationFrame(this.Update.bind(this))
     }
 
+    // Add an entity to the root of the entity tree.
     AddEntity(entity: EntityBase): void {
         this.entities.push(entity);
     }
 
-    GetAllComponentsOfType(type: any) {
+    GetEntityById(id: number): EntityBase | null {
+        const e = this.GetAllEntities().filter(e => e.entityId == id);
+        if (e[0])
+            return e[0];
+        return null;
+    }
+
+    GetEntityTreeString(): string {
+        let str = '';
+        this.entities.forEach(e => {
+            //@ts-ignore (object.constructor.name is not recognized by TypeScript)
+            str = `${str}\n${this.GetEntityTreeStringHelper(e, 0)}`
+        });
+        return str;
+    }
+
+    private GetEntityTreeStringHelper(parent: EntityBase, depth: number): string {
+        let str: string = '';
+        for (let i = 0; i < depth; i++)
+            str = `|${str}`;
+
+        //@ts-ignore (object.constructor.name is not recognized by TypeScript)
+        str = `${str}(${parent.entityId})${parent.constructor.name}`;
+        parent.GetChildren().forEach(c => {
+            str = `${str}\n${this.GetEntityTreeStringHelper(c, depth + 1)}`
+        });
+        return str;
+    }
+
+    // Function returning a collection of all the entities within the game. Utilizes 'GetAllEntitiesHelper'.
+    GetAllEntities(): EntityBase[] {
+        let entities: EntityBase[] = [];
+        this.entities.forEach(entity => {
+            entities.push(entity);
+            if (entity.GetChildren().length > 0)
+                entities = entities.concat(this.GetAllEntitiesHelper(entity));
+        });
+        return entities;
+    }
+
+    // Recursive helper function for obtaining children of a give parent entity.
+    private GetAllEntitiesHelper(parent: EntityBase): EntityBase[] {
+        let children: EntityBase[] = [];
+        parent.GetChildren().forEach(child => {
+            children.push(child);
+            if (child.GetChildren().length > 0)
+                children = children.concat(this.GetAllEntitiesHelper(child));
+        })
+        return children;
+    }
+
+    // Get components of a certain type from all the entities within the game.
+    // Calls 'GetAllEntities' to obtain all the current entities, and passes that as a collection to 'GetAllComponentsOfTypeFromEntityCollection'
+    GetAllComponentsOfType(type: any): ComponentBase[] {
+        return this.GetAllComponentsOfTypeFromEntityCollection(type, this.GetAllEntities());
+    }
+
+    // Get components of a certain type from the given collection.
+    GetAllComponentsOfTypeFromEntityCollection(type: any, collection: EntityBase[]): ComponentBase[] {
         let returned: ComponentBase[] = [];
-        this.entities.forEach(e => returned = returned.concat(e.GetComponentsOfType(type)));
+        collection.forEach(e => returned = returned.concat(e.GetComponentsOfType(type)));
         return returned;
     }
 
@@ -80,16 +155,14 @@ export class Game implements IDOMDependant {
         if (this.paused) return;
 
         // Update all entities
-        this.entities.forEach(e => e.Update());
+        this.GetAllEntities().forEach(e => e.Update());
 
-        let triggers: HitboxBase[] = this.GetAllComponentsOfType(HitboxBase).filter(c => (c as HitboxBase).GetTriggerState() != TriggerState.NotTrigger) as HitboxBase[];
-        let colliders: HitboxBase[] = this.GetAllComponentsOfType(HitboxBase).filter(c => (c as HitboxBase).GetTriggerState() == TriggerState.NotTrigger) as HitboxBase[];
+        // Updating all first and then reobtaining the list because entities may have been created due to other entities updating.
+        const allEntities = this.GetAllEntities();
+        let triggers: HitboxBase[] = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities).filter(c => (c as HitboxBase).GetTriggerState() != TriggerState.NotTrigger) as HitboxBase[];
+        let colliders: HitboxBase[] = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities).filter(c => (c as HitboxBase).GetTriggerState() == TriggerState.NotTrigger) as HitboxBase[];
 
-        triggers.forEach(t => colliders.forEach(c => {
-            if (CheckCollision(t, c)) {
-                t.OnCollision(c);
-            }
-        }));
+        triggers.forEach(t => colliders.forEach(c => { if (CheckCollision(t, c)) t.OnCollision(c); }));
 
         // Collect all drawing data:
         const dds = this.GetAllComponentsOfType(ImageDrawDirective);

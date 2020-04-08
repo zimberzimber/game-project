@@ -17,11 +17,14 @@ window.onload = (e) => {
 declare global {
     interface Window {
         Freeze: any;
-        SetFPS: any;
+        GetEntityTree: any;
+        GetEntityById: any;
     }
 }
 
-window.Freeze = (): void => { _G.Game.paused = !_G.Game.paused; };
+window.Freeze = () => { _G.Game.paused = !_G.Game.paused; };
+window.GetEntityTree = () => _G.Game.GetEntityTreeString();
+window.GetEntityById = (id: number) => _G.Game.GetEntityById(id);
 
 
 // let entity = new EntityBase();

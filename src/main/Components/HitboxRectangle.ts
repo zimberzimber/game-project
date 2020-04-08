@@ -37,13 +37,14 @@ export class HitboxRectangle extends HitboxBase {
     GetDebugDrawData(): WebglDrawData | null {
         if (!this.CollisionEnabled) return null;
 
+        const absTransform = this.parent.GetWorldRelativeTransform();
         const colorY = this.GetTriggerState() == TriggerState.NotTrigger ? 0 : 0.01
 
         const vertexes: number[] = [
-            this.parent.transform.position[0] + this.width / 2, this.parent.transform.position[1] + this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
-            this.parent.transform.position[0] - this.width / 2, this.parent.transform.position[1] + this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
-            this.parent.transform.position[0] - this.width / 2, this.parent.transform.position[1] - this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
-            this.parent.transform.position[0] + this.width / 2, this.parent.transform.position[1] - this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
+            absTransform.position[0] + this.width / 2, absTransform.position[1] + this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
+            absTransform.position[0] - this.width / 2, absTransform.position[1] + this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
+            absTransform.position[0] - this.width / 2, absTransform.position[1] - this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
+            absTransform.position[0] + this.width / 2, absTransform.position[1] - this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
         ];
 
         const indexes: number[] = [0, 1, 2, 3, 0];

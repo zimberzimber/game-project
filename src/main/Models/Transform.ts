@@ -1,6 +1,7 @@
 import Vec2 from "./Vec2";
 import ScalarUtil from "../Utility/Scalar";
 import Vec2Utils from "../Utility/Vec2";
+import { ComponentBase } from "../Bases/ComponentBase";
 
 export class Transform {
     private rotation: number = 0;
@@ -8,7 +9,7 @@ export class Transform {
     scale: Vec2 = [1, 1];
 
     GetRotation = (): number => this.rotation;
-    SetRotation = (angle: number): void => { this.rotation = angle; };
+    SetRotation = (angle: number): void => { this.rotation = angle % 360; };
     Rotate = (angle: number): void => { this.rotation = (this.rotation + angle) % 360; };
 
     GetRotationRadian = (): number => ScalarUtil.ToRadian(this.rotation);
@@ -62,5 +63,17 @@ export class Transform {
             angleDelta = angleDelta > speed ? speed : angleDelta;
 
         this.SetRotation(this.rotation + angleDelta);
+    }
+
+    static TranformByTransform(subject: Transform, operator: Transform): Transform {
+        const result = new Transform();
+
+        const scaled = Vec2Utils.Mult(subject.position, operator.scale);
+        const rotated = Vec2Utils.RotatePoint(scaled, operator.GetRotationRadian());
+        result.position = Vec2Utils.Sum(rotated, operator.position);
+
+        result.SetRotation(subject.rotation + operator.rotation);
+        result.scale = Vec2Utils.Mult(subject.scale, operator.scale);
+        return result;
     }
 }
