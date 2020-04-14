@@ -39,16 +39,17 @@ export class HitboxRectangle extends HitboxBase {
 
         const absTransform = this.parent.GetWorldRelativeTransform();
         const colorY = this.GetTriggerState() == TriggerState.NotTrigger ? 0 : 0.01
+        const width = this.width * absTransform.scale[0] / 2;
+        const height = this.height * absTransform.scale[1] / 2;
 
-        const vertexes: number[] = [
-            absTransform.position[0] + this.width / 2, absTransform.position[1] + this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
-            absTransform.position[0] - this.width / 2, absTransform.position[1] + this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
-            absTransform.position[0] - this.width / 2, absTransform.position[1] - this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
-            absTransform.position[0] + this.width / 2, absTransform.position[1] - this.height / 2, 1, 0, 0, 0, 0, 1, colorY,
-        ];
-
-        const indexes: number[] = [0, 1, 2, 3, 0];
-
-        return { vertexes, indexes };
+        return {
+            vertexes: [
+                absTransform.position[0] + width, absTransform.position[1] + height, 1, 0, 0, 0, 0, 1, colorY,
+                absTransform.position[0] - width, absTransform.position[1] + height, 1, 0, 0, 0, 0, 1, colorY,
+                absTransform.position[0] - width, absTransform.position[1] - height, 1, 0, 0, 0, 0, 1, colorY,
+                absTransform.position[0] + width, absTransform.position[1] - height, 1, 0, 0, 0, 0, 1, colorY,
+            ],
+            indexes: [0, 1, 2, 3, 0]
+        };
     };
 }

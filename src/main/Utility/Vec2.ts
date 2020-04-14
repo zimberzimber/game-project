@@ -1,7 +1,7 @@
 import Vec2 from "../Models/Vec2";
 
 class Vec2Utils {
-    static Transform = (v: Vec2, x: number, y: number): Vec2 => [v[0] + x, v[1] + y];
+    static Translate = (v: Vec2, x: number, y: number): Vec2 => [v[0] + x, v[1] + y];
     static Sum = (v1: Vec2, v2: Vec2): Vec2 => [v1[0] + v2[0], v1[1] + v2[1]];
     static Sub = (v1: Vec2, v2: Vec2): Vec2 => [v1[0] - v2[0], v1[1] - v2[1]];
     static Mult = (v1: Vec2, v2: Vec2): Vec2 => [v1[0] * v2[0], v1[1] * v2[1]];

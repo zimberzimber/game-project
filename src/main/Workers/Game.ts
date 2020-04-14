@@ -37,7 +37,7 @@ export class Game implements IDOMDependant {
         let p = new PlayerEntity();
         this.AddEntity(p);
 
-        const count = 2;
+        const count = 0;
         for (let i = 0; i < count; i++) {
             let newE: EntityBase;
 
@@ -52,6 +52,10 @@ export class Game implements IDOMDependant {
             p = newE;
         }
 
+        let test = new TestEntity();
+        test.transform.position = [100, 100];
+        test.transform.scale = [5, 5];
+        this.AddEntity(test);
 
         // for (let i = 0; i < 100; i++) {
         //     const p = new TestEntity();

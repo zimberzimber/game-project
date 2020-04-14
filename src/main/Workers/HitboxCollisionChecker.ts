@@ -1,58 +1,46 @@
 import { HitboxBase } from "../Bases/HitboxBase";
-import { HitboxType } from "../Models/HitboxType";
 import { HitboxRectangle } from "../Components/HitboxRectangle";
 import { HitboxCircle } from "../Components/HitboxCircle";
 import { HitboxPolygon } from "../Components/HitboxPolygon";
 import Vec2 from "../Models/Vec2";
 import Vec2Utils from "../Utility/Vec2";
+import ScalarUtil from "../Utility/Scalar";
 
-const HELPER_POINT_X_OFFSET: number = 100;
+// Dictionary storing colission methods for easier organization.
+// [collider class name]: { [collider class name] : [method name] }
+// Not defining a relation here will have them never collide
+const MethodDictionary = {
+    HitboxRectangle: {
+        HitboxRectangle: Rectangle_Rectangle,
+        HitboxCircle: Rectangle_Circle,
+        HitboxPolygon: Rectangle_Polygon,
+    },
+    HitboxCircle: {
+        HitboxCircle: Circle_Circle,
+        HitboxPolygon: Circle_Polygon
+    },
+    HitboxPolygon: {
+        HitboxPolygon: Polygon_Polygon
+    }
+};
 
-// This makes me sad
-export default function CheckCollision(trigger: HitboxBase, collision: HitboxBase): boolean {
-    if (!IsInCollisionRange(trigger, collision))
+export default function CheckCollision(trigger: HitboxBase, collider: HitboxBase): boolean {
+    if (!IsInCollisionRange(trigger, collider))
         return false;
 
-    switch (trigger.HitboxType) {
-        case HitboxType.Rectangular:
-            switch (collision.HitboxType) {
-                case HitboxType.Rectangular:
-                    return Rectangle_Rectangle(trigger as HitboxRectangle, collision as HitboxRectangle);
+    // Check for a method in [trigger][collider]
+    //@ts-ignore
+    if (MethodDictionary[trigger.constructor.name][collider.constructor.name])
+        //@ts-ignore
+        if (MethodDictionary[trigger.constructor.name][collider.constructor.name](trigger, collider))
+            return true
 
-                case HitboxType.Circular:
-                    return Rectangle_Circle(trigger as HitboxRectangle, collision as HitboxCircle);
-
-                case HitboxType.Polygonal:
-                    return Rectangle_Polygon(trigger as HitboxRectangle, collision as HitboxPolygon);
-            }
-            break;
-
-        case HitboxType.Circular:
-            switch (collision.HitboxType) {
-                case HitboxType.Rectangular:
-                    return Rectangle_Circle(collision as HitboxRectangle, trigger as HitboxCircle);
-
-                case HitboxType.Circular:
-                    return Circle_Circle(trigger as HitboxCircle, collision as HitboxCircle);
-
-                case HitboxType.Polygonal:
-                    return Circle_Polygon(trigger as HitboxCircle, collision as HitboxPolygon);
-            }
-            break;
-
-        case HitboxType.Polygonal:
-            switch (collision.HitboxType) {
-                case HitboxType.Rectangular:
-                    return Rectangle_Polygon(collision as HitboxRectangle, trigger as HitboxPolygon);
-
-                case HitboxType.Circular:
-                    return Circle_Polygon(collision as HitboxCircle, trigger as HitboxPolygon);
-
-                case HitboxType.Polygonal:
-                    return Polygon_Polygon(trigger as HitboxPolygon, collision as HitboxPolygon);
-            }
-            break;
-    }
+    // Check for a method in [collider][trigger]
+    //@ts-ignore
+    if (MethodDictionary[collider.constructor.name][trigger.constructor.name])
+        //@ts-ignore
+        if (MethodDictionary[collider.constructor.name][trigger.constructor.name](collider, trigger))
+            return true
 
     return false;
 }
@@ -66,6 +54,7 @@ function IsInCollisionRange(a: HitboxBase, b: HitboxBase): boolean {
     return distance <= a.HitboxOverallRadius * Math.max(aTrans.scale[0], aTrans.scale[1]) + b.HitboxOverallRadius * Math.max(bTrans.scale[0], bTrans.scale[1]);
 }
 
+// Checks if the given point is inside the given polygon
 function IsPointInPolygon(point: Vec2, polyline: Vec2[]): boolean {
     if (polyline.length < 3)
         return false;
@@ -73,7 +62,8 @@ function IsPointInPolygon(point: Vec2, polyline: Vec2[]): boolean {
     let intersections = 0;
 
     for (let i = 0; i < polyline.length; i++)
-        if (LineIntersection(point, Vec2Utils.Transform(point, HELPER_POINT_X_OFFSET, 0), polyline[i], polyline[(i + 1) % polyline.length]))
+        // Thats the max safe integer. No idea why TS doesn't recognize it.
+        if (LineIntersection(point, [point[0], 9007199254740991], polyline[i], polyline[(i + 1) % polyline.length]))
             intersections++;
 
     if (intersections % 2 == 1)
@@ -91,74 +81,102 @@ function LineIntersection(line1start: Vec2, line1end: Vec2, line2start: Vec2, li
     return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
 };
 
+// Checks is two polygons have intersecting lines
+function DoPolygonsIntersect(p1: Vec2[], p2: Vec2[]): boolean {
+    for (let i = 0; i < p1.length; i++)
+        for (let j = 0; j < p2.length; j++)
+            if (LineIntersection(p1[i], p1[(i + 1) % p1.length], p2[j], p2[(j + 1) % p2.length]))
+                return true;
+    return false;
+}
+
 // Rectangle vs Rectangle, Circle, Polygon 
 function Rectangle_Rectangle(a: HitboxRectangle, b: HitboxRectangle): boolean {
-    const wA = a.GetWidth() / 2;
-    const hA = a.GetHeight() / 2;
+    const aTrans = a.parent.GetWorldRelativeTransform();
+    const bTrans = b.parent.GetWorldRelativeTransform();
 
-    const wB = b.GetWidth() / 2;
-    const hB = b.GetHeight() / 2;
+    const aw = a.GetWidth() / 2 * aTrans.scale[0];
+    const ah = a.GetHeight() / 2 * aTrans.scale[1];
+    const aPolyline = [
+        Vec2Utils.Translate(aTrans.position, aw, ah),
+        Vec2Utils.Translate(aTrans.position, aw, -ah),
+        Vec2Utils.Translate(aTrans.position, -aw, -ah),
+        Vec2Utils.Translate(aTrans.position, -aw, ah)
+    ];
 
-    const aPoint1 = Vec2Utils.Transform(a.parent.transform.position, wA, hA);
-    const aPoint2 = Vec2Utils.Transform(a.parent.transform.position, wA, -hA);
-    const aPoint3 = Vec2Utils.Transform(a.parent.transform.position, -wA, -hA);
-    const aPoint4 = Vec2Utils.Transform(a.parent.transform.position, -wA, hA);
-    const aPolyline = [aPoint1, aPoint2, aPoint3, aPoint4];
+    const bw = b.GetWidth() / 2 * bTrans.scale[0];
+    const bh = b.GetHeight() / 2 * bTrans.scale[1];
+    const bPolyline = [
+        Vec2Utils.Translate(bTrans.position, bw, bh),
+        Vec2Utils.Translate(bTrans.position, bw, -bh),
+        Vec2Utils.Translate(bTrans.position, -bw, -bh),
+        Vec2Utils.Translate(bTrans.position, -bw, bh)
+    ];
 
-    const bPoint1 = Vec2Utils.Transform(b.parent.transform.position, wB, hB);
-    const bPoint2 = Vec2Utils.Transform(b.parent.transform.position, wB, -hB);
-    const bPoint3 = Vec2Utils.Transform(b.parent.transform.position, -wB, -hB);
-    const bPoint4 = Vec2Utils.Transform(b.parent.transform.position, -wB, hB);
-    const bPolyline = [bPoint1, bPoint2, bPoint3, bPoint4];
+    // Most cases will occur through edge intersection
+    if (DoPolygonsIntersect(aPolyline, bPolyline)) return true;
 
-    if (IsPointInPolygon(aPoint1, bPolyline)) return true;
-    if (IsPointInPolygon(aPoint2, bPolyline)) return true;
-    if (IsPointInPolygon(aPoint3, bPolyline)) return true;
-    if (IsPointInPolygon(aPoint4, bPolyline)) return true;
-
-    if (IsPointInPolygon(bPoint1, aPolyline)) return true;
-    if (IsPointInPolygon(bPoint2, aPolyline)) return true;
-    if (IsPointInPolygon(bPoint3, aPolyline)) return true;
-    if (IsPointInPolygon(bPoint4, aPolyline)) return true;
+    // Only other option is when one of the colliders is entirely within another
+    // in which case checking if their center is inside is enough
+    if (IsPointInPolygon(aTrans.position, bPolyline)) return true;
+    if (IsPointInPolygon(bTrans.position, aPolyline)) return true;
 
     return false;
 }
 
 function Rectangle_Circle(a: HitboxRectangle, b: HitboxCircle): boolean {
-    const rw = a.GetWidth() / 2;
-    const rh = a.GetHeight() / 2;
-    const crad = b.GetRadius();
+    const aTrans = a.parent.GetWorldRelativeTransform();
+    const bTrans = b.parent.GetWorldRelativeTransform();
 
-    const rPoint1 = Vec2Utils.Transform(a.parent.transform.position, rw, rh);
-    const rPoint2 = Vec2Utils.Transform(a.parent.transform.position, rw, -rh);
-    const rPoint3 = Vec2Utils.Transform(a.parent.transform.position, -rw, -rh);
-    const rPoint4 = Vec2Utils.Transform(a.parent.transform.position, -rw, rh);
-    const rPolyline = [rPoint1, rPoint2, rPoint3, rPoint4];
+    const aw = a.GetWidth() * aTrans.scale[0] / 2;
+    const ah = a.GetHeight() * aTrans.scale[1] / 2;
+    const bRad = (bTrans.scale[0] + bTrans.scale[1]) / 2 * b.GetRadius();
 
-    const cPoint: Vec2 = Vec2Utils.MoveTowards(b.parent.transform.position, a.parent.transform.position, crad);
-    if (IsPointInPolygon(cPoint, rPolyline)) return true;
+    const aPolyline = [
+        Vec2Utils.Translate(aTrans.position, aw, ah),
+        Vec2Utils.Translate(aTrans.position, -aw, ah),
+        Vec2Utils.Translate(aTrans.position, -aw, -ah),
+        Vec2Utils.Translate(aTrans.position, aw, -ah),
+    ];
+
+    // Check if any of the rectangles corners is inside the circle
+    for (let i = 0; i < 4; i++)
+        if (Vec2Utils.Distance(aPolyline[i], bTrans.position) <= bRad) return true;
+
+    // Under certain circumstances the circle may be colliding with the rectangle without having a corned inside of it
+    // Checking the 4 cardinal directions does the trick
+    const bPolyline = [
+        Vec2Utils.Translate(bTrans.position, 0, bRad),
+        Vec2Utils.Translate(bTrans.position, -bRad, 0),
+        Vec2Utils.Translate(bTrans.position, 0, -bRad),
+        Vec2Utils.Translate(bTrans.position, bRad, 0),
+    ]
+
+    for (let i = 0; i < 4; i++)
+        if (IsPointInPolygon(bPolyline[i], aPolyline)) return true;
 
     return false;
 }
 
 function Rectangle_Polygon(a: HitboxRectangle, b: HitboxPolygon): boolean {
-    const rw = a.GetWidth() / 2;
-    const rh = a.GetHeight() / 2;
-    const pPolyline = b.GetCanvasReletivePolyline();
+    const aTrans = a.parent.GetWorldRelativeTransform();
+    const bTrans = b.parent.GetWorldRelativeTransform();
 
-    const rPoint1 = Vec2Utils.Transform(a.parent.transform.position, rw, rh);
-    const rPoint2 = Vec2Utils.Transform(a.parent.transform.position, rw, -rh);
-    const rPoint3 = Vec2Utils.Transform(a.parent.transform.position, -rw, -rh);
-    const rPoint4 = Vec2Utils.Transform(a.parent.transform.position, -rw, rh);
+    const aw = a.GetWidth() / 2 * aTrans.scale[0];
+    const ah = a.GetHeight() / 2 * aTrans.scale[1];
+    const bPolyline = b.GetCanvasReletivePolyline();
 
-    if (IsPointInPolygon(rPoint1, pPolyline)) return true;
-    if (IsPointInPolygon(rPoint2, pPolyline)) return true;
-    if (IsPointInPolygon(rPoint3, pPolyline)) return true;
-    if (IsPointInPolygon(rPoint4, pPolyline)) return true;
+    const aPolyline = [
+        Vec2Utils.Translate(aTrans.position, aw, ah),
+        Vec2Utils.Translate(aTrans.position, aw, -ah),
+        Vec2Utils.Translate(aTrans.position, -aw, -ah),
+        Vec2Utils.Translate(aTrans.position, -aw, ah)
+    ];
 
-    const rPolyline = [rPoint1, rPoint2, rPoint3, rPoint4];
-    for (let i = 0; i < pPolyline.length; i++)
-        if (IsPointInPolygon(pPolyline[i], rPolyline)) return true;
+    // Check if the polylines intersect, and if one is fully immersed inside the other
+    if (DoPolygonsIntersect(aPolyline, bPolyline)) return true;
+    if (IsPointInPolygon(aTrans.position, bPolyline)) return true;
+    if (IsPointInPolygon(bTrans.position, aPolyline)) return true;
 
     return false;
 }
@@ -167,23 +185,27 @@ function Rectangle_Polygon(a: HitboxRectangle, b: HitboxPolygon): boolean {
 function Circle_Circle(a: HitboxCircle, b: HitboxCircle): boolean {
     const aTrans = a.parent.GetWorldRelativeTransform();
     const bTrans = b.parent.GetWorldRelativeTransform();
-    const collisionDistance = a.GetRadius() * ((aTrans.scale[0] + aTrans.scale[1]) / 2) + b.GetRadius() * ((bTrans.scale[0] + bTrans.scale[1]) / 2)
+    const collisionDistance = (aTrans.scale[0] + aTrans.scale[1]) / 2 * a.GetRadius() + (bTrans.scale[0] + bTrans.scale[1]) / 2 * b.GetRadius();
     return Vec2Utils.Distance(aTrans.position, bTrans.position) <= collisionDistance;
 }
 
-// This doesn't cover some edge cases... but it should... maybe one day...
 function Circle_Polygon(a: HitboxCircle, b: HitboxPolygon): boolean {
     const polyline = b.GetCanvasReletivePolyline();
-    const circleTransform = a.parent.GetWorldRelativeTransform();
+    const aTrans = a.parent.GetWorldRelativeTransform();
 
-    for (let i = 0; i < polyline.length; i++)
-        if (Vec2Utils.Distance(circleTransform.position, polyline[i]) <= a.GetRadius())
-            return true;
+    // Check if the center of the circle is inside the polygon, as the only uncovered case further down is that the circle is fully inside the polygon
+    if (IsPointInPolygon(aTrans.position, polyline)) return true;
 
-    // EDGE CASE: Polygons origin might not be inside the actual polygon
-    const closestPointToPolygonOrigin = Vec2Utils.MoveTowards(circleTransform.position, b.parent.GetWorldRelativeTransform().position, a.GetRadius(), false)
-    if (IsPointInPolygon(closestPointToPolygonOrigin, polyline))
-        return true;
+    // Create lines between the center of the circle and points on the perimeter, and polygon lines.
+    // Should cover all cases except very unlikely cases where the intersection falls on skipped angles (as I'm not covering all 360 angles)
+    // The bigger the circle and the smaller the intersection the more likely it is to happen
+    const tPoint = Vec2Utils.Translate(aTrans.position, 0, (aTrans.scale[0] + aTrans.scale[1]) / 2 * a.GetRadius());
+    for (let i = 0; i < 360; i += 4) {
+        const rotated = Vec2Utils.RotatePointAroundCenter(tPoint, ScalarUtil.ToRadian(i), aTrans.position);
+        for (let j = 0; j < polyline.length; j++)
+            if (LineIntersection(aTrans.position, rotated, polyline[j], polyline[(j + 1) % polyline.length]))
+                return true;
+    }
 
     return false;
 }
@@ -193,11 +215,14 @@ function Polygon_Polygon(a: HitboxPolygon, b: HitboxPolygon): boolean {
     const aPolyline = a.GetCanvasReletivePolyline();
     const bPolyline = b.GetCanvasReletivePolyline();
 
-    for (let i = 0; i < aPolyline.length; i++)
-        if (IsPointInPolygon(aPolyline[i], bPolyline)) return true;
+    // Check if any of the polygon lines intersect
+    if (DoPolygonsIntersect(aPolyline, bPolyline)) return true;
 
-    for (let i = 0; i < bPolyline.length; i++)
-        if (IsPointInPolygon(bPolyline[i], aPolyline)) return true;
+    // Check for full immerssion
+    const aTrans = a.parent.GetWorldRelativeTransform();
+    const bTrans = b.parent.GetWorldRelativeTransform();
+    if (IsPointInPolygon(aTrans.position, bPolyline)) return true;
+    if (IsPointInPolygon(bTrans.position, aPolyline)) return true;
 
     return false;
 }

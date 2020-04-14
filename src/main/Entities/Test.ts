@@ -7,14 +7,18 @@ import { TriggerState } from "../Models/TriggerState";
 import Vec2Utils from "../Utility/Vec2";
 import ScalarUtil from "../Utility/Scalar";
 import { HitboxCircle } from "../Components/HitboxCircle";
+import { HitboxRectangle } from "../Components/HitboxRectangle";
 
 export class TestEntity extends EntityBase {
     constructor(parent: EntityBase | void) {
         super(parent);
         this.AddComponent(new ImageDrawDirective(this, "ass", [10, 10]));
 
+        // const hitbox = new HitboxRectangle(this, 10, 40);
+        // const hitbox = new HitboxCircle(this, 10);
         // const hitbox = new HitboxPolygon(this, [0, 10], [-10, 0], [0, -10], [10, 0]);
-        const hitbox = new HitboxCircle(this, 10);
+        const hitbox = new HitboxPolygon(this, [1, -12], [7, -9], [10, -4], [10, 3], [8, 9], [3, 12], [-4, 12], [-10, 9], [-3, 8], [3, 5], [4, -1], [2, -6], [-3, -7], [-10, -7]);
+        
 
         hitbox.SetTriggerState(TriggerState.ContinuousTrigger);
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => {
