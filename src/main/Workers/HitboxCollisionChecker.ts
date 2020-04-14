@@ -9,7 +9,7 @@ import ScalarUtil from "../Utility/Scalar";
 // Dictionary storing colission methods for easier organization.
 // [collider class name]: { [collider class name] : [method name] }
 // Not defining a relation here will have them never collide
-const MethodDictionary = {
+const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
     HitboxRectangle: {
         HitboxRectangle: Rectangle_Rectangle,
         HitboxCircle: Rectangle_Circle,
