@@ -221,8 +221,8 @@ function Polygon_Polygon(a: HitboxPolygon, b: HitboxPolygon): boolean {
     // Check for full immerssion
     const aTrans = a.parent.GetWorldRelativeTransform();
     const bTrans = b.parent.GetWorldRelativeTransform();
-    if (IsPointInPolygon(aTrans.position, bPolyline)) return true;
-    if (IsPointInPolygon(bTrans.position, aPolyline)) return true;
+    if (IsPointInPolygon(aPolyline[0], bPolyline)) return true;
+    if (IsPointInPolygon(bPolyline[0], aPolyline)) return true;
 
     return false;
 }

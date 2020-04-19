@@ -13,7 +13,11 @@
     // 	"es5",
     // 	"scripthost"
     // ],
-    "target": "es5"
+    "lib": [
+      "ES2015",
+      "DOM"
+    ],
+    "target": "ES6"
   },
   "exclude": [
     //   "src/main"

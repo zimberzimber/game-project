@@ -1,8 +1,4 @@
-export interface ISprite {
-    coords: [number, number];
-    size: [number, number];
-    texture: number;
-};
+import { ISprite } from "../Models/ISprite";
 
 const staticAtlas: { [key: string]: ISprite } = Object.freeze({
     assetMissing: {
@@ -52,7 +48,7 @@ const animatedAtlas: { [key: string]: ISprite[] } = Object.freeze({
     ]
 });
 
-class SpriteAtlas {
+class SpriteManager {
     GetStaticSprite = (spriteName: string): ISprite => staticAtlas[spriteName] ? staticAtlas[spriteName] : staticAtlas.assetMissing;
 
     GetanimatedSpriteFrame = (name: string, frame: number): ISprite => {
@@ -62,7 +58,7 @@ class SpriteAtlas {
     }
 }
 
-const atlas: SpriteAtlas = new SpriteAtlas();
+const atlas: SpriteManager = new SpriteManager();
 export default atlas;
 
 // import { ISpriteAtlas } from "../Bases/SpriteAtlas";

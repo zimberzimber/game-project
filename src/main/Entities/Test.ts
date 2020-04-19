@@ -8,6 +8,7 @@ import Vec2Utils from "../Utility/Vec2";
 import ScalarUtil from "../Utility/Scalar";
 import { HitboxCircle } from "../Components/HitboxCircle";
 import { HitboxRectangle } from "../Components/HitboxRectangle";
+import SoundManager from "../Workers/SoundManager";
 
 export class TestEntity extends EntityBase {
     constructor(parent: EntityBase | void) {
@@ -18,11 +19,11 @@ export class TestEntity extends EntityBase {
         // const hitbox = new HitboxCircle(this, 10);
         // const hitbox = new HitboxPolygon(this, [0, 10], [-10, 0], [0, -10], [10, 0]);
         const hitbox = new HitboxPolygon(this, [1, -12], [7, -9], [10, -4], [10, 3], [8, 9], [3, 12], [-4, 12], [-10, 9], [-3, 8], [3, 5], [4, -1], [2, -6], [-3, -7], [-10, -7]);
-        
 
-        hitbox.SetTriggerState(TriggerState.ContinuousTrigger);
+
+        hitbox.SetTriggerState(TriggerState.OnEnterTrigger);
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => {
-            console.log('Ding!');
+            SoundManager.PlaySound('unlock');
         }
 
         hitbox.UncollisionScript = (TriggerState: HitboxBase) => {

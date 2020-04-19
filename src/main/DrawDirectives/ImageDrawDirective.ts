@@ -2,7 +2,7 @@ import { DrawDirectiveBase } from "../Bases/DrawDirectiveBase";
 import { EntityBase } from "../Bases/EntityBase";
 import { _G } from "../Main";
 import Vec2 from "../Models/Vec2";
-import SpriteAtlas from "../Workers/SpriteAtlas";
+import SpriteManager from "../Workers/SpriteManager";
 
 export class ImageDrawDirective extends DrawDirectiveBase {
     size: Vec2;
@@ -23,7 +23,7 @@ export class ImageDrawDirective extends DrawDirectiveBase {
         const rx = Math.sin(absTransform.GetRotationRadian());
         const ry = Math.cos(absTransform.GetRotationRadian());
 
-        const sd = SpriteAtlas.GetStaticSprite(this.spriteName);
+        const sd = SpriteManager.GetStaticSprite(this.spriteName);
 
         // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
         return [

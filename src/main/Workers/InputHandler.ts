@@ -1,12 +1,13 @@
 import { BaseKeyPreset, IKeyPressObserver } from "../Bases/BaseKeyPreset";
 import { WasdKeyPreset } from "../Models/InputPresets";
 import { KeyNames } from "../Models/InputHelpers";
-import { _G } from "../Main";
 import Vec2Utils from "../Utility/Vec2";
 import Vec2 from "../Models/Vec2";
+import Game from "../Workers/Game";
+import SoundManager from "./SoundManager";
 
 // Have to relay key presses through this class since holding a key down repeats the keydown event
-export class InputHandler implements IKeyPressObserver {
+class InputHandler implements IKeyPressObserver {
     keyPreset: BaseKeyPreset;
 
     constructor() {
@@ -35,10 +36,19 @@ export class InputHandler implements IKeyPressObserver {
     }
 
     OnKeyDown(key: KeyNames): void {
-        if (key == KeyNames.pause)
-            _G.Game.paused = !_G.Game.paused;
+        if (key == KeyNames.pause) {
+            Game.paused = !Game.paused;
+
+            if (Game.paused)
+                SoundManager.Pause();
+            else
+                SoundManager.Unpause();
+        }
     }
 
     OnKeyUp(key: KeyNames): void {
     }
 }
+
+const inputHandler = new InputHandler();
+export default inputHandler;

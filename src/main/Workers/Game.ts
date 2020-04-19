@@ -12,7 +12,7 @@ import { WebglDrawData } from "../Models/WebglDrawData";
 import WebglProxy from "../Proxies/WebglProxy";
 import ShaderSourcesProxy from "../Proxies/ShaderSourcesProxy";
 
-export class Game implements IDOMDependant {
+class Game implements IDOMDependant {
     canvas: any;
     interval: any;
     entities: EntityBase[];
@@ -224,3 +224,6 @@ export class Game implements IDOMDependant {
     // Draw directive and collision should have separate values
     // Different projectiles will have their own classes extending Entity
 }
+
+const game: Game = new Game();
+export default game;

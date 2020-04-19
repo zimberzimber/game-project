@@ -1,17 +1,14 @@
-import { Game } from "./Workers/Game";
-import { InputHandler } from "./Workers/InputHandler";
-import SpriteAtlas from "./Workers/SpriteAtlas"
+import Game from "./Workers/Game";
+import IndexedDB, { DbSchema } from "./Workers/IndexeddbManager";
+import SoundManager, { SoundOptions, SoundTags } from "./Workers/SoundManager";
 
 export class _G {
-    static InputHandler: InputHandler = new InputHandler()
-    static Game: Game = new Game();
-    static SpriteAtlas = SpriteAtlas;
     static DebugDraw: boolean = true;
     static EnableDebugControlls: boolean = false;
 }
 
 window.onload = (e) => {
-    _G.Game.OnDomLoaded();
+    Game.OnDomLoaded();
 };
 
 declare global {
@@ -22,12 +19,30 @@ declare global {
     }
 }
 
-window.Freeze = () => { _G.Game.paused = !_G.Game.paused; };
-window.GetEntityTree = () => _G.Game.GetEntityTreeString();
-window.GetEntityById = (id: number) => _G.Game.GetEntityById(id);
+window.Freeze = () => { Game.paused = !Game.paused; };
+window.GetEntityTree = () => Game.GetEntityTreeString();
+window.GetEntityById = (id: number) => Game.GetEntityById(id);
 
+const soundSchema: DbSchema = {
+    keyField: 'url',
+    fields: {
+        blob: { unique: false }
+    }
+}
 
-// let entity = new EntityBase();
-// entity.transform.position.Set(100, 100);
-// entity.AddComponent(new CircleDrawDirective(entity, 30));
-// _G.Game.AddEntity(entity)
+IndexedDB.OpenDatabase('sounds', 1, soundSchema)
+    .catch(() => console.warn('(0) Caught'))
+    .then(() => {
+        SoundManager.Initialize().then(() => {
+            setTimeout(() => {
+                SoundManager.PlaySound('tts', new SoundOptions(0.5, true, null, SoundTags.Music));
+            }, 1000);
+        });
+    });
+
+//@ts-ignore
+window.sm = SoundManager;
+//@ts-ignore
+window.idb = IndexedDB;
+//@ts-ignore
+window.game = Game;

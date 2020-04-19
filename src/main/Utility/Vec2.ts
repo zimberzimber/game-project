@@ -14,7 +14,6 @@ class Vec2Utils {
 
     static Normalize = (v: Vec2): Vec2 => {
         if (!v[0] || !v[1]) return v;
-
         const third: number = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
         return [v[0] / third, v[1] / third];
     }
