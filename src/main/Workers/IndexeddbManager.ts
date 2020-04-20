@@ -1,10 +1,17 @@
-import ProimseUtil, { CompletionPromiseData } from "../Utility/Promises";
+import ProimseUtil from "../Utility/Promises";
+import Logger from "./Logger";
 
 interface DbStorage {
-    [key: string]: { version: number, context: any };
+    [key: string]: { version: number, context: IDBDatabase };
 }
 
 export interface DbSchema {
+    databaseName: string;
+    stores: DbStoreSchema[];
+}
+
+export interface DbStoreSchema {
+    storeName: string;
     keyField: string;
     fields: { [key: string]: DbIndexOptions } | undefined;
 }
@@ -42,115 +49,118 @@ export class UnopenedDatabaseError extends Error {
 class IndexeddbManager {
     private dbs: DbStorage = {};
 
-    async OpenDatabase(dbName: string, version: number, schema: DbSchema): Promise<void> {
-        if (this.dbs[dbName])
-            throw new DatabaseAlreadyOpenError(`Database '${dbName}' is already open.`);
+    async OpenDatabase(schema: DbSchema, version: number): Promise<void> {
+        if (this.dbs[schema.databaseName])
+            throw new DatabaseAlreadyOpenError(`Database '${schema.databaseName}' is already open.`);
 
-        this.dbs[dbName] = { version, context: undefined };
-        const req = window.indexedDB.open(dbName, version);
-        const completionContainer: CompletionPromiseData = ProimseUtil.CreateCompletionPromise();
+        //@ts-ignore One very annoying thing about TypeScript is that unlike languages like C#, null/undefined is a separate type, not a 'no reference' flag (laymans term)
+        this.dbs[schema.databaseName] = { version, context: undefined };
+        const req = window.indexedDB.open(schema.databaseName, version);
+        const completionContainer = ProimseUtil.CreateCompletionPromise();
 
         req.onerror = (e) => {
-            delete this.dbs[dbName];
-            console.error(`Failed opening database '${dbName}', version: ${version}.`);
-            console.error(e);
-            completionContainer.reject();
-            throw new DatabaseOpeningFailedError(`Failed opening database '${dbName}', version: ${version}.`)
+            delete this.dbs[schema.databaseName];
+            Logger.Error(`Failed opening database '${schema.databaseName}', version: ${version}.`);
+            Logger.Error(req.error);
+
+            completionContainer.resolve();
+            throw new DatabaseOpeningFailedError(`Failed opening database '${schema.databaseName}', version: ${version}.`)
         };
 
-        req.onblocked = (e) => {
-            console.error(`Blocked database '${dbName}', version: ${version}.`);
-            console.error(e);
+        req.onblocked = () => {
+            Logger.Error(`Blocked database '${schema.databaseName}', version: ${version}.`);
+            Logger.Error(req.error);
         };
 
-        req.onupgradeneeded = (e) => {
+        req.onupgradeneeded = () => {
             const context = req.result;
 
-            context.onerror = (e) => {
-                console.error(`Default error in database: ${dbName}`);
-                console.error(e);
+            context.onerror = () => {
+                Logger.Error(`Default error in database: ${schema.databaseName}`);
+                Logger.Error(req.error);
             };
 
-            try { context.deleteObjectStore(dbName); }
-            catch (err) { console.warn(`Failed deleting object store '${dbName}':\n${err.message}`); }
+            schema.stores.forEach(storeSchema => {
+                try { context.deleteObjectStore(storeSchema.storeName); }
+                catch (err) { Logger.Warn(`Failed deleting object store '${storeSchema.storeName}' from database '${schema.databaseName}':\n${err.message}`); }
 
-            const objectStore = context.createObjectStore(dbName, { keyPath: schema.keyField });
-            if (schema.fields)
-                for (const index in schema.fields)
-                    objectStore.createIndex(index, index, schema.fields[index]);
+                const objectStore = context.createObjectStore(storeSchema.storeName, { keyPath: storeSchema.keyField });
+                if (storeSchema.fields)
+                    for (const index in storeSchema.fields.fields)
+                        objectStore.createIndex(index, index, storeSchema.fields.fields[index]);
+            });
 
-            console.log(`Done upgrading database '${dbName}' to version: ${version}.`);
+            Logger.Debug(`Done upgrading database '${schema.databaseName}' to version: ${version}.`);
         };
 
-        req.onsuccess = (e) => {
-            this.dbs[dbName].context = req.result;
+        req.onsuccess = () => {
+            this.dbs[schema.databaseName].context = req.result;
             completionContainer.resolve();
+
+            Logger.Debug(`Succeeded opening database:'${schema.databaseName}'. Version: ${version}.`);
         };
 
         await completionContainer.Promise;
         return;
     }
 
-    async StoreData(dbName: string, data: {}): Promise<void> {
+    async StoreData(dbName: string, storeName: string, data: any): Promise<void> {
         if (!this.dbs[dbName])
             throw new UnopenedDatabaseError(`Database named '${dbName}' was not opened.`);
 
-        const transaction = this.dbs[dbName].context.transaction([dbName], "readwrite");
-        const completionContainer: CompletionPromiseData = ProimseUtil.CreateCompletionPromise();
+        const transaction = this.dbs[dbName].context.transaction([storeName], "readwrite");
+        const completionContainer = ProimseUtil.CreateCompletionPromise();
 
-        transaction.onerror = (e) => {
-            console.error(`Failed storing data in '${dbName}'.\n${e.target.error}`);
-            console.error(data);
+        transaction.onerror = () => {
+            Logger.Error(`Failed storing data in '${dbName}' -> '${storeName}'`);
+            Logger.Error(transaction.error);
+            Logger.Error(data);
         }
 
-        const objectStore = transaction.objectStore(dbName);
-        const req = objectStore.add(data);
-        req.onerror = completionContainer.resolve;
-        req.onblocked = completionContainer.resolve;
-        req.onsuccess = completionContainer.resolve;
+        const req = transaction.objectStore(storeName).add(data);
+        req.onerror = () => completionContainer.resolve();
+        req.onsuccess = () => completionContainer.resolve();
 
         await completionContainer.Promise;
+        Logger.Debug(`(IDB) STORE ${dbName} -> ${storeName} -> ${data.url}`);
         return;
     }
 
-    async GetData(dbName: string, key: string): Promise<IndexeddbDataResult> {
+    async GetData(dbName: string, storeName: string, key: string): Promise<IndexeddbDataResult> {
         if (!this.dbs[dbName])
             return {
                 error: new UnopenedDatabaseError(`Database named '${dbName}' was not opened.`),
                 data: undefined
             };
 
-        const completionContainer: CompletionPromiseData = ProimseUtil.CreateCompletionPromise();
-        const storeRequest = this.dbs[dbName].context.transaction([dbName]).objectStore(dbName).get(key);
+        const completionContainer = ProimseUtil.CreateCompletionPromise();
+        const req = this.dbs[dbName].context.transaction(storeName).objectStore(storeName).get(key);
         const result: IndexeddbDataResult = {
             error: undefined,
             data: undefined
         }
 
-        storeRequest.onsuccess = (e: any) => {
-            result.data = e.target.result;
+        req.onsuccess = () => {
+            result.data = req.result;
             completionContainer.resolve();
         };
-        storeRequest.onblocked = (e: any) => {
-            result.error = new Error(`Get data request blocked for database: '${dbName}' key: '${key}`);
-            completionContainer.reject();
-        };
-        storeRequest.onerror = (e: any) => {
-            result.error = new Error(`Error getting data from database: '${dbName}' key: '${key}`);
-            completionContainer.reject();
+        req.onerror = () => {
+            result.error = new Error(`Error getting data from database: '${dbName}' key: '${key}\n${req.error?.message}`);
+            completionContainer.resolve();
         };
 
         await completionContainer.Promise;
+        Logger.Debug(`(IDB) GET ${dbName} -> ${storeName} -> ${key}`);
+        Logger.Debug(req.error || req.result);
         return result;
-
     }
 
-    async CheckExistence(dbName: string, key: string): Promise<boolean> {
+    async CheckExistence(dbName: string, storeName: string, key: string): Promise<boolean> {
         if (!this.dbs[dbName])
             throw new UnopenedDatabaseError(`Database named '${dbName}' was not opened.`);
 
-        const completionContainer: CompletionPromiseData = ProimseUtil.CreateCompletionPromise();
-        const counter = this.dbs[dbName].context.transaction([dbName]).objectStore(dbName).count(IDBKeyRange.only(key));
+        const completionContainer = ProimseUtil.CreateCompletionPromise();
+        const counter = this.dbs[dbName].context.transaction(storeName).objectStore(storeName).count(IDBKeyRange.only(key));
         let result: boolean = false;
 
         counter.onsuccess = () => {
@@ -159,6 +169,7 @@ class IndexeddbManager {
         };
 
         await completionContainer.Promise;
+        Logger.Debug(`(IDB) CHECK ${dbName} -> ${storeName} -> ${key} = ${result}`);
         return result;
     }
 }

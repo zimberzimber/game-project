@@ -27,7 +27,6 @@ export class TestEntity extends EntityBase {
         }
 
         hitbox.UncollisionScript = (TriggerState: HitboxBase) => {
-            console.log('Dong!');
         }
 
         this.AddComponent(hitbox);

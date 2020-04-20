@@ -1,20 +1,17 @@
-import PromiseUtil, { CompletionPromiseData } from "../Utility/Promises";
+import PromiseUtil from "../Utility/Promises";
 
 class CdnManager {
     async GetContentFromUrl(url: string): Promise<Blob | Error> {
-        const completionPromise: CompletionPromiseData = PromiseUtil.CreateCompletionPromise();
-        let result: Blob | Error = new Error('Woohoo I fucked up the promises \\o/');
+        const completionPromise = PromiseUtil.CreateCompletionPromise();
+        let result: Blob | Error = new Error(`Error while retrieving data from url: ${url}`);
 
         const req = new XMLHttpRequest();
         req.responseType = "blob";
         req.open("GET", url);
 
-        req.onerror = (e) => {
-            result = new Error(`Error while retrieving data from url: ${url}`);
-            completionPromise.resolve();
-        };
+        req.onerror = () => completionPromise.resolve();
 
-        req.onabort = (e) => {
+        req.onabort = () => {
             result = new Error(`Aborted data retrieval from url: ${url}`);
             completionPromise.resolve();
         };

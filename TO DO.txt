@@ -1,0 +1,5 @@
+Move models from IDB and Sound managers into the respective folder
+Move IDB schemas to their own folder
+Add images to IDB
+Setup a proper asset library for sounds and images
+Add animated sprite handling

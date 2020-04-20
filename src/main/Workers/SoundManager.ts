@@ -1,6 +1,7 @@
-import IndexedDb, { IndexeddbDataResult } from './IndexeddbManager';
+import IndexedDb from './IndexeddbManager';
 import CdnManager from './CdnManager';
-import PromiseUtil, { CompletionPromiseData } from '../Utility/Promises';
+import PromiseUtil from '../Utility/Promises';
+import Logger from "./Logger";
 
 const soundLibrary = {
     nitw: 'http://127.0.0.1:3001/sounds/nitw.mp3',
@@ -13,8 +14,8 @@ const soundLibrary = {
 
 interface SoundInfo {
     soundName: string;
-    context: any;
-    source: any;
+    context: AudioContext;
+    source: AudioBufferSourceNode;
     options: SoundOptions;
     nodes: {
         gain?: GainNode,
@@ -59,7 +60,7 @@ class SoundManager {
 
     async Initialize(): Promise<void> {
         if (this.initialized) {
-            console.warn('SoundManager is already initialized.');
+            Logger.Warn('SoundManager is already initialized.');
             return;
         }
         this.initialized = true;
@@ -68,11 +69,11 @@ class SoundManager {
         const promises: Promise<void>[] = [];
         for (const name in soundLibrary) {
             const method = async (): Promise<void> => {
-                const exists = await IndexedDb.CheckExistence('sounds', soundLibrary[name])
+                const exists = await IndexedDb.CheckExistence('game', 'sounds', soundLibrary[name])
 
                 if (!exists) {
                     const blob = await CdnManager.GetContentFromUrl(soundLibrary[name]);
-                    await IndexedDb.StoreData('sounds', { url: soundLibrary[name], blob: blob });
+                    await IndexedDb.StoreData('game', 'sounds', { url: soundLibrary[name], blob: blob });
                 }
             };
             promises.push(method());
@@ -121,15 +122,14 @@ class SoundManager {
     }
 
     private async GenerateSoundContext(soundName: string, options: SoundOptions): Promise<SoundInfo | null> {
-        const result: IndexeddbDataResult = await IndexedDb.GetData("sounds", soundLibrary[soundName])
+        const result = await IndexedDb.GetData('game', 'sounds', soundLibrary[soundName])
         if (result.error) {
-            console.error(`Error generating context for sound name: ${soundName}`);
-            console.error(result.error);
+            Logger.Error(`Error generating context for sound name: ${soundName}\n${result.error.message}`);
             return null;
         } else {
             //@ts-ignore (TypeScriptsd DOM library does not recognize webkit)
             const context = new (window.AudioContext || window.webkitAudioContext)();
-            const completionPromise: CompletionPromiseData = PromiseUtil.CreateCompletionPromise();
+            const completionPromise = PromiseUtil.CreateCompletionPromise();
             const audioData: ArrayBuffer = await result.data.blob.arrayBuffer();
             let info: SoundInfo | null = null;
 
@@ -144,8 +144,7 @@ class SoundManager {
                     completionPromise.resolve();
                 },
                 (e) => {
-                    console.error(`Error decoding audio for sound name: ${soundName}`);
-                    console.error(e);
+                    Logger.Error(`Error decoding audio for sound name: ${soundName}\n${e.message}`);
                     completionPromise.resolve();
                 }
             );
@@ -223,7 +222,7 @@ class SoundManager {
     // Repetetive check for a sound instance. Prints a warning if it does not.
     private InstanceExists(instanceId: number): boolean {
         if (this.activeSounds[instanceId]) return true;
-        console.warn(`Attempted to interact with nonexistence sound instance with id: ${instanceId}`);
+        Logger.Warn(`Attempted to interact with nonexistence sound instance with id: ${instanceId}`);
         return false;
     }
 
@@ -248,7 +247,7 @@ class SoundManager {
 
         const ctx = this.activeSounds[instanceId];
         if (ctx.options.pan === null) {
-            console.warn(`Attempted to manipulate panning for an instance without panning. ID: ${instanceId}`);
+            Logger.Warn(`Attempted to manipulate panning for an instance without panning. ID: ${instanceId}`);
             return;
         }
 
