@@ -5,13 +5,13 @@
   "author": "zimberzimber",
   "license": "ISC",
   "scripts": {
-    "build-main": "browserify src/main/Main.ts -p [ tsify tinyify ] > dist/main.js",
-    "build-worker": "browserify src/workers/TestWorker.ts -p [ tsify tinyify ] > dist/worker.js",
-    "build": "npm run build-main"
+    "build": "browserify src/main/Main.ts -p [ tsify ] > dist/main.js",
+    "minify": "terser -c --output dist/main.js dist/main.js",
+    "release": "npm run build & npm run minify"
   },
   "devDependencies": {
     "browserify": "^16.5.1",
-    "tinyify": "^2.5.2",
+    "terser": "^4.6.11",
     "tsify": "^4.0.1",
     "typescript": "^3.8.3"
   }

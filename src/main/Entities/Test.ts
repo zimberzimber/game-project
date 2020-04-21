@@ -23,7 +23,7 @@ export class TestEntity extends EntityBase {
 
         hitbox.SetTriggerState(TriggerState.OnEnterTrigger);
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => {
-            SoundManager.PlaySound('unlock');
+            SoundManager.PlaySound('sfx');
         }
 
         hitbox.UncollisionScript = (TriggerState: HitboxBase) => {

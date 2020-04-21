@@ -4,7 +4,7 @@ import { KeyNames } from "../Models/InputHelpers";
 import Vec2Utils from "../Utility/Vec2";
 import Vec2 from "../Models/Vec2";
 import Game from "../Workers/Game";
-import SoundManager from "./SoundManager";
+import SoundManager, { SoundOptions, SoundTags } from "./SoundManager";
 
 // Have to relay key presses through this class since holding a key down repeats the keydown event
 class InputHandler implements IKeyPressObserver {
@@ -38,6 +38,7 @@ class InputHandler implements IKeyPressObserver {
     OnKeyDown(key: KeyNames): void {
         if (key == KeyNames.pause) {
             Game.paused = !Game.paused;
+            SoundManager.PlaySound('ui', new SoundOptions(0.5, false, null, SoundTags.UI));
 
             if (Game.paused)
                 SoundManager.Pause();

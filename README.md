@@ -1,1 +1,2 @@
-game-project
+Game engine project by ya boi zimberzimber
+I do not give permission to anyone do anything with this because the only way you're getting this is by stealing my computer or hacking into my Github account, so go fuck yourself you thieving piece of shit you. :)

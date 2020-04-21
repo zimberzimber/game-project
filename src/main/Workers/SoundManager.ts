@@ -4,12 +4,10 @@ import PromiseUtil from '../Utility/Promises';
 import Logger from "./Logger";
 
 const soundLibrary = {
-    nitw: 'http://127.0.0.1:3001/sounds/nitw.mp3',
-    short: 'http://127.0.0.1:3001/sounds/short.mp3',
-    unlock: 'http://127.0.0.1:3001/sounds/unlock.mp3',
     silence: 'http://127.0.0.1:3001/sounds/silence.mp3',
-    tts: 'http://127.0.0.1:3001/sounds/tts.mp3',
-    clown: 'http://127.0.0.1:3001/sounds/clown.mp3',
+    loop: 'http://127.0.0.1:3001/sounds/loop.mp3',
+    sfx: 'http://127.0.0.1:3001/sounds/sfx.mp3',
+    ui: 'http://127.0.0.1:3001/sounds/ui.mp3',
 };
 
 interface SoundInfo {

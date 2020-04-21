@@ -31,7 +31,7 @@ IndexedDB.OpenDatabase(soundSchema, 5)
     .then(() => {
         SoundManager.Initialize().then(() => {
             setTimeout(() => {
-                SoundManager.PlaySound('tts', new SoundOptions(0.5, true, null, SoundTags.Music));
+                SoundManager.PlaySound('loop', new SoundOptions(0.5, true, null, SoundTags.Music));
             }, 1000);
         });
     });
