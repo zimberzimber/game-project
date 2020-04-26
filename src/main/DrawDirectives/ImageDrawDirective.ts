@@ -22,7 +22,7 @@ export class ImageDrawDirective extends DrawDirectiveBase {
         const rx = Math.sin(absTransform.GetRotationRadian());
         const ry = Math.cos(absTransform.GetRotationRadian());
 
-        const sd = Sprites.GetSpriteData(this.spriteName, 0);
+        const sd = Sprites.GetSprite(this.spriteName);
 
         // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
         return [

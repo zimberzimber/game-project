@@ -1,4 +1,4 @@
-import { ISPriteData } from "../Models/ISprite";
+import { ISpriteFrame, ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition, ISPriteData } from "../Models/Sprites";
 import { CDN } from "./CdnManager";
 import { Log, LogLevel } from "./Logger";
 import { IDB } from "./IndexeddbManager";
@@ -70,10 +70,6 @@ class ImageManager {
 
         // Wait for the loading to complete
         await Promise.all(promises);
-
-        for (const img in this.images) {
-            document.body.appendChild(this.images[img]);
-        }
     }
 
     GetImageIdFromName(name: string): number {
@@ -95,50 +91,53 @@ class ImageManager {
     }
 }
 
-interface ISpriteFrame {
-    origin: [number, number];
-    size: [number, number];
-}
-
-export interface ISpriteFramesDefinition {
-    imageName: string;
-    frames: ISpriteFrame[];
-    names: string[];
-    aliases: { [key: string]: string };
-}
-
 interface ISPriteFramesStorage {
     imageId: number;
-    frames: ISpriteFrame[];
-    names: string[];
-    aliases: { [key: string]: string };
+    frames: ISpriteFrame | ISpriteFrame[];
+    names?: string[];
+    aliases?: { [key: string]: string };
 }
 
 class SpriteManager {
     private sprites: { [key: string]: ISPriteFramesStorage } = {};
     private initialized: boolean = false;
 
-    Initialize(spriteDefinitions: { [key: string]: ISpriteFramesDefinition }): void {
+    Initialize(spriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition }): void {
         if (this.initialized) {
             Log.Warn('Sprite Manager already initialized.');
             return;
         }
 
         this.initialized = true;
-        for (const sprite in spriteDefinitions) {
-            this.sprites[sprite] = {
-                frames: spriteDefinitions[sprite].frames,
-                names: spriteDefinitions[sprite].names,
-                aliases: spriteDefinitions[sprite].aliases,
-                imageId: 0
-            };
+        for (const spriteName in spriteDefinitions) {
 
-            // Leave the default 0 if no image ID is present;
-            const imageId = Images.GetImageIdFromName(spriteDefinitions[sprite].imageName);
-            if (imageId > -1)
-                this.sprites[sprite].imageId = imageId;
-            else
-                Log.Error(`Image named '${spriteDefinitions[sprite].imageName}' does not exist. Defaulting texture index for sprite named '${sprite}' to 0.`);
+            // Get the images ID. Default to 0 and print a message if its an invalid image.
+            let imageId = Images.GetImageIdFromName(spriteDefinitions[spriteName].sourceImageName);
+            if (imageId == -1) {
+                Log.Error(`Attempted to fetch nonexistent image named '${spriteDefinitions[spriteName].sourceImageName}' for sprite: ${spriteName}`)
+                imageId = 0;
+            }
+
+            if ((spriteDefinitions[spriteName] as ISingleFrameSpriteDefinition).frame) {
+                const def = spriteDefinitions[spriteName] as ISingleFrameSpriteDefinition;
+                this.sprites[spriteName] = {
+                    imageId: imageId,
+                    frames: def.frame
+                }
+
+            } else if ((spriteDefinitions[spriteName] as IMultiFrameSpriteDefinition).frames) {
+                const def = spriteDefinitions[spriteName] as IMultiFrameSpriteDefinition;
+                this.sprites[spriteName] = {
+                    imageId: imageId,
+                    frames: def.frames,
+                    names: def.names || undefined, // Adding an underfined in case of the definition having an empty array
+                    aliases: def.aliases || undefined, // Adding an underfined in case of the definition having an empty array
+                }
+
+            } else { // Also covers empty frames array
+                Log.Error(`Sprite definition for ${spriteName} lacks frame definitions. Ignoring.`)
+                continue;
+            }
         }
     }
 
@@ -151,34 +150,62 @@ class SpriteManager {
         return { origin: [0, 0], size: [0, 0], imageId: 0 };
     }
 
-    GetSpriteData(sprite: string, frame: number | string): ISPriteData {
-        if (!this.sprites[sprite]) {
-            OneTimeLog.Log(`nonexistentSprite_${sprite}`, `Attempted to get non-existent sprite: ${sprite}`, LogLevel.Error);
-            return { origin: [0, 0], size: [0, 0], imageId: 0 };
-        }
+    GetSprite(name: string, frame: number | string | void): ISPriteData {
+        let result: ISPriteData = { origin: [0, 0], size: [0, 0], imageId: 0 };
 
-        const s: ISPriteFramesStorage = this.sprites[sprite];
-        let f: ISpriteFrame | undefined = undefined;
+        if (this.sprites[name]) {
+            const s: ISPriteFramesStorage = this.sprites[name];
 
-        if (typeof (frame) == "number") {
-            f = s.frames[frame];
-        } else {
-            if (s.aliases[frame])
-                frame = s.aliases.frame;
+            if (typeof (frame) == 'number') {
+                if (s.frames[frame]) {
+                    result.origin = s.frames[frame].origin;
+                    result.size = s.frames[frame].size;
+                    result.imageId = s.imageId;
+                } else {
+                    OneTimeLog.Log(`getSprite_nonexistent_numerical_frame_${name}_${frame}`, `Nonexistent numerical frame ${frame} for sprite: ${name}`, LogLevel.Error);
+                }
+            } else if (typeof (frame) == 'string') {
+                if (s.names) {
+                    let index = -1;
+                    let alias = name;
+                    if (s.aliases && s.aliases[name])
+                        alias = s.aliases[name];
 
-            for (let i = 0; i < s.names.length; i++) {
-                if (s.names[i] == frame) {
-                    f = s.frames[i];
-                    break;
+                    for (let i = 0; i < s.names.length; i++) {
+                        if (s.names[i] == alias) {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    if (index > -1) {
+                        if (s.frames[index]) {
+                            result.origin = s.frames[index].origin;
+                            result.size = s.frames[index].size;
+                            result.imageId = s.imageId;
+                        } else {
+                            OneTimeLog.Log(`getSprite_out_of_bound_frame_name_${name}_${frame}`, `Frame named '${frame}' is out of bounds for sprite info array in sprite: ${name}`, LogLevel.Error);
+                        }
+                    } else {
+                        OneTimeLog.Log(`getSprite_nonexistent_frame_name_${name}_${frame}`, `Nonexistent frame named '${frame}' for sprite: ${name}`, LogLevel.Error);
+                    }
+                } else {
+                    OneTimeLog.Log(`getSprite_no_frame_names_${name}`, `There are no frame names defined for sprite: ${name}`, LogLevel.Error);
+                }
+            } else {
+                if (s.frames instanceof Array) {
+                    OneTimeLog.Log(`getSprite_no_frame_requested_${name}`, `No frame was requested for multiframed sprite: ${name}`, LogLevel.Error);
+                } else {
+                    result.origin = s.frames.origin;
+                    result.size = s.frames.size;
+                    result.imageId = s.imageId;
                 }
             }
+        } else {
+            OneTimeLog.Log(`nonexistentSprite_${name}`, `Attempted to get non-existent sprite: ${name}`, LogLevel.Error);
         }
 
-        if (!f) {
-            OneTimeLog.Log(`nonexistentSpriteFrame_${sprite}_${frame}`, `Attempted to get non-existent from '${frame}' from sprite: ${sprite}`, LogLevel.Error);
-            return { origin: [0, 0], size: [0, 0], imageId: 0 };
-        }
-        return { origin: [f.origin[0], f.origin[1]], size: [f.size[0], f.size[1]], imageId: s.imageId };
+        return result;
     }
 }
 

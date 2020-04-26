@@ -5,7 +5,8 @@ import { Log } from "./Workers/Logger";
 import { Config } from "./Proxies/ConfigProxy";
 import { SoundOptions, SoundTags } from "./Models/SoundModels";
 import { gameSchema } from "./Models/DbSchemas";
-import { Images, Sprites, ISpriteFramesDefinition } from "./Workers/SpriteManager";
+import { Images, Sprites } from "./Workers/SpriteManager";
+import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition } from "./Models/Sprites";
 
 
 window.onload = () => {
@@ -18,38 +19,37 @@ const soundDefinitions: { [key: string]: string } = {
     ui: 'http://127.0.0.1:3001/sounds/ui.mp3',
 };
 
-const imageDefenitions = {
+const imageDefenitions: { [key: string]: string } = {
     sprites: 'http://127.0.0.1:3001/content/sprites1.png',
     colors: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/YIQ_IQ_plane.svg/1200px-YIQ_IQ_plane.svg.png',
 };
 
-const spriteDefinitions: { [key: string]: ISpriteFramesDefinition } = {
+const spriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition } = {
     assetMissing: {
-        imageName: 'sprites',
-        frames: [
-            {
-                origin: [0, 0],
-                size: [0.125, 0.125]
-            }
-        ],
-        names: [],
-        aliases: {}
+        sourceImageName: 'sprites',
+        frame: {
+            origin: [0, 0],
+            size: [0.125, 0.125]
+        }
     },
     heart: {
-        imageName: 'sprites',
-        frames: [
-            {
-                origin: [0.125, 0],
-                size: [0.125, 0.125]
-            }
-        ],
-        names: [],
-        aliases: {}
+        sourceImageName: 'sprites',
+        frame: {
+            origin: [0.125, 0],
+            size: [0.125, 0.125]
+        }
     },
     dice: {
-        imageName: 'sprites',
-        names: [],
-        aliases: {},
+        sourceImageName: 'sprites',
+        names: ['one', 'two', 'three', 'four', 'five', 'six'],
+        aliases: {
+            odin: 'one',
+            dva: 'two',
+            tri: 'three',
+            chetiri: 'four',
+            pyat: 'five',
+            shest: 'six'
+        },
         frames: [
             {
                 origin: [0, 0.125],

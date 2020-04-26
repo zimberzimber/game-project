@@ -2,10 +2,11 @@ X Move models from IDB and Sound managers into the respective folder
 X Move IDB schemas to their own folder
 X Remove _G
 X Add images to IDB
-Give game a pausing method instead of changing a variable.
+X Give game a pausing method instead of changing a variable.
+X Give game a pausing method instead of changing a variable.
 Setup a proper asset library for sounds and images
 A way to tell the shader what should and what shouldn't move with the camera view
 Create a sound emitting component
 Add FPS counter
 X Modify webgl init to accept an array of images instead of just one image
-Modify webgl so you can use multiple images as textures
+Modify webgl so you can use multiple images as textures (split tris/line arrays into image id based groups, then draw each group, activating the related texture?)
