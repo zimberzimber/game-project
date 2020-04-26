@@ -1,5 +1,4 @@
 import { EntityBase } from "../Bases/EntityBase";
-import { _G } from "../Main";
 import { PlayerEntity } from "../Entities/Player";
 import { HitboxBase } from "../Bases/HitboxBase";
 import { ComponentBase } from "../Bases/ComponentBase";
@@ -9,29 +8,28 @@ import { IDOMDependant } from "../Bases/MiscInterfaces";
 import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";
 import { TestEntity } from "../Entities/Test";
 import { WebglDrawData } from "../Models/WebglDrawData";
-import WebglProxy from "../Proxies/WebglProxy";
+import { WebGL } from "../Proxies/WebglProxy";
 import ShaderSourcesProxy from "../Proxies/ShaderSourcesProxy";
+import { Config } from "../Proxies/ConfigProxy";
+import { Images } from "./SpriteManager";
+import { Sounds } from "./SoundManager";
+import { SoundOptions, SoundTags } from "../Models/SoundModels";
 
 class Game implements IDOMDependant {
     canvas: any;
-    interval: any;
-    entities: EntityBase[];
+    entities: EntityBase[] = [];
     FPSInterval: number;
     paused: boolean = false;
 
     frameDelta: number = 0;
     oldFrameTime: number = new Date().getTime();
 
-    fpsCounter: number = 0;
-    oldTime: number = new Date().getTime();
-    fpsDisplay: number = 0;
-
     OnDomLoaded(): void {
         this.canvas = document.getElementById("game-canvas");
         this.canvas.width = 600;
         this.canvas.height = 500;
 
-        WebglProxy.Init(ShaderSourcesProxy.GetVertexShader(), ShaderSourcesProxy.GetFragmentShader(), this.canvas, document.getElementById('sprites'))
+        WebGL.Init(ShaderSourcesProxy.GetVertexShader(), ShaderSourcesProxy.GetFragmentShader(), this.canvas, Images.GetImageArray())
 
         this.entities = [];
         let p = new PlayerEntity();
@@ -69,10 +67,6 @@ class Game implements IDOMDependant {
 
 
         this.Start();
-    }
-
-    constructor() {
-        this.entities = [];
     }
 
     Start(): void {
@@ -185,10 +179,10 @@ class Game implements IDOMDependant {
             ]);
         }
 
-        WebglProxy.SetTriangleData(triangleData);
+        WebGL.SetTriangleData(triangleData);
 
         // Draw collisions if the option is enabled
-        if (_G.DebugDraw) {
+        if (Config.GetConfig('debugDraw', false) === true) {
             // this.fpsCounter++;
             // const time = new Date().getTime();
             // this.context.fillText(this.fpsDisplay, 10, 10);
@@ -214,15 +208,24 @@ class Game implements IDOMDependant {
                 indexOffset += 1;
             }
 
-            WebglProxy.SetLineData(lineData);
+            WebGL.SetLineData(lineData);
         }
 
-        WebglProxy.Draw();
+        WebGL.Draw();
     }
 
-    // Entities need a collision class
-    // Draw directive and collision should have separate values
-    // Different projectiles will have their own classes extending Entity
+    IsPaused(): boolean { return this.paused; }
+    SetPauseState(isPaused: boolean): void {
+        if (this.paused == isPaused) return;
+
+        this.paused = isPaused;
+        Sounds.PlaySound('ui', new SoundOptions(0.5, false, null, SoundTags.UI));
+
+        if (isPaused)
+            Sounds.Pause();
+        else
+            Sounds.Unpause();
+    }
 }
 
 const game: Game = new Game();

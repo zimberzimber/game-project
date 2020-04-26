@@ -4,8 +4,8 @@ class WebglProxy {
     //@ts-ignore
     private wg: any = window.webglDef;
 
-    Init = (vertexSource: string, fragmentSource: string, canvas: any, spriteSheet: any) =>
-        this.wg.init(vertexSource, fragmentSource, canvas, spriteSheet);
+    Init = (vertexSource: string, fragmentSource: string, canvas: HTMLCanvasElement, imagesArray: HTMLImageElement[]) =>
+        this.wg.init(vertexSource, fragmentSource, canvas, imagesArray);
 
     SetCameraFrustum = (horizontal: number | null = null, vertical: number | null = null, near: number | null = null, far: number | null = null) =>
         this.wg.setCameraFrustum(horizontal, vertical, near, far);
@@ -32,5 +32,4 @@ class WebglProxy {
         this.wg.setLineData(data);
 }
 
-const webglProxy = new WebglProxy();
-export default webglProxy;
+export const WebGL = new WebglProxy();

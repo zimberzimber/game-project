@@ -1,8 +1,7 @@
 import { DrawDirectiveBase } from "../Bases/DrawDirectiveBase";
 import { EntityBase } from "../Bases/EntityBase";
-import { _G } from "../Main";
 import Vec2 from "../Models/Vec2";
-import SpriteManager from "../Workers/SpriteManager";
+import { Sprites } from "../Workers/SpriteManager";
 
 export class ImageDrawDirective extends DrawDirectiveBase {
     size: Vec2;
@@ -23,14 +22,14 @@ export class ImageDrawDirective extends DrawDirectiveBase {
         const rx = Math.sin(absTransform.GetRotationRadian());
         const ry = Math.cos(absTransform.GetRotationRadian());
 
-        const sd = SpriteManager.GetStaticSprite(this.spriteName);
+        const sd = Sprites.GetSpriteData(this.spriteName, 0);
 
         // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
         return [
-            absTransform.position[0], absTransform.position[1], 0, ox, oy, rx, ry, sd.coords[0] + sd.size[0], sd.coords[1],
-            absTransform.position[0], absTransform.position[1], 0, -ox, oy, rx, ry, sd.coords[0], sd.coords[1],
-            absTransform.position[0], absTransform.position[1], 0, -ox, -oy, rx, ry, sd.coords[0], sd.coords[1] + sd.size[1],
-            absTransform.position[0], absTransform.position[1], 0, ox, -oy, rx, ry, sd.coords[0] + sd.size[0], sd.coords[1] + sd.size[1],
+            absTransform.position[0], absTransform.position[1], 0, ox, oy, rx, ry, sd.origin[0] + sd.size[0], sd.origin[1],
+            absTransform.position[0], absTransform.position[1], 0, -ox, oy, rx, ry, sd.origin[0], sd.origin[1],
+            absTransform.position[0], absTransform.position[1], 0, -ox, -oy, rx, ry, sd.origin[0], sd.origin[1] + sd.size[1],
+            absTransform.position[0], absTransform.position[1], 0, ox, -oy, rx, ry, sd.origin[0] + sd.size[0], sd.origin[1] + sd.size[1],
         ];
     }
 }

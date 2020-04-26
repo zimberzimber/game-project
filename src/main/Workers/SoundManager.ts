@@ -1,14 +1,9 @@
-import IndexedDb from './IndexeddbManager';
-import CdnManager from './CdnManager';
+import { IDB } from './IndexeddbManager';
+import { CDN } from './CdnManager';
 import PromiseUtil from '../Utility/Promises';
-import Logger from "./Logger";
+import { Log } from "./Logger";
+import { SoundOptions, SoundTags } from '../Models/SoundModels';
 
-const soundLibrary = {
-    silence: 'http://127.0.0.1:3001/sounds/silence.mp3',
-    loop: 'http://127.0.0.1:3001/sounds/loop.mp3',
-    sfx: 'http://127.0.0.1:3001/sounds/sfx.mp3',
-    ui: 'http://127.0.0.1:3001/sounds/ui.mp3',
-};
 
 interface SoundInfo {
     soundName: string;
@@ -21,27 +16,8 @@ interface SoundInfo {
     }
 }
 
-export class SoundOptions {
-    constructor(volume: number = 1, loop: boolean = false, pan: number | null = null, tag: SoundTags = SoundTags.Default) {
-        this.volume = volume;
-        this.loop = loop;
-        this.pan = pan;
-        this.tag = tag;
-    }
-
-    volume: number = 1;
-    loop: boolean = false;
-    pan: number | null = null;
-    tag: SoundTags = SoundTags.Default;
-}
-
-export enum SoundTags {
-    Default, // Paused when the game is paused.
-    Music, // Plays at a lower volume when the game is paused.
-    UI // Unaffected by pausing.
-}
-
 class SoundManager {
+    private sounds: { [key: string]: string } = {};
     private nextSoundId: number = 0;
     private masterVolume: number = 1;
     private paused: boolean = false;
@@ -56,22 +32,27 @@ class SoundManager {
                 this.volumeContainer[tag] = 1;
     }
 
-    async Initialize(): Promise<void> {
+    async Initialize(soundDefinitions: { [key: string]: string }): Promise<void> {
         if (this.initialized) {
-            Logger.Warn('SoundManager is already initialized.');
+            Log.Warn('SoundManager is already initialized.');
             return;
         }
         this.initialized = true;
 
+        this.sounds = soundDefinitions;
+
         // Load sounds into the database
         const promises: Promise<void>[] = [];
-        for (const name in soundLibrary) {
+        for (const name in soundDefinitions) {
             const method = async (): Promise<void> => {
-                const exists = await IndexedDb.CheckExistence('game', 'sounds', soundLibrary[name])
+                const exists = await IDB.CheckExistence('game', 'sounds', soundDefinitions[name])
 
                 if (!exists) {
-                    const blob = await CdnManager.GetContentFromUrl(soundLibrary[name]);
-                    await IndexedDb.StoreData('game', 'sounds', { url: soundLibrary[name], blob: blob });
+                    const result = await CDN.GetContentFromUrl(soundDefinitions[name]);
+                    if (result.error)
+                        Log.Error(`Failed fetching sound resource from url: ${soundDefinitions[name]}`);
+                    else
+                        await IDB.StoreData('game', 'sounds', { url: soundDefinitions[name], blob: result.data });
                 }
             };
             promises.push(method());
@@ -120,14 +101,15 @@ class SoundManager {
     }
 
     private async GenerateSoundContext(soundName: string, options: SoundOptions): Promise<SoundInfo | null> {
-        const result = await IndexedDb.GetData('game', 'sounds', soundLibrary[soundName])
+        const result = await IDB.GetData('game', 'sounds', this.sounds[soundName])
         if (result.error) {
-            Logger.Error(`Error generating context for sound name: ${soundName}\n${result.error.message}`);
+            Log.Error(`Error generating context for sound name: ${soundName}\n${result.error.message}`);
             return null;
         } else {
-            //@ts-ignore (TypeScriptsd DOM library does not recognize webkit)
+            //@ts-ignore (TypeScripts DOM library does not recognize webkit)
             const context = new (window.AudioContext || window.webkitAudioContext)();
             const completionPromise = PromiseUtil.CreateCompletionPromise();
+
             const audioData: ArrayBuffer = await result.data.blob.arrayBuffer();
             let info: SoundInfo | null = null;
 
@@ -142,7 +124,7 @@ class SoundManager {
                     completionPromise.resolve();
                 },
                 (e) => {
-                    Logger.Error(`Error decoding audio for sound name: ${soundName}\n${e.message}`);
+                    Log.Error(`Error decoding audio for sound name: ${soundName}\n${e.message}`);
                     completionPromise.resolve();
                 }
             );
@@ -220,7 +202,7 @@ class SoundManager {
     // Repetetive check for a sound instance. Prints a warning if it does not.
     private InstanceExists(instanceId: number): boolean {
         if (this.activeSounds[instanceId]) return true;
-        Logger.Warn(`Attempted to interact with nonexistence sound instance with id: ${instanceId}`);
+        Log.Warn(`Attempted to interact with nonexistence sound instance with id: ${instanceId}`);
         return false;
     }
 
@@ -245,7 +227,7 @@ class SoundManager {
 
         const ctx = this.activeSounds[instanceId];
         if (ctx.options.pan === null) {
-            Logger.Warn(`Attempted to manipulate panning for an instance without panning. ID: ${instanceId}`);
+            Log.Warn(`Attempted to manipulate panning for an instance without panning. ID: ${instanceId}`);
             return;
         }
 
@@ -266,5 +248,4 @@ class SoundManager {
     }
 }
 
-const soundManager = new SoundManager();
-export default soundManager;
+export const Sounds = new SoundManager();

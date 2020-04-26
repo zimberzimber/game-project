@@ -1,171 +1,186 @@
-import { ISprite } from "../Models/ISprite";
+import { ISPriteData } from "../Models/ISprite";
+import { CDN } from "./CdnManager";
+import { Log, LogLevel } from "./Logger";
+import { IDB } from "./IndexeddbManager";
+import { imageStore, gameSchema } from "../Models/DbSchemas";
+import PromiseUtil from "../Utility/Promises";
+import { OneTimeLog } from "./OneTimeLogger";
 
-const staticAtlas: { [key: string]: ISprite } = Object.freeze({
-    assetMissing: {
-        coords: [0, 0],
-        size: [0.125, 0.125],
-        texture: 0
-    },
-    heart: {
-        coords: [0.125, 0],
-        size: [0.125, 0.125],
-        texture: 0
-    },
-});
+class ImageManager {
+    private initialized: boolean = false;
+    private images: HTMLImageElement[] = [];
+    private nameIndex: { [key: string]: number } = {};
 
-const animatedAtlas: { [key: string]: ISprite[] } = Object.freeze({
-    dice: [
-        {
-            coords: [0, 0.125],
-            size: [0.125, 0.125],
-            texture: 0
-        },
-        {
-            coords: [0.125, 0.125],
-            size: [0.125, 0.125],
-            texture: 0
-        },
-        {
-            coords: [0.250, 0.125],
-            size: [0.125, 0.125],
-            texture: 0
-        },
-        {
-            coords: [0.375, 0.125],
-            size: [0.125, 0.125],
-            texture: 0
-        },
-        {
-            coords: [0.500, 0.125],
-            size: [0.125, 0.125],
-            texture: 0
-        },
-        {
-            coords: [0.625, 0.125],
-            size: [0.125, 0.125],
-            texture: 0
-        },
-    ]
-});
+    async Initialize(imageDefinitions: { [key: string]: string }): Promise<void> {
+        if (this.initialized) {
+            Log.Warn('SpriteManager is already initialized.');
+            return;
+        }
 
-class SpriteManager {
-    GetStaticSprite = (spriteName: string): ISprite => staticAtlas[spriteName] ? staticAtlas[spriteName] : staticAtlas.assetMissing;
+        this.initialized = true;
+        let promises: Promise<void>[] = [];
+        let nextId = 0;
 
-    GetanimatedSpriteFrame = (name: string, frame: number): ISprite => {
-        if (animatedAtlas[name] && animatedAtlas[name][frame])
-            return animatedAtlas[name][frame];
-        return staticAtlas.assetMissing;
+        for (const imageName in imageDefinitions) {
+            const url = imageDefinitions[imageName];
+            const promiseMethod = async (): Promise<void> => {
+                let blob: Blob;
+
+                // Add an image even if retreival fails so webgl gets an empty texture instead of nothing in case of an error
+                const image = new Image();
+                const imageId = nextId++;
+                this.images[imageId] = image;
+                this.nameIndex[imageName] = imageId;
+
+                // Check the existence of the image in the database.
+                // Retreive and save it in memory if it does, or retrieve it from the CDN, save to database, and save in memory if it doesnt
+                const exists = await IDB.CheckExistence(gameSchema.databaseName, imageStore.storeName, url)
+                if (exists) {
+                    const result = await IDB.GetData(gameSchema.databaseName, imageStore.storeName, url);
+                    if (result.error) {
+                        Log.Error(`Failed getting existing image from database: ${imageName}.\n${result.error.message}`);
+                        return;
+                    } else {
+                        blob = result.data.blob;
+                    }
+                } else {
+                    const result = await CDN.GetContentFromUrl(url);
+                    if (result.error) {
+                        Log.Error(`Failed getting image '${imageName}' from ${url}\n${result.error.message}`);
+                        return;
+                    } else {
+                        blob = result.data;
+                        await IDB.StoreData(gameSchema.databaseName, imageStore.storeName, { url: url, blob: result.data });
+                    }
+                }
+
+                const completionPromise = PromiseUtil.CreateCompletionPromise();
+
+                image.src = URL.createObjectURL(blob);
+                image.onload = () => {
+                    URL.revokeObjectURL(image.src);
+                    completionPromise.resolve();
+                    image.onload = null;
+                }
+
+                await completionPromise.Promise;
+            };
+            promises.push(promiseMethod());
+        }
+
+        // Wait for the loading to complete
+        await Promise.all(promises);
+
+        for (const img in this.images) {
+            document.body.appendChild(this.images[img]);
+        }
+    }
+
+    GetImageIdFromName(name: string): number {
+        return this.nameIndex[name] !== undefined ? this.nameIndex[name] : -1;
+    }
+
+    GetImageSize(id: number): [number, number] {
+        if (this.images[id])
+            return [this.images[id].width, this.images[id].height];
+        return [0, 0];
+    }
+
+    GetImageSizeByName(name: string): [number, number] {
+        return this.GetImageSize(this.GetImageIdFromName(name));
+    }
+
+    GetImageArray(): HTMLImageElement[] {
+        return this.images;
     }
 }
 
-const atlas: SpriteManager = new SpriteManager();
-export default atlas;
+interface ISpriteFrame {
+    origin: [number, number];
+    size: [number, number];
+}
 
-// import { ISpriteAtlas } from "../Bases/SpriteAtlas";
-// import { ImageDrawDirectiveData } from "../Models/ImageDrawDirectiveData";
+export interface ISpriteFramesDefinition {
+    imageName: string;
+    frames: ISpriteFrame[];
+    names: string[];
+    aliases: { [key: string]: string };
+}
 
-// export class LocalSpriteAtlas implements ISpriteAtlas {
+interface ISPriteFramesStorage {
+    imageId: number;
+    frames: ISpriteFrame[];
+    names: string[];
+    aliases: { [key: string]: string };
+}
 
-//     private _imageElement: any;
+class SpriteManager {
+    private sprites: { [key: string]: ISPriteFramesStorage } = {};
+    private initialized: boolean = false;
 
-//     constructor() { }
+    Initialize(spriteDefinitions: { [key: string]: ISpriteFramesDefinition }): void {
+        if (this.initialized) {
+            Log.Warn('Sprite Manager already initialized.');
+            return;
+        }
 
-//     OnDomLoaded(): void {
-//         this._imageElement = document.createElement("img");
-//         this._imageElement.src = "sprites/atlas.png";
-//         // document.body.appendChild(this._imageElement);
-//     }
+        this.initialized = true;
+        for (const sprite in spriteDefinitions) {
+            this.sprites[sprite] = {
+                frames: spriteDefinitions[sprite].frames,
+                names: spriteDefinitions[sprite].names,
+                aliases: spriteDefinitions[sprite].aliases,
+                imageId: 0
+            };
 
-//     GetSprite(spriteName: string): any {
-//         const d = new ImageDrawDirectiveData();
+            // Leave the default 0 if no image ID is present;
+            const imageId = Images.GetImageIdFromName(spriteDefinitions[sprite].imageName);
+            if (imageId > -1)
+                this.sprites[sprite].imageId = imageId;
+            else
+                Log.Error(`Image named '${spriteDefinitions[sprite].imageName}' does not exist. Defaulting texture index for sprite named '${sprite}' to 0.`);
+        }
+    }
 
-//         if (spriteName == "player") {
-//             d.img = this._imageElement;
-//             d.x = 16;
-//             d.y = 0;
-//             d.width = 16;
-//             d.height = 16;
-//         } else {
-//             d.img = this._imageElement;
-//             d.x = 0;
-//             d.y = 0;
-//             d.width = 16;
-//             d.height = 16;
-//         }
+    GetFullImageAsSprite(image: string): ISPriteData {
+        const id = Images.GetImageIdFromName(image);
+        if (id > -1)
+            return { origin: [0, 0], size: Images.GetImageSize(id), imageId: id };
 
-//         return d;
-//     }
-// }
+        OneTimeLog.Log(`nonexistentFullImage_${image}`, `Attempted to get non-existent image: ${image}`, LogLevel.Error);
+        return { origin: [0, 0], size: [0, 0], imageId: 0 };
+    }
 
-// export class SpriteAtlass {
-//     private static Atlas = [];
-//     private static UnusedTime = 30000; // Time in ms until a sprite is considered unused, so the system knows when to unload it.
+    GetSpriteData(sprite: string, frame: number | string): ISPriteData {
+        if (!this.sprites[sprite]) {
+            OneTimeLog.Log(`nonexistentSprite_${sprite}`, `Attempted to get non-existent sprite: ${sprite}`, LogLevel.Error);
+            return { origin: [0, 0], size: [0, 0], imageId: 0 };
+        }
 
-//     static GetSprite(name: string, frame: number = -1) {
+        const s: ISPriteFramesStorage = this.sprites[sprite];
+        let f: ISpriteFrame | undefined = undefined;
 
-//     }
+        if (typeof (frame) == "number") {
+            f = s.frames[frame];
+        } else {
+            if (s.aliases[frame])
+                frame = s.aliases.frame;
 
-//     static UnloadUnused() {
+            for (let i = 0; i < s.names.length; i++) {
+                if (s.names[i] == frame) {
+                    f = s.frames[i];
+                    break;
+                }
+            }
+        }
 
-//     }
+        if (!f) {
+            OneTimeLog.Log(`nonexistentSpriteFrame_${sprite}_${frame}`, `Attempted to get non-existent from '${frame}' from sprite: ${sprite}`, LogLevel.Error);
+            return { origin: [0, 0], size: [0, 0], imageId: 0 };
+        }
+        return { origin: [f.origin[0], f.origin[1]], size: [f.size[0], f.size[1]], imageId: s.imageId };
+    }
+}
 
-//     private static LoadSprite(): SpriteContainer {
-//         return null;
-//     }
-// }
-
-// export class SpriteContainer {
-//     static pathPrefix = "./sprites/";
-
-//     currentlyUsing: number;
-//     lastUsed: Date;
-
-//     name: string;
-//     fullImage: any;
-//     // framesConfig:FramesConfig;
-//     frames: any[] = [];
-
-//     constructor(name: string) {
-//         this.name = name;
-//         this.fullImage = new Image();
-//         this.fullImage.src = `${SpriteContainer.pathPrefix}${name}.png`;
-//     }
-
-// }
-
-// // Starbounds format is ****ing amazing, but its too heavy for my needs
-// /*
-// export class FramesConfig{
-//     frameSize:Vec2;
-//     frameCount:Vec2;
-//     frameNames:any[][];
-//     frameAliases:object;
-
-//     constructor(path:string){
-//         // Create a file reader class
-//         // Send that class the path
-//         // Get a JSON object back, and map the variables
-//     }
-
-//     example = {
-//         "frameSize" : [1,1],
-//         "frameCount" : [2,2],
-//         "frameNames" : [
-//             ["00", "01"],
-//             ["10", "11"]
-//         ],
-
-//         "frameAliases" : {
-//             "topleft" : "00",
-//             "topright" : "01",
-//             "bottomleft" : "10",
-//             "bottomright" : "11",
-
-//             "ten" : "10",
-//             "eleven" : "11"
-//         }
-//     }
-// }
-// */
-
-
+export const Images: ImageManager = new ImageManager();
+export const Sprites: SpriteManager = new SpriteManager();

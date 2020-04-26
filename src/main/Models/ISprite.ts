@@ -1,5 +1,5 @@
-export interface ISprite {
-    coords: [number, number];
+export interface ISPriteData {
+    origin: [number, number];
     size: [number, number];
-    texture: number;
+    imageId: number;
 }

@@ -1,7 +1,6 @@
 import { HitboxBase } from "../Bases/HitboxBase";
 import { HitboxType } from "../Models/HitboxType";
 import { EntityBase } from "../Bases/EntityBase";
-import { _G } from "../Main";
 import { WebglDrawData } from "../Models/WebglDrawData";
 import { TriggerState } from "../Models/TriggerState";
 import Vec2Utils from "../Utility/Vec2";

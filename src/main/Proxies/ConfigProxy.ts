@@ -1,10 +1,12 @@
 class ConfigProxy {
     //@ts-ignore
-    originalConfig: any = window.configuration;
+    private originalConfig: any = window.configuration;
 
     GetConfig = (field: string, defaultValue: any): any =>
-        this.originalConfig[field] ? this.originalConfig[field] : defaultValue;
+        this.originalConfig[field] !== undefined ? this.originalConfig[field] : defaultValue;
+
+    SetConfig = (field: string, value: any): void =>
+        this.originalConfig[field] = value;
 }
 
-const configProxy = new ConfigProxy();
-export default configProxy;
+export const Config = new ConfigProxy();

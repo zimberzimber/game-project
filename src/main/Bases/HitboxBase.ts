@@ -1,7 +1,6 @@
 import { ComponentBase } from "./ComponentBase";
 import { HitboxType } from "../Models/HitboxType";
 import { CollisionDelegate } from "../Models/Delegates";
-import { _G } from "../Main";
 import { TriggerState } from "../Models/TriggerState";
 import CheckCollision from "../Workers/HitboxCollisionChecker";
 import { WebglDrawData } from "../Models/WebglDrawData";

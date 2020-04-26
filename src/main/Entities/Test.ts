@@ -1,4 +1,3 @@
-import { _G } from "../Main";
 import { EntityBase } from "../Bases/EntityBase";
 import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";
 import { HitboxPolygon } from "../Components/HitboxPolygon";
@@ -8,12 +7,12 @@ import Vec2Utils from "../Utility/Vec2";
 import ScalarUtil from "../Utility/Scalar";
 import { HitboxCircle } from "../Components/HitboxCircle";
 import { HitboxRectangle } from "../Components/HitboxRectangle";
-import SoundManager from "../Workers/SoundManager";
+import {Sounds} from "../Workers/SoundManager";
 
 export class TestEntity extends EntityBase {
     constructor(parent: EntityBase | void) {
         super(parent);
-        this.AddComponent(new ImageDrawDirective(this, "ass", [10, 10]));
+        this.AddComponent(new ImageDrawDirective(this, "assetMissing", [10, 10]));
 
         // const hitbox = new HitboxRectangle(this, 10, 40);
         // const hitbox = new HitboxCircle(this, 10);
@@ -23,7 +22,7 @@ export class TestEntity extends EntityBase {
 
         hitbox.SetTriggerState(TriggerState.OnEnterTrigger);
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => {
-            SoundManager.PlaySound('sfx');
+            Sounds.PlaySound('sfx');
         }
 
         hitbox.UncollisionScript = (TriggerState: HitboxBase) => {

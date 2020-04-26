@@ -1,4 +1,3 @@
-import { _G } from "../Main";
 import { EntityBase } from "../Bases/EntityBase";
 import { PlayerMovementComponent } from "../Components/PlayerMovementComponent";
 import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";

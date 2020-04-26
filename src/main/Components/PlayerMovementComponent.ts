@@ -1,5 +1,4 @@
 import { ComponentBase } from "../Bases/ComponentBase";
-import { _G } from "../Main";
 import Vec2 from "../Models/Vec2";
 import Vec2Utils from "../Utility/Vec2";
 import ScalarUtil from "../Utility/Scalar";

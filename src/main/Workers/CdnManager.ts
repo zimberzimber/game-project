@@ -1,23 +1,27 @@
 import PromiseUtil from "../Utility/Promises";
+import { IDataOrErrorContainer } from "../Models/GenericInterfaces";
 
 class CdnManager {
-    async GetContentFromUrl(url: string): Promise<Blob | Error> {
+    async GetContentFromUrl(url: string): Promise<IDataOrErrorContainer> {
         const completionPromise = PromiseUtil.CreateCompletionPromise();
-        let result: Blob | Error = new Error(`Error while retrieving data from url: ${url}`);
+        let result: IDataOrErrorContainer = { error: undefined, data: undefined };
 
         const req = new XMLHttpRequest();
         req.responseType = "blob";
         req.open("GET", url);
 
-        req.onerror = () => completionPromise.resolve();
+        req.onerror = () => {
+            result.error = new Error(`Failed getting data from url: ${url}`);
+            completionPromise.resolve();
+        };
 
         req.onabort = () => {
-            result = new Error(`Aborted data retrieval from url: ${url}`);
+            result.error = new Error(`Aborted data retrieval from url: ${url}`);
             completionPromise.resolve();
         };
 
         req.onloadend = (e) => {
-            result = req.response;
+            result.data = req.response;
             completionPromise.resolve();
         };
 
@@ -27,5 +31,4 @@ class CdnManager {
     }
 }
 
-const cdnManager: CdnManager = new CdnManager();
-export default cdnManager;
+export const CDN: CdnManager = new CdnManager();
