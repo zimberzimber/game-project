@@ -3,7 +3,7 @@ X Move IDB schemas to their own folder
 X Remove _G
 X Add images to IDB
 X Give game a pausing method instead of changing a variable.
-X Give game a pausing method instead of changing a variable.
+Separate sound manager to sound managment, and sound playing components
 Setup a proper asset library for sounds and images
 A way to tell the shader what should and what shouldn't move with the camera view
 Create a sound emitting component

@@ -11,7 +11,7 @@ import { WebglDrawData } from "../Models/WebglDrawData";
 import { WebGL } from "../Proxies/WebglProxy";
 import ShaderSourcesProxy from "../Proxies/ShaderSourcesProxy";
 import { Config } from "../Proxies/ConfigProxy";
-import { Images } from "./SpriteManager";
+import { Images } from "./ImageManager";
 import { Sounds } from "./SoundManager";
 import { SoundOptions, SoundTags } from "../Models/SoundModels";
 

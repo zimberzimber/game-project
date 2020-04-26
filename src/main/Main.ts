@@ -5,8 +5,9 @@ import { Log } from "./Workers/Logger";
 import { Config } from "./Proxies/ConfigProxy";
 import { SoundOptions, SoundTags } from "./Models/SoundModels";
 import { gameSchema } from "./Models/DbSchemas";
-import { Images, Sprites } from "./Workers/SpriteManager";
+import { Sprites } from "./Workers/SpriteManager";
 import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition } from "./Models/Sprites";
+import { Images } from "./Workers/ImageManager";
 
 
 window.onload = () => {
