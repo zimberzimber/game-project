@@ -44,5 +44,4 @@ class InputHandler implements IKeyPressObserver {
     }
 }
 
-const inputHandler = new InputHandler();
-export default inputHandler;
+export const Input = new InputHandler();

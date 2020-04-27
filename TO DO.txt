@@ -1,12 +1,30 @@
+Technical:
+- Add FPS counter
 X Move models from IDB and Sound managers into the respective folder
 X Move IDB schemas to their own folder
 X Remove _G
 X Add images to IDB
-X Give game a pausing method instead of changing a variable.
-Separate sound manager to sound managment, and sound playing components
-Setup a proper asset library for sounds and images
-A way to tell the shader what should and what shouldn't move with the camera view
-Create a sound emitting component
-Add FPS counter
+
+Systems:
+- Separate sound manager to sound managment, and sound playing components
+--- Sound manager, and sound controller.
+--- Sound controller will keep an array of contexts, and array for each node type.
+--- Adding a context will insert it into the array under its sound ID, and all its respective nodes into their arrays under the same index.
+- Revamp input handler into an independant observable.
+- Setup a proper asset library for sounds and images
+
+Webgl:
+- Modify webgl so you can use multiple images as textures
+--- Turn drawData into an array of objects, where the index in the array is the texture ID
+--- Webgl initialization will get an array of images, and store it
+--- Adding data to draw will push it into the datas image id
+--- Calling Draw will clear the canvas, and then iterate over the indexes and draw each textures data separetly, switching to the relevant texture.
 X Modify webgl init to accept an array of images instead of just one image
-Modify webgl so you can use multiple images as textures (split tris/line arrays into image id based groups, then draw each group, activating the related texture?)
+- A way to tell the shader what should and what shouldn't move with the camera view
+
+Game:
+- Create a sound emitting component
+X Give game a pausing method instead of changing a variable.
+- Convert into a state machine, with the following states: Running, Paused, Frozen
+--- Paused only pauses the game itself, draw calls are still performed and menu UI is operational
+--- Frozen pauses everything, including interactable UIs. Just puts the system on hold
