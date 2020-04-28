@@ -36,7 +36,8 @@ class ImageManager {
                 if (exists) {
                     const result = await IDB.GetData(gameSchema.databaseName, imageStore.storeName, url);
                     if (result.error) {
-                        Log.Error(`Failed getting existing image from database: ${imageName}.\n${result.error.message}`);
+                        Log.Error(`Failed getting existing image from database: ${imageName}.`);
+                        Log.Error(result.error);
                         return;
                     }
                     else {
@@ -46,7 +47,8 @@ class ImageManager {
                 else {
                     const result = await CDN.GetContentFromUrl(url);
                     if (result.error) {
-                        Log.Error(`Failed getting image '${imageName}' from ${url}\n${result.error.message}`);
+                        Log.Error(`Failed getting image '${imageName}' from ${url}`);
+                        Log.Error(result.error);
                         return;
                     }
                     else {

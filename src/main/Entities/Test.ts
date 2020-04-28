@@ -7,7 +7,8 @@ import Vec2Utils from "../Utility/Vec2";
 import ScalarUtil from "../Utility/Scalar";
 import { HitboxCircle } from "../Components/HitboxCircle";
 import { HitboxRectangle } from "../Components/HitboxRectangle";
-import {Sounds} from "../Workers/SoundManager";
+import { SoundTags } from "../Models/SoundModels";
+import { Audio } from "../Workers/SoundPlayer";
 
 export class TestEntity extends EntityBase {
     constructor(parent: EntityBase | void) {
@@ -22,7 +23,14 @@ export class TestEntity extends EntityBase {
 
         hitbox.SetTriggerState(TriggerState.OnEnterTrigger);
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => {
-            Sounds.PlaySound('sfx');
+
+            Audio.PlaySound({
+                soundSourceName: 'sfx',
+                volume: 1,
+                playbackRate: 1,
+                loop: false,
+                tag: SoundTags.Default
+            });
         }
 
         hitbox.UncollisionScript = (TriggerState: HitboxBase) => {

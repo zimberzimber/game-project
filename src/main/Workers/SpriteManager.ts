@@ -1,4 +1,4 @@
-import { ISpriteFrame, ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition, ISPriteData } from "../Models/Sprites";
+import { ISpriteFrame, ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition, ISPriteData } from "../Models/SpriteModels";
 import { Log, LogLevel } from "./Logger";
 import { OneTimeLog } from "./OneTimeLogger";
 import { Images } from "./ImageManager";

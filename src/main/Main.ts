@@ -3,11 +3,12 @@ import { IDB } from "./Workers/IndexeddbManager";
 import { Sounds } from "./Workers/SoundManager";
 import { Log } from "./Workers/Logger";
 import { Config } from "./Proxies/ConfigProxy";
-import { SoundOptions, SoundTags } from "./Models/SoundModels";
+import { SoundTags } from "./Models/SoundModels";
 import { gameSchema } from "./Models/DbSchemas";
 import { Sprites } from "./Workers/SpriteManager";
-import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition } from "./Models/Sprites";
+import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition } from "./Models/SpriteModels";
 import { Images } from "./Workers/ImageManager";
+import { Audio } from "./Workers/SoundPlayer";
 
 
 window.onload = () => {
@@ -88,7 +89,13 @@ IDB.OpenDatabase(gameSchema)
     .then(() => {
         Sounds.Initialize(soundDefinitions).then(() => {
             Log.Info('Sound manager initialized')
-            Sounds.PlaySound('loop', new SoundOptions(0.5, true, null, SoundTags.Music));
+            Audio.PlaySound({
+                soundSourceName: 'loop',
+                volume: 1,
+                playbackRate: 1,
+                loop: true,
+                tag: SoundTags.Music
+            });
         });
 
         Images.Initialize(imageDefenitions).then(() => {
@@ -120,4 +127,6 @@ if (Config.GetConfig('debug', false) === true) {
     window.images = Images;
     //@ts-ignore
     window.sprites = Sprites;
+    //@ts-ignore
+    window.sp = Audio;
 }

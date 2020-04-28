@@ -12,8 +12,8 @@ import { WebGL } from "../Proxies/WebglProxy";
 import ShaderSourcesProxy from "../Proxies/ShaderSourcesProxy";
 import { Config } from "../Proxies/ConfigProxy";
 import { Images } from "./ImageManager";
-import { Sounds } from "./SoundManager";
-import { SoundOptions, SoundTags } from "../Models/SoundModels";
+import { SoundTags } from "../Models/SoundModels";
+import { Audio } from "./SoundPlayer";
 
 class Game implements IDOMDependant {
     canvas: any;
@@ -219,12 +219,18 @@ class Game implements IDOMDependant {
         if (this.paused == isPaused) return;
 
         this.paused = isPaused;
-        Sounds.PlaySound('ui', new SoundOptions(0.5, false, null, SoundTags.UI));
+        Audio.PlaySound({
+            soundSourceName: 'ui',
+            volume: 1,
+            playbackRate: 1,
+            loop: false,
+            tag: SoundTags.UI
+        });
 
         if (isPaused)
-            Sounds.Pause();
+            Audio.SetTagVolume(SoundTags.Music, 0.5);
         else
-            Sounds.Unpause();
+            Audio.SetTagVolume(SoundTags.Music, 1);
     }
 }
 

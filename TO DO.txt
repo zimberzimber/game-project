@@ -6,12 +6,11 @@ X Remove _G
 X Add images to IDB
 
 Systems:
-- Separate sound manager to sound managment, and sound playing components
---- Sound manager, and sound controller.
---- Sound controller will keep an array of contexts, and array for each node type.
---- Adding a context will insert it into the array under its sound ID, and all its respective nodes into their arrays under the same index.
+X Separate sound manager to sound managment, and sound playing components
 - Revamp input handler into an independant observable.
-- Setup a proper asset library for sounds and images
+- Have sound and image manager be initialized by a centralized component
+--- Define the sources, sprites, and sounds in their own files
+--- Have the component import those files, and pass them on to the managers
 
 Webgl:
 - Modify webgl so you can use multiple images as textures
