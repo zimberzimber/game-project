@@ -10,4 +10,12 @@ export abstract class ComponentBase {
     }
 
     abstract Update(): void;
+
+    Delete(): void {
+        this.parent.RemoveComponent(this);
+    }
+
+    Unitialize(): void {
+        delete this.parent;
+    }
 }

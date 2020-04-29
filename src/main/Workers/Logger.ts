@@ -1,6 +1,5 @@
 import { Config } from "../Proxies/ConfigProxy";
 
-export enum LogLevel { Debug, Info, Warn, Error, None }
 class Logger {
     logLevel: LogLevel;
 
@@ -46,4 +45,5 @@ class Logger {
     }
 }
 
+export enum LogLevel { Debug, Info, Warn, Error, None }
 export const Log: Logger = new Logger();

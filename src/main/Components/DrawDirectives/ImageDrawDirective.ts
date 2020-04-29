@@ -1,7 +1,7 @@
-import { DrawDirectiveBase } from "../Bases/DrawDirectiveBase";
-import { EntityBase } from "../Bases/EntityBase";
-import Vec2 from "../Models/Vec2";
-import { Sprites } from "../Workers/SpriteManager";
+import { DrawDirectiveBase } from "../../Bases/DrawDirectiveBase";
+import { EntityBase } from "../../Bases/EntityBase";
+import { Vec2 } from "../../Models/Vec2";
+import { Sprites } from "../../Workers/SpriteManager";
 
 export class ImageDrawDirective extends DrawDirectiveBase {
     size: Vec2;

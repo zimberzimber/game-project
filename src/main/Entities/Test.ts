@@ -1,12 +1,12 @@
 import { EntityBase } from "../Bases/EntityBase";
-import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";
-import { HitboxPolygon } from "../Components/HitboxPolygon";
+import { ImageDrawDirective } from "../Components/DrawDirectives/ImageDrawDirective";
+import { HitboxPolygon } from "../Components/Hitboxes/HitboxPolygon";
 import { HitboxBase } from "../Bases/HitboxBase";
 import { TriggerState } from "../Models/TriggerState";
-import Vec2Utils from "../Utility/Vec2";
-import ScalarUtil from "../Utility/Scalar";
-import { HitboxCircle } from "../Components/HitboxCircle";
-import { HitboxRectangle } from "../Components/HitboxRectangle";
+import { Vec2Utils } from "../Utility/Vec2";
+import { ScalarUtil } from "../Utility/Scalar";
+import { HitboxCircle } from "../Components/Hitboxes/HitboxCircle";
+import { HitboxRectangle } from "../Components/Hitboxes/HitboxRectangle";
 import { SoundTags } from "../Models/SoundModels";
 import { Audio } from "../Workers/SoundPlayer";
 

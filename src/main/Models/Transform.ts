@@ -1,7 +1,6 @@
-import Vec2 from "./Vec2";
-import ScalarUtil from "../Utility/Scalar";
-import Vec2Utils from "../Utility/Vec2";
-import { ComponentBase } from "../Bases/ComponentBase";
+import { Vec2 } from "./Vec2";
+import { ScalarUtil } from "../Utility/Scalar";
+import { Vec2Utils } from "../Utility/Vec2";
 
 export class Transform {
     private rotation: number = 0;

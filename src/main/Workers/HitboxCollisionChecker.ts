@@ -1,10 +1,10 @@
 import { HitboxBase } from "../Bases/HitboxBase";
-import { HitboxRectangle } from "../Components/HitboxRectangle";
-import { HitboxCircle } from "../Components/HitboxCircle";
-import { HitboxPolygon } from "../Components/HitboxPolygon";
-import Vec2 from "../Models/Vec2";
-import Vec2Utils from "../Utility/Vec2";
-import ScalarUtil from "../Utility/Scalar";
+import { HitboxRectangle } from "../Components/Hitboxes/HitboxRectangle";
+import { HitboxCircle } from "../Components/Hitboxes/HitboxCircle";
+import { HitboxPolygon } from "../Components/Hitboxes/HitboxPolygon";
+import { Vec2 } from "../Models/Vec2";
+import { Vec2Utils } from "../Utility/Vec2";
+import { ScalarUtil } from "../Utility/Scalar";
 
 // Dictionary storing colission methods for easier organization.
 // [collider class name]: { [collider class name] : [method name] }
@@ -24,7 +24,7 @@ const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
     }
 };
 
-export default function CheckCollision(trigger: HitboxBase, collider: HitboxBase): boolean {
+export function CheckCollision(trigger: HitboxBase, collider: HitboxBase): boolean {
     if (!IsInCollisionRange(trigger, collider))
         return false;
 
@@ -44,6 +44,7 @@ export default function CheckCollision(trigger: HitboxBase, collider: HitboxBase
 
     return false;
 }
+
 
 // Initial check - Checks whether the distance between the two colliders is small enough to before performing more complex checks
 // Basically checks if the distance between the center of two colliders is not greater than the sum of their HitboxOverallRadius
@@ -89,6 +90,9 @@ function DoPolygonsIntersect(p1: Vec2[], p2: Vec2[]): boolean {
                 return true;
     return false;
 }
+
+
+
 
 // Rectangle vs Rectangle, Circle, Polygon 
 function Rectangle_Rectangle(a: HitboxRectangle, b: HitboxRectangle): boolean {

@@ -3,33 +3,39 @@ import { PlayerEntity } from "../Entities/Player";
 import { HitboxBase } from "../Bases/HitboxBase";
 import { ComponentBase } from "../Bases/ComponentBase";
 import { TriggerState } from "../Models/TriggerState";
-import CheckCollision from "./HitboxCollisionChecker";
-import { IDOMDependant } from "../Bases/MiscInterfaces";
-import { ImageDrawDirective } from "../DrawDirectives/ImageDrawDirective";
+import { CheckCollision } from "./HitboxCollisionChecker";
+import { ImageDrawDirective } from "../Components/DrawDirectives/ImageDrawDirective";
 import { TestEntity } from "../Entities/Test";
 import { WebglDrawData } from "../Models/WebglDrawData";
-import { WebGL } from "../Proxies/WebglProxy";
-import ShaderSourcesProxy from "../Proxies/ShaderSourcesProxy";
+import { Webgl } from "../Proxies/WebglProxy";
+import { ShaderSources } from "../Proxies/ShaderSourcesProxy";
 import { Config } from "../Proxies/ConfigProxy";
 import { Images } from "./ImageManager";
 import { SoundTags } from "../Models/SoundModels";
 import { Audio } from "./SoundPlayer";
+import { Input } from "./InputHandler";
+import { Settings } from "./SettingsManager";
 
-class Game implements IDOMDependant {
-    canvas: any;
+class GameManager {
+    canvas: HTMLCanvasElement;
     entities: EntityBase[] = [];
-    FPSInterval: number;
     paused: boolean = false;
 
+    // Used for game logic
     frameDelta: number = 0;
-    oldFrameTime: number = new Date().getTime();
+    oldFrameTime: number = Date.now();
 
-    OnDomLoaded(): void {
-        this.canvas = document.getElementById("game-canvas");
+    // Used for FPS display
+    displayFps: boolean = Config.GetConfig('debug', false);
+    frameTimes: number[] = [];
+    lastFpsDisplayTime: number = Date.now();
+
+    Start(): void {
+        this.canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
         this.canvas.width = 600;
         this.canvas.height = 500;
 
-        WebGL.Init(ShaderSourcesProxy.GetVertexShader(), ShaderSourcesProxy.GetFragmentShader(), this.canvas, Images.GetImageArray())
+        Webgl.Init(ShaderSources.GetVertexShader(), ShaderSources.GetFragmentShader(), this.canvas, Images.GetImageArray())
 
         this.entities = [];
         let p = new PlayerEntity();
@@ -55,21 +61,7 @@ class Game implements IDOMDependant {
         test.transform.scale = [5, 5];
         this.AddEntity(test);
 
-        // for (let i = 0; i < 100; i++) {
-        //     const p = new TestEntity();
-        //     p.transform.position = [-300 * Math.random(), -250 * Math.random()];
-        //     this.AddEntity(p);
-
-        //     const p2 = new PlayerEntity();
-        //     p2.transform.position = [300 * Math.random(), 250 * Math.random()];
-        //     this.AddEntity(p2);
-        // }
-
-
-        this.Start();
-    }
-
-    Start(): void {
+        Input.BindKeymap(Settings.GetSetting('controlsKeymap'));
         requestAnimationFrame(this.Update.bind(this))
     }
 
@@ -145,12 +137,12 @@ class Game implements IDOMDependant {
     Update(): void {
         requestAnimationFrame(this.Update.bind(this));
 
+        // Do nothing if game is paused
+        if (this.paused) return;
+
         const newFrameTime = new Date().getTime();
         this.frameDelta = (newFrameTime - this.oldFrameTime) / 1000;
         this.oldFrameTime = newFrameTime;
-
-        // Do nothing if game is paused
-        if (this.paused) return;
 
         // Update all entities
         this.GetAllEntities().forEach(e => e.Update());
@@ -179,19 +171,10 @@ class Game implements IDOMDependant {
             ]);
         }
 
-        WebGL.SetTriangleData(triangleData);
+        Webgl.SetTriangleData(triangleData);
 
         // Draw collisions if the option is enabled
         if (Config.GetConfig('debugDraw', false) === true) {
-            // this.fpsCounter++;
-            // const time = new Date().getTime();
-            // this.context.fillText(this.fpsDisplay, 10, 10);
-            // if (time - this.oldTime >= 250) {
-            //     this.fpsDisplay = Math.floor(this.fpsCounter / (time - this.oldTime) * 1000);
-            //     this.oldTime = time;
-            //     this.fpsCounter = 0;
-            // }
-
             let indexOffset = triangleData.indexes[triangleData.indexes.length - 1] + 1;
             const lineData: WebglDrawData[] = [];
             const hitboxes = this.GetAllComponentsOfType(HitboxBase) as HitboxBase[];
@@ -208,10 +191,33 @@ class Game implements IDOMDependant {
                 indexOffset += 1;
             }
 
-            WebGL.SetLineData(lineData);
+            Webgl.SetLineData(lineData);
         }
 
-        WebGL.Draw();
+        Webgl.Draw();
+
+        if (this.displayFps) {
+            const fps = this.FPSUpdate();
+            const time = Date.now();
+
+            if (time - this.lastFpsDisplayTime >= 500) {
+                this.lastFpsDisplayTime = time;
+                const element = document.getElementById('fps-counter');
+                if (element) {
+                    element.innerHTML = fps.toString();
+                }
+            }
+        }
+    }
+
+    // Taken from https://www.growingwiththeweb.com/2017/12/fast-simple-js-fps-counter.html
+    FPSUpdate(): number {
+        const time = performance.now()
+        while (this.frameTimes.length > 0 && this.frameTimes[0] <= time - 1000)
+            this.frameTimes.shift();
+
+        this.frameTimes.push(time);
+        return this.frameTimes.length;
     }
 
     IsPaused(): boolean { return this.paused; }
@@ -232,7 +238,8 @@ class Game implements IDOMDependant {
         else
             Audio.SetTagVolume(SoundTags.Music, 1);
     }
+
+
 }
 
-const game: Game = new Game();
-export default game;
+export const Game: GameManager = new GameManager();

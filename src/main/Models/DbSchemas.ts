@@ -18,6 +18,6 @@ export const imageStore: IDbStoreSchema = {
 
 export const gameSchema: IDbSchema = {
     databaseName: 'game',
-    version: 9,
+    version: 1,
     stores: [soundStore, imageStore]
 }

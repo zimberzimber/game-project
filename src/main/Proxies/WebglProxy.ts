@@ -2,34 +2,34 @@ import { WebglDrawData } from "../Models/WebglDrawData";
 
 class WebglProxy {
     //@ts-ignore
-    private wg: any = window.webglDef;
+    private _wg = window.webglDef;
 
     Init = (vertexSource: string, fragmentSource: string, canvas: HTMLCanvasElement, imagesArray: HTMLImageElement[]) =>
-        this.wg.init(vertexSource, fragmentSource, canvas, imagesArray);
+        this._wg.init(vertexSource, fragmentSource, canvas, imagesArray);
 
     SetCameraFrustum = (horizontal: number | null = null, vertical: number | null = null, near: number | null = null, far: number | null = null) =>
-        this.wg.setCameraFrustum(horizontal, vertical, near, far);
+        this._wg.setCameraFrustum(horizontal, vertical, near, far);
 
     TranslateCamera = (x: number = 0, y: number = 0) =>
-        this.wg.translateCamera(x, y);
+        this._wg.translateCamera(x, y);
 
     SetCameraTranslation = (x: number | null = null, y: number | null = null) =>
-        this.wg.setCameraTranslation(x, y);
+        this._wg.setCameraTranslation(x, y);
 
     RotateCamera = (degrees: number) =>
-        this.wg.rotateCamera(degrees);
+        this._wg.rotateCamera(degrees);
 
     SetCameraRotation = (degrees: number) =>
-        this.wg.setCameraRotation(degrees);
+        this._wg.setCameraRotation(degrees);
 
     Draw = () =>
-        this.wg.draw();
+        this._wg.draw();
 
     SetTriangleData = (data: WebglDrawData) =>
-        this.wg.setTriangleData(data.vertexes, data.indexes);
+        this._wg.setTriangleData(data.vertexes, data.indexes);
 
     SetLineData = (data: WebglDrawData[]) =>
-        this.wg.setLineData(data);
+        this._wg.setLineData(data);
 }
 
-export const WebGL = new WebglProxy();
+export const Webgl = new WebglProxy();

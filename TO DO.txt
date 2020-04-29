@@ -1,5 +1,5 @@
 Technical:
-- Add FPS counter
+X Add FPS counter
 X Move models from IDB and Sound managers into the respective folder
 X Move IDB schemas to their own folder
 X Remove _G
@@ -7,10 +7,13 @@ X Add images to IDB
 
 Systems:
 X Separate sound manager to sound managment, and sound playing components
-- Revamp input handler into an independant observable.
-- Have sound and image manager be initialized by a centralized component
---- Define the sources, sprites, and sounds in their own files
---- Have the component import those files, and pass them on to the managers
+- Add reverb and pitch controls to the sound player
+- Add the option to fade sounds in or out
+X Revamp input handler into an independant observable.
+- Add mouse controls (canvas + world relative clicks/postions)
+- Add camera controls
+X Have sound and image manager be initialized by a centralized component
+X Add the ability to save settings between sessions
 
 Webgl:
 - Modify webgl so you can use multiple images as textures

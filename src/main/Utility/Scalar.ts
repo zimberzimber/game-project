@@ -1,7 +1,7 @@
 const _atr: number = Math.PI / 180;
 const _rta: number = 180 / Math.PI;
 
-class ScalarUtil {
+export class ScalarUtil {
     static Shake = (): number => Math.random() * 2 - 1
     static FPSReletive = (number: number, frameDelta: number): number => number * frameDelta;
 
@@ -12,5 +12,3 @@ class ScalarUtil {
     static Clamp = (min: number, value: number, max: number): number => Math.min(max, Math.max(value, min));
     static Round = (value: number): number => Math.floor(value + 0.5);
 }
-
-export default ScalarUtil;

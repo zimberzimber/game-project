@@ -1,10 +1,10 @@
-import { HitboxBase } from "../Bases/HitboxBase";
-import { HitboxType } from "../Models/HitboxType";
-import { EntityBase } from "../Bases/EntityBase";
-import { WebglDrawData } from "../Models/WebglDrawData";
-import { TriggerState } from "../Models/TriggerState";
-import Vec2Utils from "../Utility/Vec2";
-import ScalarUtil from "../Utility/Scalar";
+import { HitboxBase } from "../../Bases/HitboxBase";
+import { HitboxType } from "../../Models/HitboxType";
+import { EntityBase } from "../../Bases/EntityBase";
+import { WebglDrawData } from "../../Models/WebglDrawData";
+import { TriggerState } from "../../Models/TriggerState";
+import { Vec2Utils } from "../../Utility/Vec2";
+import { ScalarUtil } from "../../Utility/Scalar";
 
 export class HitboxCircle extends HitboxBase {
     HitboxType: HitboxType = HitboxType.Circular;

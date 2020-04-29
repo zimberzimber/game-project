@@ -1,4 +1,4 @@
-import PromiseUtil from "../Utility/Promises";
+import { PromiseUtil } from "../Utility/Promises";
 import { IDataOrErrorContainer } from "../Models/GenericInterfaces";
 
 class CdnManager {

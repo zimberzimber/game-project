@@ -1,4 +1,4 @@
-import ProimseUtil from "../Utility/Promises";
+import { PromiseUtil } from "../Utility/Promises";
 import { Log } from "./Logger";
 import { IDbSchema, DatabaseAlreadyOpenError, DatabaseOpeningFailedError, UnopenedDatabaseError } from "../Models/IndexedDbModels";
 import { IDataOrErrorContainer } from "../Models/GenericInterfaces";
@@ -17,7 +17,7 @@ class IndexeddbManager {
         //@ts-ignore One very annoying thing about TypeScript is that unlike languages like C#, null/undefined is a separate type, not a 'no reference' flag (laymans term)
         this.dbs[schema.databaseName] = { version: schema.version, context: undefined };
         const req = window.indexedDB.open(schema.databaseName, schema.version);
-        const completionContainer = ProimseUtil.CreateCompletionPromise();
+        const completionContainer = PromiseUtil.CreateCompletionPromise();
 
         req.onerror = (e) => {
             delete this.dbs[schema.databaseName];
@@ -72,7 +72,7 @@ class IndexeddbManager {
             throw new UnopenedDatabaseError(`Database named '${dbName}' was not opened.`);
 
         const transaction = this.dbs[dbName].context.transaction([storeName], "readwrite");
-        const completionContainer = ProimseUtil.CreateCompletionPromise();
+        const completionContainer = PromiseUtil.CreateCompletionPromise();
 
         transaction.onerror = () => {
             Log.Error(`Failed storing data in '${dbName}' -> '${storeName}'`);
@@ -96,7 +96,7 @@ class IndexeddbManager {
                 data: undefined
             };
 
-        const completionContainer = ProimseUtil.CreateCompletionPromise();
+        const completionContainer = PromiseUtil.CreateCompletionPromise();
         const req = this.dbs[dbName].context.transaction(storeName).objectStore(storeName).get(key);
         const result: IDataOrErrorContainer = {
             error: undefined,
@@ -123,7 +123,7 @@ class IndexeddbManager {
         if (!this.dbs[dbName])
             throw new UnopenedDatabaseError(`Database named '${dbName}' was not opened.`);
 
-        const completionContainer = ProimseUtil.CreateCompletionPromise();
+        const completionContainer = PromiseUtil.CreateCompletionPromise();
         const counter = this.dbs[dbName].context.transaction(storeName).objectStore(storeName).count(IDBKeyRange.only(key));
         let result: boolean = false;
 

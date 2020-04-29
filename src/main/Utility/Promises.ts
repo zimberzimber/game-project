@@ -1,10 +1,10 @@
-export interface CompletionPromiseData {
+interface CompletionPromiseData {
     Promise: Promise<void>;
     resolve: Function;
     reject: Function;
 }
 
-class PromiseUtil {
+export class PromiseUtil {
     /**
     * Creates an awaitable, promise based delay.
     * @param delay Time before the promise resolves itself.
@@ -25,5 +25,3 @@ class PromiseUtil {
         return container;
     }
 }
-
-export default PromiseUtil;

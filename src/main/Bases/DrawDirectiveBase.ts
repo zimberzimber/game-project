@@ -6,6 +6,6 @@ export abstract class DrawDirectiveBase extends ComponentBase {
         super(parent);
     }
 
-    abstract GetWebGlData(): number[];
     Update() { }
+    abstract GetWebGlData(): number[];
 }

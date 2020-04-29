@@ -2,7 +2,7 @@ import { CDN } from "./CdnManager";
 import { Log } from "./Logger";
 import { IDB } from "./IndexeddbManager";
 import { imageStore, gameSchema } from "../Models/DbSchemas";
-import PromiseUtil from "../Utility/Promises";
+import { PromiseUtil } from "../Utility/Promises";
 
 class ImageManager {
     private initialized: boolean = false;

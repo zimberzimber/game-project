@@ -3,7 +3,7 @@ import { SoundTags, IActiveSound, ISoundDefinition, ControllerType } from '../Mo
 import { OneTimeLog } from './OneTimeLogger';
 import { Sounds } from './SoundManager';
 
-export class SoundPlayer {
+class SoundPlayer {
     private nextSoundId: number = 0;
     private activeSoundIds: number[] = [];
     private activeSounds: IActiveSound[] = [];
@@ -182,7 +182,9 @@ export class SoundPlayer {
         this.activeSounds[id].gainNode.disconnect();
 
         delete this.activeSounds[id];
-        this.activeSoundIds = this.activeSoundIds.filter(e => e != id);
+        const index = this.activeSoundIds.indexOf(id, 0);
+        if (index > -1)
+            this.activeSoundIds.splice(index, 1);
     }
 }
 

@@ -1,46 +1,60 @@
-import { BaseKeyPreset, IKeyPressObserver } from "../Bases/BaseKeyPreset";
-import { WasdKeyPreset } from "../Models/InputPresets";
-import { KeyNames } from "../Models/InputHelpers";
-import Vec2Utils from "../Utility/Vec2";
-import Vec2 from "../Models/Vec2";
-import Game from "../Workers/Game";
+import { IInputObserver, IFullInputObserver } from "../Models/InputModels";
 
-// Have to relay key presses through this class since holding a key down repeats the keydown event
-class InputHandler implements IKeyPressObserver {
-    keyPreset: BaseKeyPreset;
+class InputHandler {
+    private observers: IInputObserver[] = [];
+    private fullObservers: IFullInputObserver[] = [];
+    private keysDown: { [key: string]: boolean } = {};
+    private keyMap: { [key: number]: string } = {};
 
     constructor() {
-        this.SetKeyPreset(new WasdKeyPreset());
+        window.addEventListener('keydown', this.OnKeyDown.bind(this));
+        window.addEventListener('keyup', this.OnKeyUp.bind(this));
     }
 
-    SetKeyPreset(keyPreset: BaseKeyPreset) {
-        if (this.keyPreset)
-            this.keyPreset.Unsubscribe(this);
-
-        this.keyPreset = keyPreset;
-        window.onkeydown = keyPreset.ParseKeyDown.bind(keyPreset);
-        window.onkeyup = keyPreset.ParseKeyUp.bind(keyPreset);
-        keyPreset.Subscribe(this);
+    BindKeymap(keyMap: { [key: number]: string }): void {
+        this.keyMap = keyMap;
     }
 
-    GetNormalizedMovementVector(): Vec2 {
-        const delta: Vec2 = [0, 0];
-
-        if (this.keyPreset.keysDown[KeyNames.up]) delta[1]++;
-        if (this.keyPreset.keysDown[KeyNames.down]) delta[1]--;
-        if (this.keyPreset.keysDown[KeyNames.right]) delta[0]++;
-        if (this.keyPreset.keysDown[KeyNames.left]) delta[0]--;
-
-        return Vec2Utils.Normalize(delta);
+    Subscribe(observer: IInputObserver): void {
+        const index = this.observers.indexOf(observer, 0);
+        if (index == -1)
+            this.observers.push(observer);
     }
 
-    OnKeyDown(key: KeyNames): void {
-        if (key == KeyNames.pause) {
-            Game.SetPauseState(!Game.IsPaused());
+    Unsubscribe(observer: IInputObserver): void {
+        const index = this.observers.indexOf(observer, 0);
+        if (index > -1)
+            this.observers.splice(index, 1);
+    }
+
+    SubscribeFullObserver(fullObserver: IFullInputObserver): void {
+        const index = this.fullObservers.indexOf(fullObserver, 0);
+        if (index == -1)
+            this.fullObservers.push(fullObserver);
+    }
+
+    UnsubscribeFullObserver(fullObserver: IFullInputObserver): void {
+        const index = this.fullObservers.indexOf(fullObserver, 0);
+        if (index > -1)
+            this.observers.splice(index, 1);
+    }
+
+    OnKeyDown(e: KeyboardEvent): void {
+        if (this.keyMap[e.keyCode] && !this.keysDown[this.keyMap[e.keyCode]]) {
+            this.keysDown[this.keyMap[e.keyCode]] = true;
+            this.observers.forEach(o => o.OnKeyDown(this.keyMap[e.keyCode]));
         }
+
+        this.fullObservers.forEach(o => o.OnKeyDown(e));
     }
 
-    OnKeyUp(key: KeyNames): void {
+    OnKeyUp(e: KeyboardEvent): void {
+        if (this.keyMap[e.keyCode] && this.keysDown[this.keyMap[e.keyCode]]) {
+            delete this.keysDown[this.keyMap[e.keyCode]];
+            this.observers.forEach(o => o.OnKeyUp(this.keyMap[e.keyCode]));
+        }
+
+        this.fullObservers.forEach(o => o.OnKeyUp(e));
     }
 }
 

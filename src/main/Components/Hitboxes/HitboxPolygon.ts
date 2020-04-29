@@ -1,10 +1,10 @@
-import Vec2 from "../Models/Vec2";
-import { HitboxBase } from "../Bases/HitboxBase";
-import { HitboxType } from "../Models/HitboxType";
-import { EntityBase } from "../Bases/EntityBase";
-import { TriggerState } from "../Models/TriggerState";
-import Vec2Utils from "../Utility/Vec2";
-import { WebglDrawData } from "../Models/WebglDrawData";
+import { Vec2 } from "../../Models/Vec2";
+import { HitboxBase } from "../../Bases/HitboxBase";
+import { HitboxType } from "../../Models/HitboxType";
+import { EntityBase } from "../../Bases/EntityBase";
+import { TriggerState } from "../../Models/TriggerState";
+import { Vec2Utils } from "../../Utility/Vec2";
+import { WebglDrawData } from "../../Models/WebglDrawData";
 
 export class HitboxPolygon extends HitboxBase {
     HitboxType: HitboxType = HitboxType.Polygonal;

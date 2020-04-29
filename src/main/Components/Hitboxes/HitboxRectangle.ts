@@ -1,8 +1,8 @@
-import { HitboxBase } from "../Bases/HitboxBase";
-import { HitboxType } from "../Models/HitboxType";
-import { EntityBase } from "../Bases/EntityBase";
-import { WebglDrawData } from "../Models/WebglDrawData";
-import { TriggerState } from "../Models/TriggerState";
+import { HitboxBase } from "../../Bases/HitboxBase";
+import { HitboxType } from "../../Models/HitboxType";
+import { EntityBase } from "../../Bases/EntityBase";
+import { WebglDrawData } from "../../Models/WebglDrawData";
+import { TriggerState } from "../../Models/TriggerState";
 
 export class HitboxRectangle extends HitboxBase {
     HitboxType: HitboxType = HitboxType.Rectangular;
