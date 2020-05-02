@@ -27,3 +27,7 @@ export interface ISoundDefinition {
 export enum ControllerType {
     Volume, Pan, Playback
 }
+
+export interface ISoundplayerIndividualCallback { (soundId: number): void; }
+
+export interface ISoundplayerMasterCallback { (): void; }

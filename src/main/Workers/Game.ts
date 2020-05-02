@@ -62,6 +62,14 @@ class GameManager {
         this.AddEntity(test);
 
         Input.BindKeymap(Settings.GetSetting('controlsKeymap'));
+        Audio.PlaySound({
+            soundSourceName: 'loop2',
+            volume: 0.5,
+            playbackRate: 1,
+            loop: true,
+            tag: SoundTags.Music,
+        });
+
         requestAnimationFrame(this.Update.bind(this))
     }
 
@@ -200,7 +208,7 @@ class GameManager {
             const fps = this.FPSUpdate();
             const time = Date.now();
 
-            if (time - this.lastFpsDisplayTime >= 500) {
+            if (time - this.lastFpsDisplayTime >= 250) {
                 this.lastFpsDisplayTime = time;
                 const element = document.getElementById('fps-counter');
                 if (element) {
@@ -220,11 +228,11 @@ class GameManager {
         return this.frameTimes.length;
     }
 
-    IsPaused(): boolean { return this.paused; }
-    SetPauseState(isPaused: boolean): void {
-        if (this.paused == isPaused) return;
+    get Paused(): boolean { return this.paused; }
+    set Paused(paused: boolean) {
+        if (this.paused == paused) return;
 
-        this.paused = isPaused;
+        this.paused = paused;
         Audio.PlaySound({
             soundSourceName: 'ui',
             volume: 1,
@@ -233,13 +241,20 @@ class GameManager {
             tag: SoundTags.UI
         });
 
-        if (isPaused)
+        if (paused)
             Audio.SetTagVolume(SoundTags.Music, 0.5);
         else
             Audio.SetTagVolume(SoundTags.Music, 1);
     }
 
+    private updateEvents:any = [];
+    AddUpdateEvent(event): void {
+        this.updateEvents.push(event);
+    }
 
+    RemoveUpdateEvent(): void {
+        this.updateEvents.push(event);
+    }
 }
 
 export const Game: GameManager = new GameManager();

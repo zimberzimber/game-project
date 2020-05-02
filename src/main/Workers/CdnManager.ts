@@ -10,17 +10,22 @@ class CdnManager {
         req.responseType = "blob";
         req.open("GET", url);
 
+        req.ontimeout = () => {
+            result.error = new Error(`Data retrieval timed out from url: ${url}`);
+            completionPromise.resolve();
+        };
+
         req.onerror = () => {
-            result.error = new Error(`Failed getting data from url: ${url}`);
+            result.error = new Error(`Data retrieval error from url: ${url}`);
             completionPromise.resolve();
         };
 
         req.onabort = () => {
-            result.error = new Error(`Aborted data retrieval from url: ${url}`);
+            result.error = new Error(`Data retrieval aborted for url: ${url}`);
             completionPromise.resolve();
         };
 
-        req.onloadend = (e) => {
+        req.onloadend = () => {
             result.data = req.response;
             completionPromise.resolve();
         };

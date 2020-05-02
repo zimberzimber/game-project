@@ -42,7 +42,7 @@ IDB.OpenDatabase(gameSchema)
 // Expose some methods globally for easy acess when in debug mode
 if (Config.GetConfig('debug', false) === true) {
     //@ts-ignore
-    window.Freeze = () => { Game.paused = !Game.paused; };
+    window.Freeze = () => { Game.Paused = !Game.Paused; };
     //@ts-ignore
     window.GetEntityTree = () => Game.GetEntityTreeString();
     //@ts-ignore

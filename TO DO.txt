@@ -4,11 +4,13 @@ X Move models from IDB and Sound managers into the respective folder
 X Move IDB schemas to their own folder
 X Remove _G
 X Add images to IDB
+- Rewrite all get/set methods into properties
 
 Systems:
 X Separate sound manager to sound managment, and sound playing components
-- Add reverb and pitch controls to the sound player
-- Add the option to fade sounds in or out
+X Add reverb controls to the sound player
+- Add pitch controls to the sound player
+X Add the option to fade sounds in or out
 X Revamp input handler into an independant observable.
 - Add mouse controls (canvas + world relative clicks/postions)
 - Add camera controls

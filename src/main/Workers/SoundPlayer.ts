@@ -1,7 +1,9 @@
 import { LogLevel } from "./Logger";
-import { SoundTags, IActiveSound, ISoundDefinition, ControllerType } from '../Models/SoundModels';
+import { SoundTags, IActiveSound, ISoundDefinition, ControllerType, ISoundplayerMasterCallback, ISoundplayerIndividualCallback } from '../Models/SoundModels';
 import { OneTimeLog } from './OneTimeLogger';
 import { Sounds } from './SoundManager';
+import { CDN } from "./CdnManager";
+import { ScalarUtil } from "../Utility/Scalar";
 
 class SoundPlayer {
     private nextSoundId: number = 0;
@@ -10,10 +12,13 @@ class SoundPlayer {
 
     private context: AudioContext;
 
+    private nodeConnectionPoint: AudioNode;
     private masterGainNode: GainNode;
     private masterPanNode: StereoPannerNode;
     private masterPlaybackRate: number = 1;
+    private masterConvolver: ConvolverNode;
 
+    private convolverConnected: boolean = false;
     private tagGainNodes: { [key: number]: GainNode; } = {};
 
     constructor() {
@@ -22,18 +27,46 @@ class SoundPlayer {
 
         this.masterGainNode = this.context.createGain();
         this.masterPanNode = this.context.createStereoPanner();
+        this.masterConvolver = this.context.createConvolver();
 
         this.masterGainNode.gain.value = 1;
         this.masterPanNode.pan.value = 0;
 
         this.masterPanNode.connect(this.masterGainNode).connect(this.context.destination);
+        this.nodeConnectionPoint = this.masterPanNode;
 
         for (let tag in SoundTags)
             if (!isNaN(Number(tag))) {
                 this.tagGainNodes[tag] = this.context.createGain();
-                this.tagGainNodes[tag].connect(this.masterPanNode);
+                this.tagGainNodes[tag].connect(this.nodeConnectionPoint);
                 this.tagGainNodes[tag].gain.value = 1;
             }
+    }
+
+    SetConvolverImpulse(soundName: string): void {
+        const blob = Sounds.GetSoundSourceByName(soundName);
+        if (!blob) {
+            OneTimeLog.Log(`soundPlayer_failedLoading_${soundName}`, `Failed retrieving sound named '${soundName}' from sound manager.`, LogLevel.Error);
+            return;
+        }
+
+        blob.arrayBuffer().then((audioArray: ArrayBuffer) => {
+            this.context.decodeAudioData(audioArray, (buffer) => {
+                this.masterConvolver.buffer = buffer;
+                if (!this.convolverConnected) {
+                    this.masterGainNode.connect(this.masterConvolver).connect(this.context.destination);
+                    this.convolverConnected = true;
+                }
+            });
+        });
+    }
+
+    RemoveConvolverImpulse(): void {
+        if (this.convolverConnected) {
+            this.convolverConnected = false;
+            this.masterConvolver.disconnect(this.context.destination);
+            this.masterGainNode.disconnect(this.masterConvolver);
+        }
     }
 
     StopSound(id: number): void {
@@ -63,6 +96,7 @@ class SoundPlayer {
             tag: config.tag
         };
 
+        gain.gain.value = config.volume;
         source.loop = config.loop;
         this.UpdatePlaybackRate(acttivityInfo);
 
@@ -185,6 +219,55 @@ class SoundPlayer {
         const index = this.activeSoundIds.indexOf(id, 0);
         if (index > -1)
             this.activeSoundIds.splice(index, 1);
+    }
+
+    ////////////////////////////////////////
+    // Effects
+    ////////////////////////////////////////
+
+    FadeInOutPlaybackRate(minimalRate: number, duration: number, endRate: number = this.masterPlaybackRate, callback: ISoundplayerMasterCallback | void): void {
+        if (duration <= 0) return;
+        minimalRate = ScalarUtil.Clamp(0, minimalRate, 1);
+
+        duration *= 1000;
+        let ratePivot = this.masterPlaybackRate;
+        let last = performance.now();
+        let elapsed = 0
+
+        const func = () => {
+            const now = performance.now();
+            elapsed += now - last;
+            last = now;
+
+            if (elapsed >= duration) {
+                this.SetMasterControllerValue(ControllerType.Playback, endRate);
+                if (callback) callback();
+            } else {
+                requestAnimationFrame(func);
+
+                if (elapsed >= duration / 2)
+                    ratePivot = endRate;
+
+                this.SetMasterControllerValue(ControllerType.Playback, ((1 - minimalRate) * (Math.abs((elapsed - duration / 2) ^ 2) / (duration / 2)) + minimalRate) * ratePivot);
+
+                // Formula:
+                // let time = elapsed - duration / 2
+                // let frac = Math.abs(time ^ 2) / (duration / 2)
+                // let rate = ((1 - minimalRate) * frac + minimalRate) * normalRate
+            }
+        }
+        requestAnimationFrame(func.bind(this));
+    }
+
+    FadeMasterVolume(volume: number, duration: number, callback: ISoundplayerMasterCallback | void): void {
+        this.masterGainNode.gain.setValueCurveAtTime([this.masterGainNode.gain.value, volume], 0, duration);
+        if (callback) setTimeout(callback, duration * 1000);
+    }
+
+    FadeVolumeForSound(soundId: number, volume: number, duration: number, callback: ISoundplayerIndividualCallback | void): void {
+        if (!this.IsActive(soundId)) return;
+        this.activeSounds[soundId].gainNode.gain.setValueCurveAtTime([this.activeSounds[soundId].gainNode.gain.value, volume], 0, duration)
+        if (callback) setTimeout(callback, duration * 1000, soundId);
     }
 }
 
