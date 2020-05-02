@@ -6,47 +6,48 @@ import { TriggerState } from "../../Models/TriggerState";
 
 export class HitboxRectangle extends HitboxBase {
     HitboxType: HitboxType = HitboxType.Rectangular;
-    private width: number;
-    private height: number;
+    private _width: number;
+    private _height: number;
 
     constructor(parent: EntityBase, width: number, height: number) {
         super(parent);
-        this.width = width;
-        this.height = height;
+        this._width = width;
+        this._height = height;
         this.CalculateOverallHitboxRadius();
     }
 
     protected CalculateOverallHitboxRadius(): void {
-        this.HitboxOverallRadius = Math.sqrt(Math.pow(this.width, 2) + Math.pow(this.height, 2)) / 2;
+        this.HitboxOverallRadius = Math.sqrt(Math.pow(this._width, 2) + Math.pow(this._height, 2)) / 2;
     }
 
-    GetHeight(): number { return this.height; }
-    SetHeight(height: number): void {
-        this.height = height;
+    get Height(): number { return this._height; }
+    set Height(height: number) {
+        this._height = height;
         this.CalculateOverallHitboxRadius();
     }
 
-    GetWidth(): number { return this.width; }
-    SetWidth(width: number): void {
-        this.width = width;
+
+    get Width(): number { return this._width; }
+    set Width(width: number) {
+        this._width = width;
         this.CalculateOverallHitboxRadius();
     }
 
     // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
-    GetDebugDrawData(): WebglDrawData | null {
+    get DebugDrawData(): WebglDrawData | null {
         if (!this.CollisionEnabled) return null;
 
-        const absTransform = this.parent.GetWorldRelativeTransform();
-        const colorY = this.GetTriggerState() == TriggerState.NotTrigger ? 0 : 0.01
-        const width = this.width * absTransform.scale[0] / 2;
-        const height = this.height * absTransform.scale[1] / 2;
+        const absTransform = this._parent.worldRelativeTransform;
+        const colorY = this.TriggerState == TriggerState.NotTrigger ? 0 : 0.01
+        const width = this._width * absTransform.Scale[0] / 2;
+        const height = this._height * absTransform.Scale[1] / 2;
 
         return {
             vertexes: [
-                absTransform.position[0] + width, absTransform.position[1] + height, 1, 0, 0, 0, 0, 1, colorY,
-                absTransform.position[0] - width, absTransform.position[1] + height, 1, 0, 0, 0, 0, 1, colorY,
-                absTransform.position[0] - width, absTransform.position[1] - height, 1, 0, 0, 0, 0, 1, colorY,
-                absTransform.position[0] + width, absTransform.position[1] - height, 1, 0, 0, 0, 0, 1, colorY,
+                absTransform.Position[0] + width, absTransform.Position[1] + height, 1, 0, 0, 0, 0, 1, colorY,
+                absTransform.Position[0] - width, absTransform.Position[1] + height, 1, 0, 0, 0, 0, 1, colorY,
+                absTransform.Position[0] - width, absTransform.Position[1] - height, 1, 0, 0, 0, 0, 1, colorY,
+                absTransform.Position[0] + width, absTransform.Position[1] - height, 1, 0, 0, 0, 0, 1, colorY,
             ],
             indexes: [0, 1, 2, 3, 0]
         };

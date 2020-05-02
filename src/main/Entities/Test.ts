@@ -21,7 +21,7 @@ export class TestEntity extends EntityBase {
         const hitbox = new HitboxPolygon(this, [1, -12], [7, -9], [10, -4], [10, 3], [8, 9], [3, 12], [-4, 12], [-10, 9], [-3, 8], [3, 5], [4, -1], [2, -6], [-3, -7], [-10, -7]);
 
 
-        hitbox.SetTriggerState(TriggerState.OnEnterTrigger);
+        hitbox.TriggerState = TriggerState.OnEnterTrigger;
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => {
 
             Audio.PlaySound({

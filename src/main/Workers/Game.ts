@@ -50,15 +50,16 @@ class GameManager {
             else
                 newE = new PlayerEntity();
 
-            newE.transform.scale = [0.5, 1.5];
-            newE.transform.position[0] = 30;
+            //newE.transform.Scale = [0.5, 1.5];
+            newE.transform.Position = [50, 50];
+            newE.transform.Rotation = 45;
             p.AddChildEntity(newE);
             p = newE;
         }
 
         let test = new TestEntity();
-        test.transform.position = [100, 100];
-        test.transform.scale = [5, 5];
+        test.transform.Position = [100, 100];
+        test.transform.Scale = [5, 5];
         this.AddEntity(test);
 
         Input.BindKeymap(Settings.GetSetting('controlsKeymap'));
@@ -101,7 +102,7 @@ class GameManager {
 
         //@ts-ignore (object.constructor.name is not recognized by TypeScript)
         str = `${str}(${parent.entityId})${parent.constructor.name}`;
-        parent.GetChildren().forEach(c => {
+        parent.Children.forEach(c => {
             str = `${str}\n${this.GetEntityTreeStringHelper(c, depth + 1)}`
         });
         return str;
@@ -112,7 +113,7 @@ class GameManager {
         let entities: EntityBase[] = [];
         this.entities.forEach(entity => {
             entities.push(entity);
-            if (entity.GetChildren().length > 0)
+            if (entity.Children.length > 0)
                 entities = entities.concat(this.GetAllEntitiesHelper(entity));
         });
         return entities;
@@ -121,9 +122,9 @@ class GameManager {
     // Recursive helper function for obtaining children of a give parent entity.
     private GetAllEntitiesHelper(parent: EntityBase): EntityBase[] {
         let children: EntityBase[] = [];
-        parent.GetChildren().forEach(child => {
+        parent.Children.forEach(child => {
             children.push(child);
-            if (child.GetChildren().length > 0)
+            if (child.Children.length > 0)
                 children = children.concat(this.GetAllEntitiesHelper(child));
         })
         return children;
@@ -157,8 +158,8 @@ class GameManager {
 
         // Updating all first and then reobtaining the list because entities may have been created due to other entities updating.
         const allEntities = this.GetAllEntities();
-        let triggers: HitboxBase[] = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities).filter(c => (c as HitboxBase).GetTriggerState() != TriggerState.NotTrigger) as HitboxBase[];
-        let colliders: HitboxBase[] = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities).filter(c => (c as HitboxBase).GetTriggerState() == TriggerState.NotTrigger) as HitboxBase[];
+        let triggers: HitboxBase[] = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities).filter(c => (c as HitboxBase).TriggerState != TriggerState.NotTrigger) as HitboxBase[];
+        let colliders: HitboxBase[] = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities).filter(c => (c as HitboxBase).TriggerState == TriggerState.NotTrigger) as HitboxBase[];
 
         triggers.forEach(t => colliders.forEach(c => { if (CheckCollision(t, c)) t.OnCollision(c); }));
 
@@ -170,7 +171,7 @@ class GameManager {
         };
 
         for (let i = 0; i < dds.length; i++) {
-            triangleData.vertexes = triangleData.vertexes.concat((dds[i] as ImageDrawDirective).GetWebGlData());
+            triangleData.vertexes = triangleData.vertexes.concat((dds[i] as ImageDrawDirective).WebGlData);
 
             const s = i * 4;
             triangleData.indexes = triangleData.indexes.concat([
@@ -188,7 +189,7 @@ class GameManager {
             const hitboxes = this.GetAllComponentsOfType(HitboxBase) as HitboxBase[];
 
             for (let i = 0; i < hitboxes.length; i++) {
-                const hData: WebglDrawData | null = hitboxes[i].GetDebugDrawData()
+                const hData: WebglDrawData | null = hitboxes[i].DebugDrawData;
                 if (hData) {
                     for (let j = 0; j < hData.indexes.length; j++)
                         hData.indexes[j] += indexOffset;
@@ -247,7 +248,7 @@ class GameManager {
             Audio.SetTagVolume(SoundTags.Music, 1);
     }
 
-    private updateEvents:any = [];
+    private updateEvents: any = [];
     AddUpdateEvent(event): void {
         this.updateEvents.push(event);
     }

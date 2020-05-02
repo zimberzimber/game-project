@@ -9,7 +9,7 @@ export abstract class HitboxBase extends ComponentBase {
     HitboxType: HitboxType = HitboxType.Base;
     HitboxOverallRadius: number = 0;
     CollisionEnabled: boolean = true;
-    private TriggerState: TriggerState = TriggerState.NotTrigger;
+    private _triggerState: TriggerState = TriggerState.NotTrigger;
 
     // Stores objects it already collided with, for on enter and one time trigerring
     private PreviousCollisions: HitboxBase[] | undefined;
@@ -18,7 +18,6 @@ export abstract class HitboxBase extends ComponentBase {
         // Yes yes, ugly double code and all that
         // But I'm calling the 'if' only once instead of N times :>
         if (this.PreviousCollisions && this.TriggerState == TriggerState.OnEnterTrigger) {
-
             const markedIndexes: number[] = [];
 
             if (this.UncollisionScript == undefined) {
@@ -42,14 +41,11 @@ export abstract class HitboxBase extends ComponentBase {
         }
     };
 
-    GetTriggerState(): TriggerState {
-        return this.TriggerState;
-    }
-
-    SetTriggerState(newState: TriggerState): void {
+    get TriggerState(): TriggerState { return this._triggerState }
+    set TriggerState(newState: TriggerState) {
         if (this.TriggerState == newState) return;
 
-        this.TriggerState = newState;
+        this._triggerState = newState;
         switch (newState) {
             case TriggerState.NotTrigger:
                 this.PreviousCollisions = undefined;
@@ -95,5 +91,5 @@ export abstract class HitboxBase extends ComponentBase {
     }
 
     protected abstract CalculateOverallHitboxRadius(): void;
-    abstract GetDebugDrawData(): WebglDrawData | null;
+    abstract get DebugDrawData(): WebglDrawData | null;
 }

@@ -4,7 +4,7 @@ X Move models from IDB and Sound managers into the respective folder
 X Move IDB schemas to their own folder
 X Remove _G
 X Add images to IDB
-- Rewrite all get/set methods into properties
+X Rewrite all get/set methods into properties
 
 Systems:
 X Separate sound manager to sound managment, and sound playing components
@@ -16,6 +16,7 @@ X Revamp input handler into an independant observable.
 - Add camera controls
 X Have sound and image manager be initialized by a centralized component
 X Add the ability to save settings between sessions
+- Add colission tags: A collider has his own tags, and colission tag targets it can collide with
 
 Webgl:
 - Modify webgl so you can use multiple images as textures

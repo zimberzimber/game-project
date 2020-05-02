@@ -8,10 +8,10 @@ import { EntityBase } from "../Bases/EntityBase";
 import { IInputObserver } from "../Models/InputModels";
 
 export class PlayerMovementComponent extends ComponentBase implements IInputObserver {
-    private verticalDirection: number = 0;
-    private horizontalDirection: number = 0;
-    private movement: Vec2 = [0, 0];
-    private speed: number = 200;
+    private _verticalDirection: number = 0;
+    private _horizontalDirection: number = 0;
+    private _movement: Vec2 = [0, 0];
+    private _speed: number = 200;
 
     constructor(parent: EntityBase) {
         super(parent);
@@ -19,15 +19,15 @@ export class PlayerMovementComponent extends ComponentBase implements IInputObse
     }
 
     Update(): void {
-        this.parent.transform.position = Vec2Utils.Sum(this.parent.transform.position, this.movement);
+        this._parent.transform.Position = Vec2Utils.Sum(this._parent.transform.Position, this._movement);
     }
 
     OnKeyDown(key: string): void {
         switch (key) {
-            case 'up': this.verticalDirection++; break;
-            case 'down': this.verticalDirection--; break;
-            case 'right': this.horizontalDirection++; break;
-            case 'left': this.horizontalDirection--; break;
+            case 'up': this._verticalDirection++; break;
+            case 'down': this._verticalDirection--; break;
+            case 'right': this._horizontalDirection++; break;
+            case 'left': this._horizontalDirection--; break;
             default: return;
         }
         this.RecalculateMovement();
@@ -35,17 +35,17 @@ export class PlayerMovementComponent extends ComponentBase implements IInputObse
 
     OnKeyUp(key: string): void {
         switch (key) {
-            case 'up': this.verticalDirection--; break;
-            case 'down': this.verticalDirection++; break;
-            case 'right': this.horizontalDirection--; break;
-            case 'left': this.horizontalDirection++; break;
+            case 'up': this._verticalDirection--; break;
+            case 'down': this._verticalDirection++; break;
+            case 'right': this._horizontalDirection--; break;
+            case 'left': this._horizontalDirection++; break;
             default: return;
         }
         this.RecalculateMovement();
     }
 
     private RecalculateMovement(): void {
-        this.movement = Vec2Utils.MultS(Vec2Utils.Normalize([this.horizontalDirection, this.verticalDirection]), ScalarUtil.FPSReletive(this.speed, Game.frameDelta));
+        this._movement = Vec2Utils.MultS(Vec2Utils.Normalize([this._horizontalDirection, this._verticalDirection]), ScalarUtil.FPSReletive(this._speed, Game.frameDelta));
     }
 
     Unitialize(): void {

@@ -24,27 +24,27 @@ export class HitboxPolygon extends HitboxBase {
         });
     }
 
-    GetCanvasReletivePolyline(): Vec2[] {
-        const absTransform = this.parent.GetWorldRelativeTransform();
-        const radian = absTransform.GetRotationRadian();
+    get CanvasReletivePolyline(): Vec2[] {
+        const absTransform = this._parent.worldRelativeTransform;
+        const radian = absTransform.RotationRadian;
         const polyline: Vec2[] = [];
 
         for (let i = 0; i < this.Polyline.length; i++)
-            polyline[i] = Vec2Utils.Sum(absTransform.position, Vec2Utils.RotatePoint(Vec2Utils.Mult(this.Polyline[i], absTransform.scale), radian));
+            polyline[i] = Vec2Utils.Sum(absTransform.Position, Vec2Utils.RotatePoint(Vec2Utils.Mult(this.Polyline[i], absTransform.Scale), radian));
 
         return polyline;
     }
 
     // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
-    GetDebugDrawData(): WebglDrawData | null {
+    get DebugDrawData(): WebglDrawData | null {
         if (!this.CollisionEnabled) return null;
         if (this.Polyline.length < 2) return null;
 
         let vertexes: number[] = [];
         let indexes: number[] = [];
 
-        const colorY = this.GetTriggerState() == TriggerState.NotTrigger ? 0 : 0.01
-        const polyline = this.GetCanvasReletivePolyline();
+        const colorY = this.TriggerState == TriggerState.NotTrigger ? 0 : 0.01
+        const polyline = this.CanvasReletivePolyline;
         for (let i = 0; i < polyline.length; i++) {
             vertexes = vertexes.concat([polyline[i][0], polyline[i][1], 1, 0, 0, 0, 0, 1, colorY])
             indexes.push(i);

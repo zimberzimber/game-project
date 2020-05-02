@@ -19,7 +19,7 @@ export class PlayerEntity extends EntityBase {
         // const hitbox = new HitboxPolygon(this, [0, 30], [-10, 0], [0, -10], [10, 0]);
         const hitbox = new HitboxPolygon(this, [1, -12], [7, -9], [10, -4], [10, 3], [8, 9], [3, 12], [-4, 12], [-10, 9], [-3, 8], [3, 5], [4, -1], [2, -6], [-3, -7], [-10, -7]);
 
-        hitbox.SetTriggerState(TriggerState.NotTrigger);
+        hitbox.TriggerState = TriggerState.NotTrigger;
         this.AddComponent(hitbox);
     }
 

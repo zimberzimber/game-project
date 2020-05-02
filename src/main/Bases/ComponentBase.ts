@@ -1,21 +1,20 @@
 import { EntityBase } from "./EntityBase";
-import { Transform } from "../Models/Transform";
 
 export abstract class ComponentBase {
-    parent: EntityBase;
-    transform: Transform;
+    protected _parent: EntityBase;
+    get Parent(): EntityBase { return this._parent; }
 
     constructor(parent: EntityBase) {
-        this.parent = parent;
+        this._parent = parent;
     }
 
     abstract Update(): void;
 
     Delete(): void {
-        this.parent.RemoveComponent(this);
+        this._parent.RemoveComponent(this);
     }
 
     Unitialize(): void {
-        delete this.parent;
+        delete this._parent;
     }
 }

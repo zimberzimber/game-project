@@ -3,43 +3,59 @@ import { ScalarUtil } from "../Utility/Scalar";
 import { Vec2Utils } from "../Utility/Vec2";
 
 export class Transform {
-    private rotation: number = 0;
-    position: Vec2 = [0, 0];
-    scale: Vec2 = [1, 1];
+    /** Callback for whenever the transform changes. */
+    onChanged: Function | undefined = undefined;
 
-    GetRotation = (): number => this.rotation;
-    SetRotation = (angle: number): void => { this.rotation = angle % 360; };
-    Rotate = (angle: number): void => { this.rotation = (this.rotation + angle) % 360; };
+    private _position: Vec2 = [0, 0];
+    get Position(): Vec2 { return this._position; }
+    set Position(position: Vec2) {
+        this._position = position;
+        if (this.onChanged) this.onChanged();
+    }
 
-    GetRotationRadian = (): number => ScalarUtil.ToRadian(this.rotation);
+    private _scale: Vec2 = [1, 1];
+    get Scale(): Vec2 { return this._scale; }
+    set Scale(scale: Vec2) {
+        this._scale = scale;
+        if (this.onChanged) this.onChanged();
+    }
 
-    toString = (): string => `pos: ${this.position} | rot: ${this.rotation} | scale: ${this.scale}`;
+    private _rotation: number = 0;
+    get Rotation(): number { return this._rotation; }
+    set Rotation(angle: number) {
+        this._rotation = angle % 360;
+        if (this.onChanged) this.onChanged();
+    };
+
+    get RotationRadian(): number { return ScalarUtil.ToRadian(this._rotation); }
+
+    Rotate = (angle: number): void => {
+        this.Rotation = (this._rotation + angle) % 360;
+    };
 
     // https://stackoverflow.com/questions/43748418/c-move-2d-point-along-angle
     MoveForward = (distance: number): void => {
-        const rad = this.GetRotationRadian();
-        this.position[0] += Math.cos(rad) * distance;
-        this.position[1] += Math.sin(rad) * distance;
+        const rad = this.RotationRadian;
+        this.Position = [this._position[0] = Math.cos(rad) * distance, this._position[1] = Math.sin(rad) * distance];
     }
 
     MoveTowards = (target: Vec2, distance: number, allowOvershoot: boolean = false): void => {
-        this.position = Vec2Utils.MoveTowards(this.position, target, distance, allowOvershoot);
+        this.Position = Vec2Utils.MoveTowards(this._position, target, distance, allowOvershoot);
     }
 
     // Boy am I bad with math.
     // https://answers.unity.com/questions/650460/rotating-a-2d-sprite-to-face-a-target-on-a-single.html
     RotateTowards(target: Vec2, speed: number | undefined = undefined): void {
-
         // Do nothing if speed is 0 or the entity is on top of the target.
-        if (speed === 0 || (this.position[0] == target[0] && this.position[1] == target[1]))
+        if (speed === 0 || (this._position[0] == target[0] && this._position[1] == target[1]))
             return;
 
         // Get the value representing the target angle.
-        let targetAngle = ScalarUtil.ToAngle(Math.atan2(target[1] - this.position[1], target[0] - this.position[0]));
+        let targetAngle = ScalarUtil.ToAngle(Math.atan2(target[1] - this._position[1], target[0] - this._position[0]));
 
         // Set the rotation to the target angle, and return if no speed was passed.
         if (!speed) {
-            this.SetRotation(targetAngle);
+            this.Rotation = targetAngle;
             return;
         }
 
@@ -47,7 +63,7 @@ export class Transform {
         if (targetAngle < 0) targetAngle += 360;
 
         // Get the delta.
-        let angleDelta = targetAngle - this.rotation;
+        let angleDelta = targetAngle - this._rotation;
 
         // If the delta is 0, do nothing.
         if (angleDelta == 0) return;
@@ -61,18 +77,32 @@ export class Transform {
         else
             angleDelta = angleDelta > speed ? speed : angleDelta;
 
-        this.SetRotation(this.rotation + angleDelta);
+        this.Rotation = this._rotation + angleDelta;
     }
+
+    toString = (): string => `pos: ${this._position} | rot: ${this._rotation} | scale: ${this._scale}`;
 
     static TranformByTransform(subject: Transform, operator: Transform): Transform {
         const result = new Transform();
 
-        const scaled = Vec2Utils.Mult(subject.position, operator.scale);
-        const rotated = Vec2Utils.RotatePoint(scaled, operator.GetRotationRadian());
-        result.position = Vec2Utils.Sum(rotated, operator.position);
+        const scaled = Vec2Utils.Mult(subject._position, operator._scale);
+        const rotated = Vec2Utils.RotatePoint(scaled, operator.RotationRadian);
+        result._position = Vec2Utils.Sum(rotated, operator._position);
 
-        result.SetRotation(subject.rotation + operator.rotation);
-        result.scale = Vec2Utils.Mult(subject.scale, operator.scale);
+        result.Rotation = subject._rotation + operator._rotation;
+        result._scale = Vec2Utils.Mult(subject._scale, operator._scale);
         return result;
+    }
+
+    static Copy(original: Transform, includeCallback: boolean = false): Transform {
+        const copy = new Transform();
+        copy._position = original._position;
+        copy._rotation = original._rotation;
+        copy._scale = original._scale;
+
+        if (includeCallback)
+            copy.onChanged = original.onChanged;
+
+        return copy;
     }
 }

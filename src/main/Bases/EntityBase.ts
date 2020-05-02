@@ -4,66 +4,81 @@ import { Transform } from "../Models/Transform";
 export class EntityBase {
     private static NextEntityId: number = 0;
 
-    protected parent: EntityBase | undefined = undefined;
-    protected children: EntityBase[] = [];
-    protected components: ComponentBase[] = [];
-    readonly transform: Transform = new Transform();
     readonly entityId: number;
+    readonly transform: Transform = new Transform();
+
+    protected _parent: EntityBase | undefined;
+    protected _children: EntityBase[] = [];
+    protected _components: ComponentBase[] = [];
+
+    worldRelativeTransform: Transform;
+
+    get Parent(): EntityBase | undefined { return this._parent; }
+    get Children(): EntityBase[] { return this._children; }
 
     constructor(parent: EntityBase | void) {
-        if (parent)
-            this.parent = parent;
+        this._parent = parent || undefined;
+        this.entityId = EntityBase.NextEntityId++;
 
-        this.entityId = EntityBase.NextEntityId;
-        EntityBase.NextEntityId++;
-    }
-
-    GetParent(): EntityBase | undefined {
-        return this.parent;
+        this.transform.onChanged = () => EntityBase.CalculateWorlRelativeTransform(this);
     }
 
     Update(): void {
-        this.components.forEach(c => c.Update());
+        this._components.forEach(c => c.Update());
     }
 
     AddComponent(component: ComponentBase): void {
-        this.components.push(component);
+        this._components.push(component);
     }
 
     RemoveComponent(component: ComponentBase): void {
-        this.components = this.components.filter(c => c !== component);
+        this._components = this._components.filter(c => {
+            if (c === component) {
+                c.Unitialize();
+                return false;
+            }
+            return true;
+        });
     }
 
     GetComponentsOfType(type: any): ComponentBase[] {
-        return this.components.filter(c => c instanceof type);
-    }
-
-    GetChildren(): EntityBase[] {
-        return this.children;
+        return this._components.filter(c => c instanceof type);
     }
 
     AddChildEntity(child: EntityBase): void {
-        if (child.parent)
-            child.parent.RemoveChild(child);
-        child.parent = this;
-        this.children.push(child);
+        if (child._parent)
+            child._parent.RemoveChildEntity(child);
+        child._parent = this;
+        this._children.push(child);
     }
 
-    RemoveChild(child: EntityBase): void {
-        this.children = this.children.filter(c => c != child);
+    RemoveChildEntity(child: EntityBase): void {
+        this._children = this._children.filter(c => {
+            if (c === child) {
+                c._parent = undefined;
+                return false;
+            }
+            return true;
+        });
     }
 
-    GetWorldRelativeTransform(): Transform {
-        if (this.parent == undefined)
-            return this.transform;
+    // Method for calculating an entities world relative transform, which is based on its parent chain
+    // Also responsible for doing the same for all children entities 
+    private static CalculateWorlRelativeTransform(entity: EntityBase): void {
+        let relative: Transform;
 
-        let relative: Transform = this.transform;
-        let current: EntityBase | undefined = this.parent;
-        while (current) {
-            relative = Transform.TranformByTransform(relative, current.transform);
-            current = current.GetParent();
+        if (entity._parent == undefined)
+            relative = Transform.Copy(entity.transform);
+        else {
+            relative = entity.transform;
+            let current: EntityBase | undefined = entity._parent;
+            while (current) {
+                relative = Transform.TranformByTransform(relative, current.transform);
+                current = current.Parent;
+            }
         }
 
-        return relative;
+        entity.worldRelativeTransform = relative;
+        entity._children.forEach(c => EntityBase.CalculateWorlRelativeTransform(c));
     }
 }
