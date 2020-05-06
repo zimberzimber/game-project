@@ -5,7 +5,7 @@ X Move IDB schemas to their own folder
 X Remove _G
 X Add images to IDB
 X Rewrite all get/set methods into properties
-- Try optimizing any large array operators, namely the one inside 'Draw()' in WebglDef
+X Try optimizing any large array operators, namely the one inside 'Draw()' in WebglDef
 
 Systems:
 X Separate sound manager to sound managment, and sound playing components

@@ -5,6 +5,7 @@ class Logger {
 
     constructor() {
         this.logLevel = Config.GetConfig('logLevel', LogLevel.Warn);
+        Config.Subscribe('logLevel', (newValue: LogLevel) => this.logLevel = newValue);
     }
 
     Error(message: any): void {

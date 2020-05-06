@@ -1,0 +1,7 @@
+
+Pushing spread arrays is faster than concatenating them.
+
+Arrow functions seem to be faster than traditional functions in Firefox.
+The opposite is true for Chrome, thought the difference is smaller.
+
+Biggest performence impact (so far) comes from array processing for the graphic context

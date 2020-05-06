@@ -1,3 +1,5 @@
+import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
+
 export enum TriggerState {
     NotTrigger,
     ContinuousTrigger,
@@ -22,3 +24,5 @@ export enum CollisionGroup {
     UI = 1 << 3,
     All = ~(~0 << 4)
 }
+
+export type CollisionDelegate = (trigerredBy: HitboxBase) => void;

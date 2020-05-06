@@ -1,8 +1,7 @@
 import { ComponentBase } from "../../Bases/ComponentBase";
-import { CollisionDelegate } from "../../Models/Delegates";
 import { CheckCollision } from "../../Workers/HitboxCollisionChecker";
 import { WebglDrawData } from "../../Models/WebglDrawData";
-import { HitboxType, TriggerState, CollisionGroup } from "../../Models/CollisionModels";
+import { HitboxType, TriggerState, CollisionGroup, CollisionDelegate } from "../../Models/CollisionModels";
 
 export abstract class HitboxBase extends ComponentBase {
     readonly HitboxType: HitboxType = HitboxType.Base;

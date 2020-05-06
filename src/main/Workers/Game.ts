@@ -7,7 +7,6 @@ import { CheckCollision } from "./HitboxCollisionChecker";
 import { ImageDrawDirective } from "../Components/DrawDirectives/ImageDrawDirective";
 import { TestEntity } from "../Entities/Test";
 import { WebglDrawData } from "../Models/WebglDrawData";
-import { Webgl } from "../Proxies/WebglProxy";
 import { ShaderSources } from "../Proxies/ShaderSourcesProxy";
 import { Config } from "../Proxies/ConfigProxy";
 import { Images } from "./ImageManager";
@@ -16,12 +15,13 @@ import { Audio } from "./SoundPlayer";
 import { Input } from "./InputHandler";
 import { Settings } from "./SettingsManager";
 import { Test2Entity } from "../Entities/Test2";
-import { ScalarUtil } from "../Utility/Scalar";
+import { Webgl } from "./WebglManager";
 
 class GameManager {
     canvas: HTMLCanvasElement;
     entities: EntityBase[] = [];
     paused: boolean = false;
+    _debugDraw: boolean = Config.GetConfig('debugDraw', false);
 
     // Used for game logic
     frameDelta: number = 0;
@@ -37,7 +37,10 @@ class GameManager {
         this.canvas.width = 600;
         this.canvas.height = 500;
 
-        Webgl.Init(ShaderSources.GetVertexShader(), ShaderSources.GetFragmentShader(), this.canvas, Images.GetImageArray())
+        Webgl.Init(ShaderSources.VertexShader, ShaderSources.FragmentShader, this.canvas, Images.GetImageArray())
+
+        Config.Subscribe('debug', (newValue: boolean) => this.displayFps = newValue);
+        Config.Subscribe('debugDraw', (newValue: boolean) => this._debugDraw = newValue);
 
         this.entities = [];
         let p = new PlayerEntity();
@@ -218,10 +221,10 @@ class GameManager {
             );
         }
 
-        Webgl.SetTriangleData(triangleData);
+        Webgl.TriangleData = triangleData;
 
         // Draw collisions if the option is enabled
-        if (Config.GetConfig('debugDraw', false) === true) {
+        if (this._debugDraw) {
             let indexOffset = triangleData.indexes[triangleData.indexes.length - 1] + 1;
             const lineData: WebglDrawData[] = [];
             const hitboxes = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities, true) as HitboxBase[];
@@ -238,9 +241,9 @@ class GameManager {
                 indexOffset += 1;
             }
 
-            Webgl.SetLineData(lineData);
+            Webgl.LineData = lineData;
         } else
-            Webgl.SetLineData([]);
+            Webgl.LineData = [];
 
 
         Webgl.Draw();

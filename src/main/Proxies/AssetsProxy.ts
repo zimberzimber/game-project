@@ -1,3 +1,5 @@
+// Definitions get removed so they don't just sit in memory when they're no longer needed.
+
 class AssetsProxy {
     //@ts-ignore
     private _original = window.assets;

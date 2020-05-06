@@ -2,8 +2,8 @@ export class ShaderSourcesProxy {
     //@ts-ignore
     private _source = window.shaderSources;
 
-    GetVertexShader = (): string => this._source.vertex;
-    GetFragmentShader = (): string => this._source.fragment;
+    get VertexShader(): string { return this._source.vertex; }
+    get FragmentShader(): string { return this._source.fragment; }
 }
 
 export const ShaderSources = new ShaderSourcesProxy();
