@@ -1,7 +1,6 @@
 import { ComponentBase } from "../Bases/ComponentBase";
 import { Vec2 } from "../Models/Vec2";
 import { Vec2Utils } from "../Utility/Vec2";
-import { ScalarUtil } from "../Utility/Scalar";
 import { Game } from "../Workers/Game";
 import { Input } from "../Workers/InputHandler";
 import { EntityBase } from "../Bases/EntityBase";
@@ -45,7 +44,7 @@ export class PlayerMovementComponent extends ComponentBase implements IInputObse
     }
 
     private RecalculateMovement(): void {
-        this._movement = Vec2Utils.MultS(Vec2Utils.Normalize([this._horizontalDirection, this._verticalDirection]), ScalarUtil.FPSReletive(this._speed, Game.frameDelta));
+        this._movement = Vec2Utils.MultS(Vec2Utils.Normalize([this._horizontalDirection, this._verticalDirection]), Game.FPSReletive(this._speed));
     }
 
     Unitialize(): void {

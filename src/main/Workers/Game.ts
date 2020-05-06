@@ -1,8 +1,8 @@
 import { EntityBase } from "../Bases/EntityBase";
 import { PlayerEntity } from "../Entities/Player";
-import { HitboxBase } from "../Bases/HitboxBase";
+import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { ComponentBase } from "../Bases/ComponentBase";
-import { TriggerState } from "../Models/TriggerState";
+import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
 import { CheckCollision } from "./HitboxCollisionChecker";
 import { ImageDrawDirective } from "../Components/DrawDirectives/ImageDrawDirective";
 import { TestEntity } from "../Entities/Test";
@@ -15,6 +15,8 @@ import { SoundTags } from "../Models/SoundModels";
 import { Audio } from "./SoundPlayer";
 import { Input } from "./InputHandler";
 import { Settings } from "./SettingsManager";
+import { Test2Entity } from "../Entities/Test2";
+import { ScalarUtil } from "../Utility/Scalar";
 
 class GameManager {
     canvas: HTMLCanvasElement;
@@ -61,6 +63,14 @@ class GameManager {
         test.transform.Position = [100, 100];
         test.transform.Scale = [5, 5];
         this.AddEntity(test);
+
+        for (let x = 0; x < 10; x++) {
+            for (let y = 0; y < 10; y++) {
+                let test2 = new Test2Entity();
+                test2.transform.Position = [(-5 + x) * 10, (-5 + y) * 10];
+                this.AddEntity(test2);
+            }
+        }
 
         Input.BindKeymap(Settings.GetSetting('controlsKeymap'));
         Audio.PlaySound({
@@ -114,7 +124,7 @@ class GameManager {
         this.entities.forEach(entity => {
             entities.push(entity);
             if (entity.Children.length > 0)
-                entities = entities.concat(this.GetAllEntitiesHelper(entity));
+                entities.push(...this.GetAllEntitiesHelper(entity));
         });
         return entities;
     }
@@ -125,21 +135,21 @@ class GameManager {
         parent.Children.forEach(child => {
             children.push(child);
             if (child.Children.length > 0)
-                children = children.concat(this.GetAllEntitiesHelper(child));
+                children.push(...this.GetAllEntitiesHelper(child));
         })
         return children;
     }
 
     // Get components of a certain type from all the entities within the game.
     // Calls 'GetAllEntities' to obtain all the current entities, and passes that as a collection to 'GetAllComponentsOfTypeFromEntityCollection'
-    GetAllComponentsOfType(type: any): ComponentBase[] {
-        return this.GetAllComponentsOfTypeFromEntityCollection(type, this.GetAllEntities());
+    GetAllComponentsOfType(type: any, activeOnly: boolean = false): ComponentBase[] {
+        return this.GetAllComponentsOfTypeFromEntityCollection(type, this.GetAllEntities(), activeOnly);
     }
 
     // Get components of a certain type from the given collection.
-    GetAllComponentsOfTypeFromEntityCollection(type: any, collection: EntityBase[]): ComponentBase[] {
+    GetAllComponentsOfTypeFromEntityCollection(type: any, collection: EntityBase[], activeOnly: boolean = false): ComponentBase[] {
         let returned: ComponentBase[] = [];
-        collection.forEach(e => returned = returned.concat(e.GetComponentsOfType(type)));
+        collection.forEach(e => returned.push(...e.GetComponentsOfType(type, activeOnly)));
         return returned;
     }
 
@@ -158,26 +168,54 @@ class GameManager {
 
         // Updating all first and then reobtaining the list because entities may have been created due to other entities updating.
         const allEntities = this.GetAllEntities();
-        let triggers: HitboxBase[] = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities).filter(c => (c as HitboxBase).TriggerState != TriggerState.NotTrigger) as HitboxBase[];
-        let colliders: HitboxBase[] = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities).filter(c => (c as HitboxBase).TriggerState == TriggerState.NotTrigger) as HitboxBase[];
+        let triggers: HitboxBase[] = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities, true).filter(c => (c as HitboxBase).TriggerState != TriggerState.NotTrigger) as HitboxBase[];
+        let colliders: HitboxBase[] = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities, true).filter(c => (c as HitboxBase).TriggerState == TriggerState.NotTrigger) as HitboxBase[];
 
-        triggers.forEach(t => colliders.forEach(c => { if (CheckCollision(t, c)) t.OnCollision(c); }));
+        for (let i = 0; i < triggers.length; i++) {
+            const t = triggers[i];
+            if (t.CollisionGroup == CollisionGroup.None && t.CollideWithGroup == CollisionGroup.None)
+                continue;
+
+            for (let j = i + 1; j < triggers.length; j++) {
+                const c = triggers[j];
+                if (c.CollisionGroup == CollisionGroup.None && c.CollideWithGroup == CollisionGroup.None)
+                    continue;
+
+                if (t.CollideWithGroup & c.CollisionGroup && CheckCollision(t, c))
+                    t.CollideWith(c);
+
+                if (t.CollisionGroup & c.CollideWithGroup && CheckCollision(t, c))
+                    c.CollideWith(t);
+            }
+
+            for (let j = 0; j < colliders.length; j++) {
+                const c = colliders[j];
+                if (c.CollisionGroup == CollisionGroup.None && c.CollideWithGroup == CollisionGroup.None)
+                    continue;
+
+                if (t.CollideWithGroup & c.CollisionGroup && CheckCollision(t, c))
+                    t.CollideWith(c);
+
+                if (t.CollisionGroup & c.CollideWithGroup && CheckCollision(t, c))
+                    c.CollideWith(t);
+            }
+        }
 
         // Collect all drawing data:
-        const dds = this.GetAllComponentsOfType(ImageDrawDirective);
+        const dds = this.GetAllComponentsOfTypeFromEntityCollection(ImageDrawDirective, allEntities, true);
         const triangleData: WebglDrawData = {
             vertexes: [],
             indexes: [],
         };
 
         for (let i = 0; i < dds.length; i++) {
-            triangleData.vertexes = triangleData.vertexes.concat((dds[i] as ImageDrawDirective).WebGlData);
+            triangleData.vertexes.push(...(dds[i] as ImageDrawDirective).WebGlData);
 
             const s = i * 4;
-            triangleData.indexes = triangleData.indexes.concat([
+            triangleData.indexes.push(
                 s, s + 1, s + 2,
                 s, s + 2, s + 3
-            ]);
+            );
         }
 
         Webgl.SetTriangleData(triangleData);
@@ -186,7 +224,7 @@ class GameManager {
         if (Config.GetConfig('debugDraw', false) === true) {
             let indexOffset = triangleData.indexes[triangleData.indexes.length - 1] + 1;
             const lineData: WebglDrawData[] = [];
-            const hitboxes = this.GetAllComponentsOfType(HitboxBase) as HitboxBase[];
+            const hitboxes = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities, true) as HitboxBase[];
 
             for (let i = 0; i < hitboxes.length; i++) {
                 const hData: WebglDrawData | null = hitboxes[i].DebugDrawData;
@@ -201,7 +239,9 @@ class GameManager {
             }
 
             Webgl.SetLineData(lineData);
-        }
+        } else
+            Webgl.SetLineData([]);
+
 
         Webgl.Draw();
 
@@ -227,6 +267,12 @@ class GameManager {
 
         this.frameTimes.push(time);
         return this.frameTimes.length;
+    }
+
+    private readonly _minimumFrameDelta = 1 / 30;
+    FPSReletive(value: number): number {
+        // Need the limit to prevent some unwanted behaviors at lower
+        return value * Math.min(this.frameDelta, this._minimumFrameDelta);
     }
 
     get Paused(): boolean { return this.paused; }

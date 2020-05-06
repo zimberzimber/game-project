@@ -1,8 +1,7 @@
-import { HitboxBase } from "../../Bases/HitboxBase";
-import { HitboxType } from "../../Models/HitboxType";
+import { HitboxBase } from "./HitboxBase";
+import { TriggerState, HitboxType } from "../../Models/CollisionModels";
 import { EntityBase } from "../../Bases/EntityBase";
 import { WebglDrawData } from "../../Models/WebglDrawData";
-import { TriggerState } from "../../Models/TriggerState";
 
 export class HitboxRectangle extends HitboxBase {
     HitboxType: HitboxType = HitboxType.Rectangular;
@@ -17,7 +16,7 @@ export class HitboxRectangle extends HitboxBase {
     }
 
     protected CalculateOverallHitboxRadius(): void {
-        this.HitboxOverallRadius = Math.sqrt(Math.pow(this._width, 2) + Math.pow(this._height, 2)) / 2;
+        this._hitboxOverallRadius = Math.sqrt(Math.pow(this._width, 2) + Math.pow(this._height, 2)) / 2;
     }
 
     get Height(): number { return this._height; }
@@ -35,8 +34,6 @@ export class HitboxRectangle extends HitboxBase {
 
     // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
     get DebugDrawData(): WebglDrawData | null {
-        if (!this.CollisionEnabled) return null;
-
         const absTransform = this._parent.worldRelativeTransform;
         const colorY = this.TriggerState == TriggerState.NotTrigger ? 0 : 0.01
         const width = this._width * absTransform.Scale[0] / 2;

@@ -20,6 +20,7 @@ export class EntityBase {
         this._parent = parent || undefined;
         this.entityId = EntityBase.NextEntityId++;
 
+        EntityBase.CalculateWorlRelativeTransform(this);
         this.transform.onChanged = () => EntityBase.CalculateWorlRelativeTransform(this);
     }
 
@@ -41,8 +42,11 @@ export class EntityBase {
         });
     }
 
-    GetComponentsOfType(type: any): ComponentBase[] {
-        return this._components.filter(c => c instanceof type);
+    GetComponentsOfType(type: any, activeOnly: boolean = false): ComponentBase[] {
+        if (activeOnly)
+            return this._components.filter(c => c.Enabled && c instanceof type);
+        else
+            return this._components.filter(c => c instanceof type);
     }
 
     AddChildEntity(child: EntityBase): void {

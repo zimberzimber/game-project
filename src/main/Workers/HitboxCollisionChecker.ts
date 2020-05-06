@@ -1,4 +1,4 @@
-import { HitboxBase } from "../Bases/HitboxBase";
+import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { HitboxRectangle } from "../Components/Hitboxes/HitboxRectangle";
 import { HitboxCircle } from "../Components/Hitboxes/HitboxCircle";
 import { HitboxPolygon } from "../Components/Hitboxes/HitboxPolygon";
@@ -52,7 +52,7 @@ function IsInCollisionRange(a: HitboxBase, b: HitboxBase): boolean {
     const aTrans = a.Parent.worldRelativeTransform;
     const bTrans = b.Parent.worldRelativeTransform;
     const distance = Vec2Utils.Distance(aTrans.Position, bTrans.Position);
-    return distance <= a.HitboxOverallRadius * Math.max(aTrans.Scale[0], aTrans.Scale[1]) + b.HitboxOverallRadius * Math.max(bTrans.Scale[0], bTrans.Scale[1]);
+    return distance <= a._hitboxOverallRadius * Math.max(aTrans.Scale[0], aTrans.Scale[1]) + b._hitboxOverallRadius * Math.max(bTrans.Scale[0], bTrans.Scale[1]);
 }
 
 // Checks if the given point is inside the given polygon

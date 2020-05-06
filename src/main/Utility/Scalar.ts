@@ -1,9 +1,10 @@
+import { Game } from "../Workers/Game";
+
 const _atr: number = Math.PI / 180;
 const _rta: number = 180 / Math.PI;
 
 export class ScalarUtil {
     static Shake = (): number => Math.random() * 2 - 1
-    static FPSReletive = (number: number, frameDelta: number): number => number * frameDelta;
 
     static ToRadian = (angle: number): number => angle * _atr;
     static ToAngle = (radian: number): number => radian * _rta;

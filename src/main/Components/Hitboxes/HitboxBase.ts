@@ -1,14 +1,17 @@
-import { ComponentBase } from "./ComponentBase";
-import { HitboxType } from "../Models/HitboxType";
-import { CollisionDelegate } from "../Models/Delegates";
-import { TriggerState } from "../Models/TriggerState";
-import { CheckCollision } from "../Workers/HitboxCollisionChecker";
-import { WebglDrawData } from "../Models/WebglDrawData";
+import { ComponentBase } from "../../Bases/ComponentBase";
+import { CollisionDelegate } from "../../Models/Delegates";
+import { CheckCollision } from "../../Workers/HitboxCollisionChecker";
+import { WebglDrawData } from "../../Models/WebglDrawData";
+import { HitboxType, TriggerState, CollisionGroup } from "../../Models/CollisionModels";
 
 export abstract class HitboxBase extends ComponentBase {
-    HitboxType: HitboxType = HitboxType.Base;
-    HitboxOverallRadius: number = 0;
-    CollisionEnabled: boolean = true;
+    readonly HitboxType: HitboxType = HitboxType.Base;
+    _hitboxOverallRadius: number = 0;
+    get HitboxOverallRadius(): number { return this._hitboxOverallRadius; }
+
+    CollisionGroup: CollisionGroup = CollisionGroup.None;
+    CollideWithGroup: CollisionGroup = CollisionGroup.None;
+
     private _triggerState: TriggerState = TriggerState.NotTrigger;
 
     // Stores objects it already collided with, for on enter and one time trigerring
@@ -72,7 +75,7 @@ export abstract class HitboxBase extends ComponentBase {
     CollisionScript: CollisionDelegate | undefined;
 
 
-    OnCollision(collidedWith: HitboxBase): void {
+    CollideWith(collidedWith: HitboxBase): void {
         if (this.PreviousCollisions && (this.TriggerState == TriggerState.OnEnterTrigger || this.TriggerState == TriggerState.OneTimeTrigger)) {
             if (this.PreviousCollisions.indexOf(collidedWith) != -1)
                 return;
@@ -83,11 +86,6 @@ export abstract class HitboxBase extends ComponentBase {
         // Call the collision script if defined
         if (this.CollisionScript != undefined)
             this.CollisionScript(collidedWith);
-
-        // Call the other colliders collision script if its not a trigger, and the script is defined.
-        // Triggers will trigger their own script from the collision.
-        if (collidedWith.TriggerState == TriggerState.NotTrigger && collidedWith.CollisionScript != undefined)
-            collidedWith.CollisionScript(this);
     }
 
     protected abstract CalculateOverallHitboxRadius(): void;
