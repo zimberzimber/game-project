@@ -11,10 +11,12 @@ class IndexeddbManager {
     private dbs: DbStorage = {};
 
     async OpenDatabase(schema: IDbSchema): Promise<void> {
-        if (this.dbs[schema.databaseName])
-            throw new DatabaseAlreadyOpenError(`Database '${schema.databaseName}' is already open.`);
+        if (this.dbs[schema.databaseName]) {
+            Log.Warn(`Database '${schema.databaseName}' is already open.`);
+            return;
+        }
 
-        //@ts-ignore One very annoying thing about TypeScript is that unlike languages like C#, null/undefined is a separate type, not a 'no reference' flag (laymans term)
+        //@ts-ignore One very annoying thing about TypeScript is that unlike languages like C#, null/undefined is a separate type, not a 'no reference'
         this.dbs[schema.databaseName] = { version: schema.version, context: undefined };
         const req = window.indexedDB.open(schema.databaseName, schema.version);
         const completionContainer = PromiseUtil.CreateCompletionPromise();

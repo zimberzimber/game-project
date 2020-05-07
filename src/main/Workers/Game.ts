@@ -3,7 +3,7 @@ import { PlayerEntity } from "../Entities/Player";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { ComponentBase } from "../Bases/ComponentBase";
 import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
-import { CheckCollision } from "./HitboxCollisionChecker";
+import { CheckCollision, IsPointInCollider } from "./CollisionChecker";
 import { ImageDrawDirective } from "../Components/DrawDirectives/ImageDrawDirective";
 import { TestEntity } from "../Entities/Test";
 import { WebglDrawData } from "../Models/WebglDrawData";
@@ -16,6 +16,8 @@ import { Input } from "./InputHandler";
 import { Settings } from "./SettingsManager";
 import { Test2Entity } from "../Entities/Test2";
 import { Webgl } from "./WebglManager";
+import { IMouseInputObserver } from "../Models/InputModels";
+import { Vec2 } from "../Models/Vec2";
 
 class GameManager {
     canvas: HTMLCanvasElement;
@@ -75,7 +77,9 @@ class GameManager {
             }
         }
 
-        Input.BindKeymap(Settings.GetSetting('controlsKeymap'));
+        Input.MouseElemet = this.canvas;
+        Input.Keymap = Settings.GetSetting('controlsKeymap');
+
         Audio.PlaySound({
             soundSourceName: 'loop2',
             volume: 0.5,

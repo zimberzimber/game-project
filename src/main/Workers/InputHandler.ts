@@ -1,60 +1,122 @@
-import { IInputObserver, IFullInputObserver } from "../Models/InputModels";
+import { IKeyboardInputObserver, IKeyboardFullInputObserver, IMouseInputObserver, IMouseFullInputObserver } from "../Models/InputModels";
+import { Vec2 } from "../Models/Vec2";
 
 class InputHandler {
-    private observers: IInputObserver[] = [];
-    private fullObservers: IFullInputObserver[] = [];
-    private keysDown: { [key: string]: boolean } = {};
-    private keyMap: { [key: number]: string } = {};
+    private _keyboardObservers: IKeyboardInputObserver[] = [];
+    private _keyboardFullObservers: IKeyboardFullInputObserver[] = [];
+    private _keysDown: { [key: string]: boolean } = {};
+    private _keyMap: { [key: number]: string } = {};
+
+    private _mouseElement: HTMLElement | null = null;
+    private _mousePosition: Vec2 = [0, 0];
+    private _mouseObservers: IMouseInputObserver[] = [];
+    private _mouseFullObservers: IMouseFullInputObserver[] = [];
 
     constructor() {
         window.addEventListener('keydown', this.OnKeyDown.bind(this));
         window.addEventListener('keyup', this.OnKeyUp.bind(this));
     }
 
-    BindKeymap(keyMap: { [key: number]: string }): void {
-        this.keyMap = keyMap;
+    set Keymap(keyMap: { [key: number]: string }) {
+        this._keyMap = { ...keyMap };
     }
 
-    Subscribe(observer: IInputObserver): void {
-        const index = this.observers.indexOf(observer, 0);
+    set MouseElemet(element: HTMLElement) {
+        this._mouseElement?.removeEventListener('mousedown', this.OnMouseDown.bind(this));
+        this._mouseElement?.removeEventListener('mouseup', this.OnMouseUp.bind(this));
+        this._mouseElement?.removeEventListener('mousemove', this.OnMouseMove.bind(this));
+
+        this._mouseElement = element;
+        this._mouseElement.addEventListener('mousedown', this.OnMouseDown.bind(this));
+        this._mouseElement.addEventListener('mouseup', this.OnMouseUp.bind(this));
+        this._mouseElement.addEventListener('mousemove', this.OnMouseMove.bind(this));
+    }
+
+    get MousePosition(): Vec2 {
+        return [this._mousePosition[0], this._mousePosition[1]];
+    }
+
+    SubscribeKeyboardEvent(observer: IKeyboardInputObserver): void {
+        const index = this._keyboardObservers.indexOf(observer, 0);
         if (index == -1)
-            this.observers.push(observer);
+            this._keyboardObservers.push(observer);
     }
 
-    Unsubscribe(observer: IInputObserver): void {
-        const index = this.observers.indexOf(observer, 0);
+    UnsubscribeKeyboardEvent(observer: IKeyboardInputObserver): void {
+        const index = this._keyboardObservers.indexOf(observer, 0);
         if (index > -1)
-            this.observers.splice(index, 1);
+            this._keyboardObservers.splice(index, 1);
     }
 
-    SubscribeFullObserver(fullObserver: IFullInputObserver): void {
-        const index = this.fullObservers.indexOf(fullObserver, 0);
+    SubscribeFullKeyboardEvent(fullObserver: IKeyboardFullInputObserver): void {
+        const index = this._keyboardFullObservers.indexOf(fullObserver, 0);
         if (index == -1)
-            this.fullObservers.push(fullObserver);
+            this._keyboardFullObservers.push(fullObserver);
     }
 
-    UnsubscribeFullObserver(fullObserver: IFullInputObserver): void {
-        const index = this.fullObservers.indexOf(fullObserver, 0);
+    UnsubscribeFullKeyboardEvent(fullObserver: IKeyboardFullInputObserver): void {
+        const index = this._keyboardFullObservers.indexOf(fullObserver, 0);
         if (index > -1)
-            this.observers.splice(index, 1);
+            this._keyboardFullObservers.splice(index, 1);
     }
 
-    OnKeyDown(e: KeyboardEvent): void {
-        if (this.keyMap[e.keyCode] && !this.keysDown[this.keyMap[e.keyCode]]) {
-            this.keysDown[this.keyMap[e.keyCode]] = true;
-            this.observers.forEach(o => o.OnKeyDown(this.keyMap[e.keyCode]));
+    private OnKeyDown(e: KeyboardEvent): void {
+        if (this._keyMap[e.keyCode] && !this._keysDown[this._keyMap[e.keyCode]]) {
+            this._keysDown[this._keyMap[e.keyCode]] = true;
+            this._keyboardObservers.forEach(o => o.OnKeyDown(this._keyMap[e.keyCode]));
         }
-
-        this.fullObservers.forEach(o => o.OnKeyDown(e));
+        this._keyboardFullObservers.forEach(o => o.OnKeyDown(e));
     }
 
-    OnKeyUp(e: KeyboardEvent): void {
-        if (this.keyMap[e.keyCode] && this.keysDown[this.keyMap[e.keyCode]]) {
-            delete this.keysDown[this.keyMap[e.keyCode]];
-            this.observers.forEach(o => o.OnKeyUp(this.keyMap[e.keyCode]));
+    private OnKeyUp(e: KeyboardEvent): void {
+        if (this._keyMap[e.keyCode] && this._keysDown[this._keyMap[e.keyCode]]) {
+            delete this._keysDown[this._keyMap[e.keyCode]];
+            this._keyboardObservers.forEach(o => o.OnKeyUp(this._keyMap[e.keyCode]));
         }
+        this._keyboardFullObservers.forEach(o => o.OnKeyUp(e));
+    }
 
-        this.fullObservers.forEach(o => o.OnKeyUp(e));
+
+
+    SubscribeMouseEvent(observer: IMouseInputObserver): void {
+        const index = this._mouseObservers.indexOf(observer, 0);
+        if (index == -1)
+            this._mouseObservers.push(observer);
+    }
+
+    UnsubscribeMouseEvent(observer: IMouseInputObserver): void {
+        const index = this._mouseObservers.indexOf(observer, 0);
+        if (index > -1)
+            this._mouseObservers.splice(index, 1);
+    }
+
+    SubscribeFullMouseEvent(fullObserver: IMouseFullInputObserver): void {
+        const index = this._mouseFullObservers.indexOf(fullObserver, 0);
+        if (index == -1)
+            this._mouseFullObservers.push(fullObserver);
+    }
+
+    UnsubscribeFullMouseEvent(fullObserver: IMouseFullInputObserver): void {
+        const index = this._mouseFullObservers.indexOf(fullObserver, 0);
+        if (index > -1)
+            this._mouseFullObservers.splice(index, 1);
+    }
+
+    private OnMouseDown(e: MouseEvent): void {
+        const rect = this._mouseElement!.getBoundingClientRect();
+        const pos: Vec2 = [e.clientX - rect.left, rect.height - (e.clientY - rect.top)];
+        this._mouseObservers.forEach(o => o.OnMouseDown(e.button, pos));
+        this._mouseFullObservers.forEach(o => o.OnMouseDown(e));
+    }
+    private OnMouseUp(e: MouseEvent): void {
+        const rect = this._mouseElement!.getBoundingClientRect();
+        const pos: Vec2 = [e.clientX - rect.left, rect.height - (e.clientY - rect.top)];
+        this._mouseObservers.forEach(o => o.OnMouseUp(e.button, pos));
+        this._mouseFullObservers.forEach(o => o.OnMouseUp(e));
+    }
+    private OnMouseMove(e: MouseEvent): void {
+        const rect = this._mouseElement!.getBoundingClientRect();
+        this._mousePosition = [e.clientX - rect.left, rect.height - (e.clientY - rect.top)];
     }
 }
 

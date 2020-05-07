@@ -10,7 +10,24 @@ import { ScalarUtil } from "../Utility/Scalar";
 // Dictionary storing colission methods.
 // [collider class name]: { [collider class name] : [method name] }
 // Not defining a relation here will have them never collide.
+// 'Point' is a separate field for checking point against different hitbox types.
 const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
+    Point: {
+        HitboxRectangle: (point: Vec2, c: HitboxRectangle): boolean => {
+            const cTrans = c.Parent.worldRelativeTransform;
+            if (point[0] >= cTrans.Position[0] - c.Width / 2 && point[0] <= cTrans.Position[0] + c.Width / 2
+                && point[1] >= cTrans.Position[1] - c.Height / 2 && point[1] <= cTrans.Position[1] + c.Height / 2)
+                return true;
+            return false;
+        },
+        HitboxCircle: (point: Vec2, c: HitboxCircle): boolean => {
+            return Vec2Utils.Distance(point, c.Parent.worldRelativeTransform.Position) <= c.Radius;
+        },
+        HitboxPolygon: (point: Vec2, c: HitboxPolygon): boolean => {
+            return IsPointInPolygon(point, c.CanvasReletivePolyline);
+        }
+    },
+
     HitboxRectangle: {
         HitboxRectangle: (a: HitboxRectangle, b: HitboxRectangle): boolean => {
             const aTrans = a.Parent.worldRelativeTransform;
@@ -147,16 +164,34 @@ const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
     }
 };
 
-export const CheckCollision = (trigger: HitboxBase, collider: HitboxBase): boolean => {
-    if (IsInCollisionRange(trigger, collider)) {
+/**
+ * Checks whether the passed point is within the passed hitbox.
+ * @param point The point to check
+ * @param hitbox Within which hitbox to check
+ */
+export const IsPointInCollider = (point: Vec2, hitbox: HitboxBase): boolean => {
+    if (Vec2Utils.Distance(point, hitbox.Parent.worldRelativeTransform.Position))
+        if (MethodDictionary.Point[hitbox.constructor.name])
+            if (MethodDictionary.Point[hitbox.constructor.name](point, hitbox))
+                return true;
+    return false;
+}
+
+/**
+ * Checks for collision between the two passed hitboxes
+ * @param hitbox1 Hitbox to check
+ * @param hitbox2 The other hitbox to check
+ */
+export const CheckCollision = (hitbox1: HitboxBase, hitbox2: HitboxBase): boolean => {
+    if (IsInCollisionRange(hitbox1, hitbox2)) {
         // Check for a method in [trigger][collider]
-        if (MethodDictionary[trigger.constructor.name][collider.constructor.name]) {
-            if (MethodDictionary[trigger.constructor.name][collider.constructor.name](trigger, collider))
+        if (MethodDictionary[hitbox1.constructor.name][hitbox2.constructor.name]) {
+            if (MethodDictionary[hitbox1.constructor.name][hitbox2.constructor.name](hitbox1, hitbox2))
                 return true
         }
         // Check for a method in [collider][trigger]
-        else if (MethodDictionary[collider.constructor.name][trigger.constructor.name]) {
-            if (MethodDictionary[collider.constructor.name][trigger.constructor.name](collider, trigger))
+        else if (MethodDictionary[hitbox2.constructor.name][hitbox1.constructor.name]) {
+            if (MethodDictionary[hitbox2.constructor.name][hitbox1.constructor.name](hitbox2, hitbox1))
                 return true
         }
     }

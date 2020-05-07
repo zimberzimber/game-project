@@ -1,5 +1,5 @@
 import { ComponentBase } from "../../Bases/ComponentBase";
-import { CheckCollision } from "../../Workers/HitboxCollisionChecker";
+import { CheckCollision } from "../../Workers/CollisionChecker";
 import { WebglDrawData } from "../../Models/WebglDrawData";
 import { HitboxType, TriggerState, CollisionGroup, CollisionDelegate } from "../../Models/CollisionModels";
 

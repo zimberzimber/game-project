@@ -1,4 +1,4 @@
-export interface IConfigObserver { (newValue: any): void; }
+interface IConfigObserver { (newValue: any): void; }
 
 class ConfigProxy {
     //@ts-ignore

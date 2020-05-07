@@ -13,7 +13,7 @@ X Add reverb controls to the sound player
 - Add pitch controls to the sound player
 X Add the option to fade sounds in or out
 X Revamp input handler into an independant observable.
-- Add mouse controls (canvas + world relative clicks/postions)
+X Add mouse controls (canvas + world relative clicks/postions)
 - Add camera controls
 X Have sound and image manager be initialized by a centralized component
 X Add the ability to save settings between sessions

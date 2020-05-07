@@ -4,9 +4,9 @@ import { Vec2Utils } from "../Utility/Vec2";
 import { Game } from "../Workers/Game";
 import { Input } from "../Workers/InputHandler";
 import { EntityBase } from "../Bases/EntityBase";
-import { IInputObserver } from "../Models/InputModels";
+import { IKeyboardInputObserver } from "../Models/InputModels";
 
-export class PlayerMovementComponent extends ComponentBase implements IInputObserver {
+export class PlayerMovementComponent extends ComponentBase implements IKeyboardInputObserver {
     private _verticalDirection: number = 0;
     private _horizontalDirection: number = 0;
     private _movement: Vec2 = [0, 0];
@@ -14,7 +14,7 @@ export class PlayerMovementComponent extends ComponentBase implements IInputObse
 
     constructor(parent: EntityBase) {
         super(parent);
-        Input.Subscribe(this);
+        Input.SubscribeKeyboardEvent(this);
     }
 
     Update(): void {
@@ -49,6 +49,6 @@ export class PlayerMovementComponent extends ComponentBase implements IInputObse
 
     Unitialize(): void {
         super.Unitialize();
-        Input.Unsubscribe(this);
+        Input.UnsubscribeKeyboardEvent(this);
     }
 }
