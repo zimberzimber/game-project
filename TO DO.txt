@@ -26,6 +26,7 @@ Webgl:
 X Modify webgl so you can use multiple images as textures
 X Modify webgl init to accept an array of images instead of just one image
 X UI elements will have to move with the camera. (old topic: A way to tell the shader what should and what shouldn't move with the camera view)
+X Opacity from textures
 
 Game:
 - Create a sound emitting component

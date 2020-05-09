@@ -13,6 +13,7 @@ export class PlayerEntity extends EntityBase {
     constructor(parent: EntityBase | void) {
         super(parent);
         this.transform.Depth = -50;
+        this.transform.Scale = [10, 10];
 
         this.AddComponent(new PlayerMovementComponent(this));
         this.AddComponent(new ImageDrawDirective(this, "heart", [10, 10]));

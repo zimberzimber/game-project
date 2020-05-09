@@ -116,6 +116,9 @@ class WebglManager {
         gl.frontFace(gl.CCW);
         gl.cullFace(gl.BACK);
 
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        
         //@ts-ignore Can't be null
         this._program = gl.createProgram();
         const program = this._program;
