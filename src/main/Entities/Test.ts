@@ -13,6 +13,7 @@ import { Audio } from "../Workers/SoundPlayer";
 export class TestEntity extends EntityBase {
     constructor(parent: EntityBase | void) {
         super(parent);
+        this.transform.Depth = -5;
         this.AddComponent(new ImageDrawDirective(this, "assetMissing", [10, 10]));
 
         // const hitbox = new HitboxRectangle(this, 10, 40);

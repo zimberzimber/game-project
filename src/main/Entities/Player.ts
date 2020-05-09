@@ -12,6 +12,8 @@ import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 export class PlayerEntity extends EntityBase {
     constructor(parent: EntityBase | void) {
         super(parent);
+        this.transform.Depth = -50;
+
         this.AddComponent(new PlayerMovementComponent(this));
         this.AddComponent(new ImageDrawDirective(this, "heart", [10, 10]));
 
@@ -23,7 +25,7 @@ export class PlayerEntity extends EntityBase {
         hitbox.CollideWithGroup = CollisionGroup.Hazard;
         hitbox.TriggerState = TriggerState.NotTrigger;
         hitbox.CollisionScript = (e: HitboxBase): void => {
-            e.Parent.transform.MoveTowards(this.transform.Position, -5);
+            // e.Parent.transform.MoveTowards(this.transform.Position, -5);
         }
         this.AddComponent(hitbox);
     }

@@ -2,7 +2,7 @@ import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition } from "../Mo
 
 export const  SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition } = {
     assetMissing: {
-        sourceImageName: 'sprites',
+        sourceImageName: 'colors',
         frame: {
             origin: [0, 0],
             size: [0.125, 0.125]

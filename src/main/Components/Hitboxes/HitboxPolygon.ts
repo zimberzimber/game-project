@@ -44,7 +44,7 @@ export class HitboxPolygon extends HitboxBase {
         const colorY = this.TriggerState == TriggerState.NotTrigger ? 0 : 0.01
         const polyline = this.CanvasReletivePolyline;
         for (let i = 0; i < polyline.length; i++) {
-            vertexes.push(polyline[i][0], polyline[i][1], 1, 0, 0, 0, 0, 1, colorY);
+            vertexes.push(polyline[i][0], polyline[i][1], this.Parent.worldRelativeTransform.Depth, 0, 0, 0, 0, 1, colorY);
             indexes.push(i);
         }
         indexes.push(0);

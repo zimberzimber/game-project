@@ -16,6 +16,7 @@ import { Input } from "./InputHandler";
 import { Settings } from "./SettingsManager";
 import { Test2Entity } from "../Entities/Test2";
 import { Webgl } from "./WebglManager";
+import { Camera } from "./CameraManager";
 
 class GameManager {
     private _canvas: HTMLCanvasElement;
@@ -60,7 +61,8 @@ class GameManager {
         this._canvas.height = 500;
 
         Webgl.Init(ShaderSources.VertexShader, ShaderSources.FragmentShader, this._canvas, Images.GetImageArray())
-
+        Camera.ManualUpdate();
+        
         Config.Subscribe('debug', (newValue: boolean) => this._displayFps = newValue);
         Config.Subscribe('debugDraw', (newValue: boolean) => this._debugDraw = newValue);
 
@@ -230,46 +232,35 @@ class GameManager {
 
         // Collect all drawing data:
         const dds = this.GetAllComponentsOfTypeFromEntityCollection(ImageDrawDirective, allEntities, true);
-        const triangleData: WebglDrawData = {
-            vertexes: [],
-            indexes: [],
+        const drawData: { triangles: WebglDrawData[], lines: WebglDrawData[] } = {
+            triangles: [],
+            lines: []
         };
 
         for (let i = 0; i < dds.length; i++) {
-            triangleData.vertexes.push(...(dds[i] as ImageDrawDirective).WebGlData);
+            const dd = dds[i] as ImageDrawDirective;
+            if (!drawData.triangles[dd.SpriteData.imageId])
+                drawData.triangles[dd.SpriteData.imageId] = { vertexes: [], indexes: [] };
 
-            const s = i * 4;
-            triangleData.indexes.push(
+            const s = drawData.triangles[dd.SpriteData.imageId].indexes.length / 6 * 4;
+            drawData.triangles[dd.SpriteData.imageId].vertexes.push(...(dds[i] as ImageDrawDirective).WebGlData);
+            drawData.triangles[dd.SpriteData.imageId].indexes.push(
                 s, s + 1, s + 2,
                 s, s + 2, s + 3
             );
         }
 
-        Webgl.TriangleData = triangleData;
-
         // Draw collisions if the option is enabled
         if (this._debugDraw) {
-            let indexOffset = triangleData.indexes[triangleData.indexes.length - 1] + 1;
-            const lineData: WebglDrawData[] = [];
             const hitboxes = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities, true) as HitboxBase[];
-
             for (let i = 0; i < hitboxes.length; i++) {
                 const hData: WebglDrawData | null = hitboxes[i].DebugDrawData;
                 if (hData) {
-                    for (let j = 0; j < hData.indexes.length; j++)
-                        hData.indexes[j] += indexOffset;
-
-                    indexOffset += hData.indexes.length - 2;
-                    lineData.push(hData);
+                    drawData.lines.push(hData);
                 }
-                indexOffset += 1;
             }
-
-            Webgl.LineData = lineData;
-        } else
-            Webgl.LineData = [];
-
-
+        }
+        Webgl.DrawData = drawData;
         Webgl.Draw();
 
         if (this._displayFps) {

@@ -45,13 +45,14 @@ class WebglManager {
         vertexes: null, indexes: null,
     };
 
-    private _drawData: { triangles: { vertexes: number[], indexes: number[], }, lines: WebglDrawData[], } = {
-        triangles: {
-            vertexes: [],
-            indexes: []
-        },
+    private _drawData: { triangles: WebglDrawData[], lines: WebglDrawData[] } = {
+        triangles: [],
         lines: []
     };
+
+    set DrawData(drawData: { triangles: WebglDrawData[], lines: WebglDrawData[] }) {
+        this._drawData = drawData;
+    }
 
 
     Init(vertexSource: string, fragmentSource: string, canvas: HTMLCanvasElement, imagesArray: HTMLImageElement[]): void {
@@ -198,7 +199,7 @@ class WebglManager {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imagesArray[i]);
-            // gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindTexture(gl.TEXTURE_2D, null);
         }
 
         gl.useProgram(program);
@@ -262,42 +263,29 @@ class WebglManager {
     }
 
     Draw() {
-        // gl.bindTexture(gl.TEXTURE_2D, webglDef._textureArray[Date.now()%2]);
-        // gl.activeTexture(gl[`TEXTURE${0}`]);
-
-        let verts = Array.from(this._drawData.triangles.vertexes);
-        let inds = Array.from(this._drawData.triangles.indexes);
-
-        // HEAVY impact
-        // Funnily enough, pushing spread arrays is faster than concatenating them
-        for (let i = 0; i < this._drawData.lines.length; i++) {
-            verts.push(...this._drawData.lines[i].vertexes);
-            inds.push(...this._drawData.lines[i].indexes);
-        }
-
         const gl = this._gl;
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.DYNAMIC_DRAW);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(inds), gl.DYNAMIC_DRAW);
-
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.drawElements(gl.TRIANGLES, this._drawData.triangles.indexes.length, gl.UNSIGNED_SHORT, 0)
+        
+        for (const i in this._drawData.triangles) {
+            gl.bindTexture(gl.TEXTURE_2D, this._textureArray[i]);
+            gl.activeTexture(gl.TEXTURE0);
 
-        let indexOffset = this._drawData.triangles.indexes.length;
-
-        for (let i = 0; i < this._drawData.lines.length; i++) {
-            const data = this._drawData.lines[i];
-            gl.drawElements(gl.LINE_STRIP, data.indexes.length, gl.UNSIGNED_SHORT, Uint16Array.BYTES_PER_ELEMENT * indexOffset)
-            indexOffset += data.indexes.length;
+            const dd = this._drawData.triangles[i];
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(dd.vertexes), gl.DYNAMIC_DRAW);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(dd.indexes), gl.DYNAMIC_DRAW);
+            gl.drawElements(gl.TRIANGLES, dd.indexes.length, gl.UNSIGNED_SHORT, 0)
         }
-    }
 
-    set TriangleData(data: WebglDrawData) {
-        this._drawData.triangles.vertexes = data.vertexes;
-        this._drawData.triangles.indexes = data.indexes;
-    }
+        if (this._drawData.lines.length > 0) {
+            gl.bindTexture(gl.TEXTURE_2D, this._textureArray[0]);
+            gl.activeTexture(gl.TEXTURE0);
 
-    set LineData(data: WebglDrawData[]) {
-        this._drawData.lines = data;
+            for (const i in this._drawData.lines) {
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this._drawData.lines[i].vertexes), gl.DYNAMIC_DRAW);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this._drawData.lines[i].indexes), gl.DYNAMIC_DRAW);
+                gl.drawElements(gl.LINE_STRIP, this._drawData.lines[i].indexes.length, gl.UNSIGNED_SHORT, 0);
+            }
+        }
     }
 }
 

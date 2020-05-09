@@ -81,7 +81,7 @@ export class EntityBase {
                 current = current.Parent;
             }
         }
-
+        
         entity.worldRelativeTransform = relative;
         entity._children.forEach(c => EntityBase.CalculateWorlRelativeTransform(c));
     }

@@ -13,6 +13,13 @@ export class Transform {
         if (this.onChanged) this.onChanged();
     }
 
+    private _depth: number = 0;
+    get Depth(): number { return this._depth; }
+    set Depth(depth: number) {
+        this._depth = depth;
+        if (this.onChanged) this.onChanged();
+    }
+
     private _scale: Vec2 = [1, 1];
     get Scale(): Vec2 { return this._scale; }
     set Scale(scale: Vec2) {
@@ -99,6 +106,8 @@ export class Transform {
 
         result.Rotation = subject._rotation + operator._rotation;
         result._scale = Vec2Utils.Mult(subject._scale, operator._scale);
+        result._depth = subject._depth + operator._depth;
+        
         return result;
     }
 
@@ -107,6 +116,7 @@ export class Transform {
         copy._position = original._position;
         copy._rotation = original._rotation;
         copy._scale = original._scale;
+        copy._depth = original._depth;
 
         if (includeCallback)
             copy.onChanged = original.onChanged;

@@ -14,6 +14,8 @@ export class ImageDrawDirective extends DrawDirectiveBase {
         this._spriteData = Sprites.GetSprite(spriteName);
     }
 
+    get SpriteData(): ISPriteData { return this._spriteData };
+
     get WebGlData(): number[] {
         const trans = this._parent.worldRelativeTransform;
 
@@ -27,10 +29,10 @@ export class ImageDrawDirective extends DrawDirectiveBase {
 
         // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
         return [
-            trans.Position[0], trans.Position[1], 0, ox, oy, rx, ry, sd.origin[0] + sd.size[0], sd.origin[1],
-            trans.Position[0], trans.Position[1], 0, -ox, oy, rx, ry, sd.origin[0], sd.origin[1],
-            trans.Position[0], trans.Position[1], 0, -ox, -oy, rx, ry, sd.origin[0], sd.origin[1] + sd.size[1],
-            trans.Position[0], trans.Position[1], 0, ox, -oy, rx, ry, sd.origin[0] + sd.size[0], sd.origin[1] + sd.size[1],
+            trans.Position[0], trans.Position[1], trans.Depth, ox, oy, rx, ry, sd.origin[0] + sd.size[0], sd.origin[1],
+            trans.Position[0], trans.Position[1], trans.Depth, -ox, oy, rx, ry, sd.origin[0], sd.origin[1],
+            trans.Position[0], trans.Position[1], trans.Depth, -ox, -oy, rx, ry, sd.origin[0], sd.origin[1] + sd.size[1],
+            trans.Position[0], trans.Position[1], trans.Depth, ox, -oy, rx, ry, sd.origin[0] + sd.size[0], sd.origin[1] + sd.size[1],
         ];
     }
 }

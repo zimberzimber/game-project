@@ -41,10 +41,10 @@ export class HitboxRectangle extends HitboxBase {
 
         return {
             vertexes: [
-                absTransform.Position[0] + width, absTransform.Position[1] + height, 1, 0, 0, 0, 0, 1, colorY,
-                absTransform.Position[0] - width, absTransform.Position[1] + height, 1, 0, 0, 0, 0, 1, colorY,
-                absTransform.Position[0] - width, absTransform.Position[1] - height, 1, 0, 0, 0, 0, 1, colorY,
-                absTransform.Position[0] + width, absTransform.Position[1] - height, 1, 0, 0, 0, 0, 1, colorY,
+                absTransform.Position[0] + width, absTransform.Position[1] + height, absTransform.Depth, 0, 0, 0, 0, 1, colorY,
+                absTransform.Position[0] - width, absTransform.Position[1] + height, absTransform.Depth, 0, 0, 0, 0, 1, colorY,
+                absTransform.Position[0] - width, absTransform.Position[1] - height, absTransform.Depth, 0, 0, 0, 0, 1, colorY,
+                absTransform.Position[0] + width, absTransform.Position[1] - height, absTransform.Depth, 0, 0, 0, 0, 1, colorY,
             ],
             indexes: [0, 1, 2, 3, 0]
         };

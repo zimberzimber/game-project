@@ -23,13 +23,9 @@ X Add colission tags: A collider has his own tags, and colission tag targets it 
 X Convert IDB to store ArraryBuffers for sound, and Base64 strings for images instead of blobs for both
 
 Webgl:
-- Modify webgl so you can use multiple images as textures
---- Turn drawData into an array of objects, where the index in the array is the texture ID
---- Webgl initialization will get an array of images, and store it
---- Adding data to draw will push it into the datas image id
---- Calling Draw will clear the canvas, and then iterate over the indexes and draw each textures data separetly, switching to the relevant texture.
+X Modify webgl so you can use multiple images as textures
 X Modify webgl init to accept an array of images instead of just one image
-- A way to tell the shader what should and what shouldn't move with the camera view
+X UI elements will have to move with the camera. (old topic: A way to tell the shader what should and what shouldn't move with the camera view)
 
 Game:
 - Create a sound emitting component

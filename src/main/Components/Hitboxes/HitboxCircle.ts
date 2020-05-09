@@ -35,7 +35,7 @@ export class HitboxCircle extends HitboxBase {
 
         for (let i = 0; i < 360 / 4; i++) {
             const pos = Vec2Utils.Sum(absTransform.Position, Vec2Utils.RotatePoint([radius, 0], ScalarUtil.ToRadian(i * 4)));
-            vertexes.push(pos[0], pos[1], 1, 0, 0, 0, 0, 1, colorY);
+            vertexes.push(pos[0], pos[1], absTransform.Depth, 0, 0, 0, 0, 1, colorY);
             indexes.push(i);
         }
         indexes.push(0);
