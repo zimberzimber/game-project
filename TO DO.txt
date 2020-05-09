@@ -14,10 +14,13 @@ X Add reverb controls to the sound player
 X Add the option to fade sounds in or out
 X Revamp input handler into an independant observable.
 X Add mouse controls (canvas + world relative clicks/postions)
-- Add camera controls
+X Add world relative mouse and click position
+X Add camera controls
+- Have the game only pass draw directives within camera view
 X Have sound and image manager be initialized by a centralized component
 X Add the ability to save settings between sessions
 X Add colission tags: A collider has his own tags, and colission tag targets it can collide with
+X Convert IDB to store ArraryBuffers for sound, and Base64 strings for images instead of blobs for both
 
 Webgl:
 - Modify webgl so you can use multiple images as textures

@@ -15,22 +15,24 @@ export class ImageDrawDirective extends DrawDirectiveBase {
     }
 
     get WebGlData(): number[] {
-        const absTransform = this._parent.worldRelativeTransform;
+        const trans = this._parent.worldRelativeTransform;
 
-        const ox = this.size[0] / 2 * absTransform.Scale[0];
-        const oy = this.size[1] / 2 * absTransform.Scale[1];
+        const ox = this.size[0] / 2 * trans.Scale[0];
+        const oy = this.size[1] / 2 * trans.Scale[1];
 
-        const rx = Math.sin(absTransform.RotationRadian);
-        const ry = Math.cos(absTransform.RotationRadian);
+        const rx = Math.cos(trans.RotationRadian);
+        const ry = Math.sin(trans.RotationRadian);
 
         const sd = this._spriteData;
 
         // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
         return [
-            absTransform.Position[0], absTransform.Position[1], 0, ox, oy, rx, ry, sd.origin[0] + sd.size[0], sd.origin[1],
-            absTransform.Position[0], absTransform.Position[1], 0, -ox, oy, rx, ry, sd.origin[0], sd.origin[1],
-            absTransform.Position[0], absTransform.Position[1], 0, -ox, -oy, rx, ry, sd.origin[0], sd.origin[1] + sd.size[1],
-            absTransform.Position[0], absTransform.Position[1], 0, ox, -oy, rx, ry, sd.origin[0] + sd.size[0], sd.origin[1] + sd.size[1],
+            trans.Position[0], trans.Position[1], 0, ox, oy, rx, ry, sd.origin[0] + sd.size[0], sd.origin[1],
+            trans.Position[0], trans.Position[1], 0, -ox, oy, rx, ry, sd.origin[0], sd.origin[1],
+            trans.Position[0], trans.Position[1], 0, -ox, -oy, rx, ry, sd.origin[0], sd.origin[1] + sd.size[1],
+            trans.Position[0], trans.Position[1], 0, ox, -oy, rx, ry, sd.origin[0] + sd.size[0], sd.origin[1] + sd.size[1],
         ];
     }
 }
+
+

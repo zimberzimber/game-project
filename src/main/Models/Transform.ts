@@ -33,6 +33,14 @@ export class Transform {
         this.Rotation = (this._rotation + angle) % 360;
     };
 
+    Translate = (x: number, y: number): void => {
+        this.Position = [this.Position[0] + x, this.Position[1] + y];
+    };
+
+    TranslateByVec2 = (vec2: Vec2): void => {
+        this.Position = Vec2Utils.Sum(this.Position, vec2);
+    };
+
     // https://stackoverflow.com/questions/43748418/c-move-2d-point-along-angle
     MoveForward = (distance: number): void => {
         const rad = this.RotationRadian;
@@ -77,7 +85,7 @@ export class Transform {
         else
             angleDelta = angleDelta > speed ? speed : angleDelta;
 
-        this.Rotation = this._rotation + angleDelta;
+        this.Rotation += angleDelta;
     }
 
     toString = (): string => `pos: ${this._position} | rot: ${this._rotation} | scale: ${this._scale}`;

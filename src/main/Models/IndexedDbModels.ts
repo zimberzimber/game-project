@@ -14,6 +14,10 @@ export interface IDbIndexOptions {
     unique: boolean;
 }
 
+export interface IDBDataModel {
+    GetKey(): string;
+}
+
 export class DatabaseAlreadyOpenError extends Error {
     constructor(message: any) {
         super(message);

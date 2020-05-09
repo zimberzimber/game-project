@@ -41,16 +41,16 @@ export class Vec2Utils {
     // https://www.gamefromscratch.com/post/2012/11/24/GameDev-math-recipes-Rotating-one-point-around-another-point.aspx
     static RotatePointAroundCenter = (point: Vec2, radian: number, center: Vec2): Vec2 =>
         [
-            Math.cos(-radian) * (point[0] - center[0]) - Math.sin(-radian) * (point[1] - center[1]) + center[0],
-            Math.sin(-radian) * (point[0] - center[0]) + Math.cos(-radian) * (point[1] - center[1]) + center[1]
+            Math.cos(radian) * (point[0] - center[0]) - Math.sin(radian) * (point[1] - center[1]) + center[0],
+            Math.sin(radian) * (point[0] - center[0]) + Math.cos(radian) * (point[1] - center[1]) + center[1]
         ];
 
     // Derived from the RotatePointAroundCenter method
     static RotatePoint = (point: Vec2, radian: number): Vec2 => {
         if (radian == 0) return point;
         return [
-            Math.cos(-radian) * point[0] - Math.sin(-radian) * point[1],
-            Math.sin(-radian) * point[0] + Math.cos(-radian) * point[1],
+            Math.cos(radian) * point[0] - Math.sin(radian) * point[1],
+            Math.sin(radian) * point[0] + Math.cos(radian) * point[1],
         ];
     }
 }

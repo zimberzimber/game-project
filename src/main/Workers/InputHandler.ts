@@ -7,7 +7,8 @@ class InputHandler {
     private _keysDown: { [key: string]: boolean } = {};
     private _keyMap: { [key: number]: string } = {};
 
-    private _mouseElement: HTMLElement | null = null;
+    private _mouseElement: HTMLElement | undefined = undefined;
+    private _mouseElementBindingbox: DOMRect | undefined = undefined;
     private _mousePosition: Vec2 = [0, 0];
     private _mouseObservers: IMouseInputObserver[] = [];
     private _mouseFullObservers: IMouseFullInputObserver[] = [];
@@ -25,11 +26,14 @@ class InputHandler {
         this._mouseElement?.removeEventListener('mousedown', this.OnMouseDown.bind(this));
         this._mouseElement?.removeEventListener('mouseup', this.OnMouseUp.bind(this));
         this._mouseElement?.removeEventListener('mousemove', this.OnMouseMove.bind(this));
+        this._mouseElement?.removeEventListener('resize', this.OnMouseElementResize.bind(this));
 
         this._mouseElement = element;
+        this._mouseElementBindingbox = element.getBoundingClientRect();
         this._mouseElement.addEventListener('mousedown', this.OnMouseDown.bind(this));
         this._mouseElement.addEventListener('mouseup', this.OnMouseUp.bind(this));
         this._mouseElement.addEventListener('mousemove', this.OnMouseMove.bind(this));
+        this._mouseElement.addEventListener('resize', this.OnMouseElementResize.bind(this));
     }
 
     get MousePosition(): Vec2 {
@@ -102,21 +106,26 @@ class InputHandler {
             this._mouseFullObservers.splice(index, 1);
     }
 
+    private OnMouseElementResize(e: UIEvent): void {
+        this._mouseElementBindingbox = this._mouseElement?.getBoundingClientRect();
+    }
     private OnMouseDown(e: MouseEvent): void {
-        const rect = this._mouseElement!.getBoundingClientRect();
-        const pos: Vec2 = [e.clientX - rect.left, rect.height - (e.clientY - rect.top)];
-        this._mouseObservers.forEach(o => o.OnMouseDown(e.button, pos));
+        const position = this.RelativeClickPosition(e.clientX, e.clientY);
+        this._mouseObservers.forEach(o => o.OnMouseDown(e.button, position));
         this._mouseFullObservers.forEach(o => o.OnMouseDown(e));
     }
     private OnMouseUp(e: MouseEvent): void {
-        const rect = this._mouseElement!.getBoundingClientRect();
-        const pos: Vec2 = [e.clientX - rect.left, rect.height - (e.clientY - rect.top)];
-        this._mouseObservers.forEach(o => o.OnMouseUp(e.button, pos));
+        const position = this.RelativeClickPosition(e.clientX, e.clientY);
+        this._mouseObservers.forEach(o => o.OnMouseUp(e.button, position));
         this._mouseFullObservers.forEach(o => o.OnMouseUp(e));
     }
     private OnMouseMove(e: MouseEvent): void {
-        const rect = this._mouseElement!.getBoundingClientRect();
+        const rect: DOMRect = this._mouseElementBindingbox!;
         this._mousePosition = [e.clientX - rect.left, rect.height - (e.clientY - rect.top)];
+    }
+    private RelativeClickPosition(x: number, y: number): Vec2 {
+        const rect: DOMRect = this._mouseElementBindingbox!;
+        return [(x - rect.left) - rect.width / 2, (rect.height - (y - rect.top)) - rect.height / 2];
     }
 }
 

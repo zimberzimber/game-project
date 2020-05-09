@@ -1,8 +1,9 @@
 import { CDN } from "./CdnManager";
 import { Log } from "./Logger";
 import { IDB } from "./IndexeddbManager";
-import { imageStore, gameSchema } from "../Models/DbSchemas";
+import { imageStore, gameSchema, IDBImageDataModel } from "../Models/IndexedDbSchemas";
 import { PromiseUtil } from "../Utility/Promises";
+import { MiscUtil } from "../Utility/Misc";
 
 class ImageManager {
     private initialized: boolean = false;
@@ -22,7 +23,7 @@ class ImageManager {
         for (const imageName in imageDefinitions) {
             const url = imageDefinitions[imageName];
             const promiseMethod = async (): Promise<void> => {
-                let blob: Blob;
+                let base64: string;
 
                 // Add an image even if retreival fails so webgl gets an empty texture instead of nothing in case of an error
                 const image = new Image();
@@ -41,7 +42,7 @@ class ImageManager {
                         return;
                     }
                     else {
-                        blob = result.data.blob;
+                        base64 = (result.data as IDBImageDataModel).base64;
                     }
                 }
                 else {
@@ -52,19 +53,34 @@ class ImageManager {
                         return;
                     }
                     else {
-                        blob = result.data;
-                        await IDB.StoreData(gameSchema.databaseName, imageStore.storeName, { url: url, blob: result.data });
+                        const completionPromise = PromiseUtil.CreateCompletionPromise();
+
+                        var reader = new FileReader();
+                        reader.readAsDataURL(result.data);
+                        reader.onloadend = () => {
+                            base64 = reader.result as string;
+                            completionPromise.resolve();
+                        }
+
+                        await completionPromise.Promise;
+                        await IDB.StoreData(gameSchema.databaseName, imageStore.storeName, new IDBImageDataModel(url, base64!));
                     }
                 }
 
                 const completionPromise = PromiseUtil.CreateCompletionPromise();
-                image.src = URL.createObjectURL(blob);
                 image.onload = () => {
-                    URL.revokeObjectURL(image.src);
-                    completionPromise.resolve();
                     image.onload = null;
+                    image.onerror = null;
+                    completionPromise.resolve();
+                };
+                image.onerror = () => {
+                    Log.Error(`Failed loading image ${imageName}. Make sure its data os correct.`);
+                    image.onload = null;
+                    image.onerror = null;
+                    completionPromise.resolve();
                 };
 
+                image.src = base64!;
                 await completionPromise.Promise;
             };
             promises.push(promiseMethod());

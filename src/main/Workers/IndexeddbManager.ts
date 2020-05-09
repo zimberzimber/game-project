@@ -1,7 +1,8 @@
 import { PromiseUtil } from "../Utility/Promises";
-import { Log } from "./Logger";
-import { IDbSchema, DatabaseAlreadyOpenError, DatabaseOpeningFailedError, UnopenedDatabaseError } from "../Models/IndexedDbModels";
+import { Log, LogLevel } from "./Logger";
+import { IDbSchema, DatabaseAlreadyOpenError, DatabaseOpeningFailedError, UnopenedDatabaseError, IDBDataModel } from "../Models/IndexedDbModels";
 import { IDataOrErrorContainer } from "../Models/GenericInterfaces";
+import { OneTimeLog } from "./OneTimeLogger";
 
 interface DbStorage {
     [key: string]: { version: number, context: IDBDatabase };
@@ -69,7 +70,7 @@ class IndexeddbManager {
         return;
     }
 
-    async StoreData(dbName: string, storeName: string, data: any): Promise<void> {
+    async StoreData(dbName: string, storeName: string, dataModel: IDBDataModel): Promise<void> {
         if (!this.dbs[dbName])
             throw new UnopenedDatabaseError(`Database named '${dbName}' was not opened.`);
 
@@ -79,15 +80,15 @@ class IndexeddbManager {
         transaction.onerror = () => {
             Log.Error(`Failed storing data in '${dbName}' -> '${storeName}'`);
             Log.Error(transaction.error);
-            Log.Error(data);
+            Log.Error(dataModel);
         }
 
-        const req = transaction.objectStore(storeName).add(data);
+        const req = transaction.objectStore(storeName).add(dataModel);
         req.onerror = () => completionContainer.resolve();
         req.onsuccess = () => completionContainer.resolve();
 
         await completionContainer.Promise;
-        Log.Debug(`(IDB) STORE ${dbName} -> ${storeName} -> ${data.url}`);
+        Log.Debug(`(IDB) STORE ${dbName} -> ${storeName} -> ${dataModel.GetKey()}`);
         return;
     }
 
@@ -116,7 +117,8 @@ class IndexeddbManager {
 
         await completionContainer.Promise;
         Log.Debug(`(IDB) GET ${dbName} -> ${storeName} -> ${key}`);
-        Log.Debug(req.error || req.result);
+        if (req.error)
+            OneTimeLog.Log(`idb_get_error_${dbName}_${storeName}_${key}`, `IDB failed getting data from: ${dbName} -> ${storeName} -> ${key}\n${req.error}`, LogLevel.Error);
 
         return result;
     }

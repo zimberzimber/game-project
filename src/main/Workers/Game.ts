@@ -16,35 +16,55 @@ import { Input } from "./InputHandler";
 import { Settings } from "./SettingsManager";
 import { Test2Entity } from "../Entities/Test2";
 import { Webgl } from "./WebglManager";
-import { IMouseInputObserver } from "../Models/InputModels";
-import { Vec2 } from "../Models/Vec2";
 
 class GameManager {
-    canvas: HTMLCanvasElement;
-    entities: EntityBase[] = [];
-    paused: boolean = false;
-    _debugDraw: boolean = Config.GetConfig('debugDraw', false);
+    private _canvas: HTMLCanvasElement;
+    private _entities: EntityBase[] = [];
+    private _paused: boolean = false;
+    private _debugDraw: boolean = Config.GetConfig('debugDraw', false);
 
     // Used for game logic
-    frameDelta: number = 0;
-    oldFrameTime: number = Date.now();
+    private readonly _minimumUpdateDelta = 1 / 30; // Required to prevent some unwanted behaviors at extreme cases
+    private _updateDelta: number = 0;
+    private _oldUpdateTime: number = Date.now();
 
     // Used for FPS display
-    displayFps: boolean = Config.GetConfig('debug', false);
-    frameTimes: number[] = [];
-    lastFpsDisplayTime: number = Date.now();
+    private _displayFps: boolean = Config.GetConfig('debug', false);
+    private _frameTimes: number[] = [];
+    private _lastFpsDisplayTime: number = Date.now();
+
+    get UpdateDelta(): number { return this._updateDelta; }
+
+    get Paused(): boolean { return this._paused; }
+    set Paused(paused: boolean) {
+        if (this._paused == paused) return;
+
+        this._paused = paused;
+        Audio.PlaySound({
+            soundSourceName: 'ui',
+            volume: 1,
+            playbackRate: 1,
+            loop: false,
+            tag: SoundTags.UI
+        });
+
+        if (paused)
+            Audio.SetTagVolume(SoundTags.Music, 0.5);
+        else
+            Audio.SetTagVolume(SoundTags.Music, 1);
+    }
 
     Start(): void {
-        this.canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
-        this.canvas.width = 600;
-        this.canvas.height = 500;
+        this._canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
+        this._canvas.width = 600;
+        this._canvas.height = 500;
 
-        Webgl.Init(ShaderSources.VertexShader, ShaderSources.FragmentShader, this.canvas, Images.GetImageArray())
+        Webgl.Init(ShaderSources.VertexShader, ShaderSources.FragmentShader, this._canvas, Images.GetImageArray())
 
-        Config.Subscribe('debug', (newValue: boolean) => this.displayFps = newValue);
+        Config.Subscribe('debug', (newValue: boolean) => this._displayFps = newValue);
         Config.Subscribe('debugDraw', (newValue: boolean) => this._debugDraw = newValue);
 
-        this.entities = [];
+        this._entities = [];
         let p = new PlayerEntity();
         this.AddEntity(p);
 
@@ -69,7 +89,7 @@ class GameManager {
         test.transform.Scale = [5, 5];
         this.AddEntity(test);
 
-        for (let x = 0; x < 10; x++) {
+        for (let x = 0; x < 1; x++) {
             for (let y = 0; y < 10; y++) {
                 let test2 = new Test2Entity();
                 test2.transform.Position = [(-5 + x) * 10, (-5 + y) * 10];
@@ -77,7 +97,7 @@ class GameManager {
             }
         }
 
-        Input.MouseElemet = this.canvas;
+        Input.MouseElemet = this._canvas;
         Input.Keymap = Settings.GetSetting('controlsKeymap');
 
         Audio.PlaySound({
@@ -93,7 +113,7 @@ class GameManager {
 
     // Add an entity to the root of the entity tree.
     AddEntity(entity: EntityBase): void {
-        this.entities.push(entity);
+        this._entities.push(entity);
     }
 
     GetEntityById(id: number): EntityBase | null {
@@ -105,7 +125,7 @@ class GameManager {
 
     GetEntityTreeString(): string {
         let str = '';
-        this.entities.forEach(e => {
+        this._entities.forEach(e => {
             //@ts-ignore (object.constructor.name is not recognized by TypeScript)
             str = `${str}\n${this.GetEntityTreeStringHelper(e, 0)}`
         });
@@ -128,7 +148,7 @@ class GameManager {
     // Function returning a collection of all the entities within the game. Utilizes 'GetAllEntitiesHelper'.
     GetAllEntities(): EntityBase[] {
         let entities: EntityBase[] = [];
-        this.entities.forEach(entity => {
+        this._entities.forEach(entity => {
             entities.push(entity);
             if (entity.Children.length > 0)
                 entities.push(...this.GetAllEntitiesHelper(entity));
@@ -164,11 +184,11 @@ class GameManager {
         requestAnimationFrame(this.Update.bind(this));
 
         // Do nothing if game is paused
-        if (this.paused) return;
+        if (this._paused) return;
 
         const newFrameTime = new Date().getTime();
-        this.frameDelta = (newFrameTime - this.oldFrameTime) / 1000;
-        this.oldFrameTime = newFrameTime;
+        this._updateDelta = Math.min((newFrameTime - this._oldUpdateTime) / 1000, this._minimumUpdateDelta);
+        this._oldUpdateTime = newFrameTime;
 
         // Update all entities
         this.GetAllEntities().forEach(e => e.Update());
@@ -252,12 +272,12 @@ class GameManager {
 
         Webgl.Draw();
 
-        if (this.displayFps) {
+        if (this._displayFps) {
             const fps = this.FPSUpdate();
             const time = Date.now();
 
-            if (time - this.lastFpsDisplayTime >= 250) {
-                this.lastFpsDisplayTime = time;
+            if (time - this._lastFpsDisplayTime >= 250) {
+                this._lastFpsDisplayTime = time;
                 const element = document.getElementById('fps-counter');
                 if (element) {
                     element.innerHTML = fps.toString();
@@ -269,45 +289,15 @@ class GameManager {
     // Taken from https://www.growingwiththeweb.com/2017/12/fast-simple-js-fps-counter.html
     FPSUpdate(): number {
         const time = performance.now()
-        while (this.frameTimes.length > 0 && this.frameTimes[0] <= time - 1000)
-            this.frameTimes.shift();
+        while (this._frameTimes.length > 0 && this._frameTimes[0] <= time - 1000)
+            this._frameTimes.shift();
 
-        this.frameTimes.push(time);
-        return this.frameTimes.length;
+        this._frameTimes.push(time);
+        return this._frameTimes.length;
     }
 
-    private readonly _minimumFrameDelta = 1 / 30;
     FPSReletive(value: number): number {
-        // Need the limit to prevent some unwanted behaviors at lower
-        return value * Math.min(this.frameDelta, this._minimumFrameDelta);
-    }
-
-    get Paused(): boolean { return this.paused; }
-    set Paused(paused: boolean) {
-        if (this.paused == paused) return;
-
-        this.paused = paused;
-        Audio.PlaySound({
-            soundSourceName: 'ui',
-            volume: 1,
-            playbackRate: 1,
-            loop: false,
-            tag: SoundTags.UI
-        });
-
-        if (paused)
-            Audio.SetTagVolume(SoundTags.Music, 0.5);
-        else
-            Audio.SetTagVolume(SoundTags.Music, 1);
-    }
-
-    private updateEvents: any = [];
-    AddUpdateEvent(event): void {
-        this.updateEvents.push(event);
-    }
-
-    RemoveUpdateEvent(): void {
-        this.updateEvents.push(event);
+        return value * this._updateDelta;
     }
 }
 

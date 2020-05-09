@@ -24,12 +24,12 @@ export class HitboxPolygon extends HitboxBase {
     }
 
     get CanvasReletivePolyline(): Vec2[] {
-        const absTransform = this._parent.worldRelativeTransform;
-        const radian = absTransform.RotationRadian;
+        const trans = this._parent.worldRelativeTransform;
+        const radian = trans.RotationRadian;
         const polyline: Vec2[] = [];
 
         for (let i = 0; i < this.Polyline.length; i++)
-            polyline[i] = Vec2Utils.Sum(absTransform.Position, Vec2Utils.RotatePoint(Vec2Utils.Mult(this.Polyline[i], absTransform.Scale), radian));
+            polyline[i] = Vec2Utils.Sum(trans.Position, Vec2Utils.RotatePoint(Vec2Utils.Mult(this.Polyline[i], trans.Scale), radian));
 
         return polyline;
     }

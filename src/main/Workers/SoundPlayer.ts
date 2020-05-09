@@ -2,7 +2,6 @@ import { LogLevel } from "./Logger";
 import { SoundTags, IActiveSound, ISoundDefinition, ControllerType, ISoundplayerMasterCallback, ISoundplayerIndividualCallback } from '../Models/SoundModels';
 import { OneTimeLog } from './OneTimeLogger';
 import { Sounds } from './SoundManager';
-import { CDN } from "./CdnManager";
 import { ScalarUtil } from "../Utility/Scalar";
 
 class SoundPlayer {
@@ -44,20 +43,18 @@ class SoundPlayer {
     }
 
     SetConvolverImpulse(soundName: string): void {
-        const blob = Sounds.GetSoundSourceByName(soundName);
-        if (!blob) {
+        const buffer = Sounds.GetSoundSourceByName(soundName);
+        if (!buffer) {
             OneTimeLog.Log(`soundPlayer_failedLoading_${soundName}`, `Failed retrieving sound named '${soundName}' from sound manager.`, LogLevel.Error);
             return;
         }
 
-        blob.arrayBuffer().then((audioArray: ArrayBuffer) => {
-            this.context.decodeAudioData(audioArray, (buffer) => {
-                this.masterConvolver.buffer = buffer;
-                if (!this.convolverConnected) {
-                    this.masterGainNode.connect(this.masterConvolver).connect(this.context.destination);
-                    this.convolverConnected = true;
-                }
-            });
+        this.context.decodeAudioData(buffer, (audioBuffer) => {
+            this.masterConvolver.buffer = audioBuffer;
+            if (!this.convolverConnected) {
+                this.masterGainNode.connect(this.masterConvolver).connect(this.context.destination);
+                this.convolverConnected = true;
+            }
         });
     }
 
@@ -75,8 +72,8 @@ class SoundPlayer {
     }
 
     PlaySound(config: ISoundDefinition): number {
-        const blob = Sounds.GetSoundSourceByName(config.soundSourceName);
-        if (!blob) {
+        const buffer = Sounds.GetSoundSourceByName(config.soundSourceName);
+        if (!buffer) {
             OneTimeLog.Log(`soundPlayer_failedLoading_${config.soundSourceName}`, `Failed retrieving sound named '${config.soundSourceName}' from sound manager.`, LogLevel.Error);
             return -1;
         }
@@ -103,12 +100,10 @@ class SoundPlayer {
         this.activeSoundIds.push(id);
         this.activeSounds[id] = acttivityInfo;
 
-        blob.arrayBuffer().then((audioArray: ArrayBuffer) => {
-            this.context.decodeAudioData(audioArray, (buffer) => {
-                source.buffer = buffer;
-                source.start(0);
-                source.onended = () => this.DisposeSound(id);
-            });
+        this.context.decodeAudioData(buffer, (audioBuffer) => {
+            source.buffer = audioBuffer;
+            source.start(0);
+            source.onended = () => this.DisposeSound(id);
         });
 
         source.connect(pan);

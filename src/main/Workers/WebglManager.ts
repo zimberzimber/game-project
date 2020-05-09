@@ -1,6 +1,7 @@
 import { Log } from "./Logger";
 import { Vec2 } from "../Models/Vec2";
 import { WebglDrawData } from "../Models/WebglDrawData";
+import { Camera } from "./CameraManager";
 
 //@ts-ignore
 const glMatrix = window.glMatrix;
@@ -219,9 +220,7 @@ class WebglManager {
         gl.uniformMatrix4fv(this._uniforms.projectionMatrix, false, projectionMatrix);
         gl.uniformMatrix4fv(this._uniforms.viewMatrix, false, viewMatrix);
 
-        this.SetCameraFrustum(canvas.clientWidth, canvas.clientHeight, 0.1, 1000);
-        this.SetCameraTranslation(0, 0);
-        this.SetCameraRotation(0);
+        Camera.Transform.Scale = [canvas.clientWidth, canvas.clientHeight];
     }
 
     SetCameraFrustum(horizontal: number | null = null, vertical: number | null = null, near: number | null = null, far: number | null = null) {
@@ -241,8 +240,8 @@ class WebglManager {
     }
 
     SetCameraTranslation(x: number | null = null, y: number | null = null) {
-        this._camera[0] = x == null ? this._camera[0] : x;
-        this._camera[1] = y == null ? this._camera[1] : y;
+        this._camera.position[0] = x === null ? this._camera[0] : x;
+        this._camera.position[1] = y === null ? this._camera[1] : y;
         this.UpdateCameraTransform();
     }
 
@@ -258,7 +257,7 @@ class WebglManager {
     private UpdateCameraTransform() {
         const matrix = GetEmptyMatrix2D();
         glMatrix.mat4.rotate(matrix, matrix, this._camera.radians, [0, 0, 1]);
-        glMatrix.mat4.translate(matrix, matrix, [this._camera[0], this._camera[1], 0]);
+        glMatrix.mat4.translate(matrix, matrix, [-this._camera.position[0], -this._camera.position[1], 0]);
         this._gl.uniformMatrix4fv(this._uniforms.worldMatrix, false, matrix);
     }
 

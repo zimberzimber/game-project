@@ -1,10 +1,12 @@
 import { IDB } from './IndexeddbManager';
 import { CDN } from './CdnManager';
 import { Log } from "./Logger";
+import { IDBSoundDataModel } from '../Models/IndexedDbSchemas';
+import { MiscUtil } from '../Utility/Misc';
 
 class SoundManager {
     private initialized: boolean = false;
-    private soundSourceStorage: Blob[] = [];
+    private soundSourceStorage: ArrayBuffer[] = [];
     private soundSourceNameIndexes: { [key: string]: number } = {};
 
     async Initialize(soundSourceDefinitions: { [key: string]: string }): Promise<void> {
@@ -22,7 +24,7 @@ class SoundManager {
 
             const method = async (): Promise<void> => {
                 const exists = await IDB.CheckExistence('game', 'sounds', url)
-                let blob: Blob;
+                let arrayBuffer: ArrayBuffer;
 
                 if (exists) {
                     const result = await IDB.GetData('game', 'sounds', url);
@@ -32,7 +34,7 @@ class SoundManager {
                         return;
                     }
                     else {
-                        blob = result.data.blob;
+                        arrayBuffer = (result.data as IDBSoundDataModel).buffer;
                     }
                 } else {
                     const result = await CDN.GetContentFromUrl(url);
@@ -42,12 +44,12 @@ class SoundManager {
                         return;
                     }
                     else {
-                        await IDB.StoreData('game', 'sounds', { url: url, blob: result.data });
-                        blob = result.data;
+                        arrayBuffer = await result.data.arrayBuffer();
+                        await IDB.StoreData('game', 'sounds', new IDBSoundDataModel(url, arrayBuffer));
                     }
                 }
 
-                this.soundSourceStorage[sourceId] = blob;
+                this.soundSourceStorage[sourceId] = arrayBuffer;
                 this.soundSourceNameIndexes[sourceName] = sourceId;
             };
 
@@ -59,11 +61,12 @@ class SoundManager {
         return;
     }
 
-    GetSoundSource(id: number): Blob | null {
-        return this.soundSourceStorage[id] ? this.soundSourceStorage[id] : null;
+    GetSoundSource(id: number): ArrayBuffer | null {
+        // Need a copy of the buffer so the original doesn't get detached
+        return this.soundSourceStorage[id] ? MiscUtil.CopyArrayBuffer(this.soundSourceStorage[id]) : null;
     }
 
-    GetSoundSourceByName(name: string): Blob | null {
+    GetSoundSourceByName(name: string): ArrayBuffer | null {
         return this.soundSourceNameIndexes[name] ? this.GetSoundSource(this.soundSourceNameIndexes[name]) : null;
     }
 }

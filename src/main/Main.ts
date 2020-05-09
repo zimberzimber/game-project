@@ -3,7 +3,7 @@ import { IDB } from "./Workers/IndexeddbManager";
 import { Sounds } from "./Workers/SoundManager";
 import { Log } from "./Workers/Logger";
 import { Config } from "./Proxies/ConfigProxy";
-import { gameSchema } from "./Models/DbSchemas";
+import { gameSchema } from "./Models/IndexedDbSchemas";
 import { Sprites } from "./Workers/SpriteManager";
 import { Images } from "./Workers/ImageManager";
 import { Audio } from "./Workers/SoundPlayer";
@@ -12,6 +12,7 @@ import { SpriteDefinitions } from "./AssetDefinitions/SpriteDefinitions";
 import { Assets } from "./Proxies/AssetsProxy";
 import { Settings } from "./Workers/SettingsManager";
 import { PromiseUtil } from "./Utility/Promises";
+import { Webgl } from "./Workers/WebglManager";
 
 let domPromise: any = PromiseUtil.CreateCompletionPromise();
 window.addEventListener('DOMContentLoaded', domPromise.resolve);
@@ -68,4 +69,6 @@ if (Config.GetConfig('debug', false) === true) {
     window.input = Input;
     //@ts-ignore
     window.settings = Settings;
+    //@ts-ignore
+    window.webgl = Webgl;
 }

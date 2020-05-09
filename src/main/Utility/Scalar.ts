@@ -1,5 +1,3 @@
-import { Game } from "../Workers/Game";
-
 const _atr: number = Math.PI / 180;
 const _rta: number = 180 / Math.PI;
 

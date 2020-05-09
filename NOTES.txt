@@ -1,4 +1,6 @@
 
+Safari does not support storing blobs in IndexedDB
+
 Pushing spread arrays is faster than concatenating them.
 
 Arrow functions seem to be faster than traditional functions in Firefox.
