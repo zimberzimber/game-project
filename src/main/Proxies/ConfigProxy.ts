@@ -1,9 +1,17 @@
+import { Log } from "../Workers/Logger";
+
 interface IConfigObserver { (newValue: any): void; }
 
 class ConfigProxy {
     //@ts-ignore
     private _original = window.configuration;
     private _observers: { [key: string]: IConfigObserver[] } = {};
+
+    
+    constructor(){
+        if (!this._original)
+            Log.Error("Config proxy could not find field 'window.configuration'")
+    }
 
     /**
      * Get a configuration in run time.

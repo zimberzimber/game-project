@@ -7,7 +7,6 @@ import { CheckCollision, IsPointInCollider } from "./CollisionChecker";
 import { ImageDrawDirective } from "../Components/DrawDirectives/ImageDrawDirective";
 import { TestEntity } from "../Entities/Test";
 import { WebglDrawData } from "../Models/WebglDrawData";
-import { ShaderSources } from "../Proxies/ShaderSourcesProxy";
 import { Config } from "../Proxies/ConfigProxy";
 import { Images } from "./ImageManager";
 import { SoundTags } from "../Models/SoundModels";
@@ -17,6 +16,7 @@ import { Settings } from "./SettingsManager";
 import { Test2Entity } from "../Entities/Test2";
 import { Webgl } from "./WebglManager";
 import { Camera } from "./CameraManager";
+import { ShaderSources } from "../AssetDefinitions/ShaderDefinitions";
 
 class GameManager {
     private _canvas: HTMLCanvasElement;
@@ -60,7 +60,7 @@ class GameManager {
         this._canvas.width = 600;
         this._canvas.height = 500;
 
-        Webgl.Init(ShaderSources.VertexShader, ShaderSources.FragmentShader, this._canvas, Images.GetImageArray())
+        Webgl.Init(ShaderSources.vertex, ShaderSources.fragment, this._canvas, Images.GetImageArray())
         Camera.ManualUpdate();
         
         Config.Subscribe('debug', (newValue: boolean) => this._displayFps = newValue);
