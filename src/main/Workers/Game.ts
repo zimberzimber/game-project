@@ -3,22 +3,22 @@ import { PlayerEntity } from "../Entities/Player";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { ComponentBase } from "../Bases/ComponentBase";
 import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
-import { CheckCollision, IsPointInCollider } from "./CollisionChecker";
+import { CheckCollision, IsPointInCollider, IsPointInPolygon } from "./CollisionChecker";
 import { ImageDrawDirective } from "../Components/DrawDirectives/ImageDrawDirective";
 import { TestEntity } from "../Entities/Test";
-import { WebglDrawData } from "../Models/WebglDrawData";
-import { Config } from "../Proxies/ConfigProxy";
-import { Images } from "./ImageManager";
+import { Config, IConfigObserver, IConfigEventArgs } from "../Proxies/ConfigProxy";
 import { SoundTags } from "../Models/SoundModels";
 import { Audio } from "./SoundPlayer";
 import { Input } from "./InputHandler";
 import { Settings } from "./SettingsManager";
 import { Test2Entity } from "../Entities/Test2";
-import { Webgl } from "./WebglManager";
-import { Camera } from "./CameraManager";
-import { ShaderSources } from "../AssetDefinitions/ShaderDefinitions";
+import { Camera, } from "./CameraManager";
+import { Rendering } from "./RenderingPipeline";
+import { Vec2 } from "../Models/Vectors";
+import { Vec2Utils } from "../Utility/Vec2";
+import { ScalarUtil } from "../Utility/Scalar";
 
-class GameManager {
+class GameManager implements IConfigObserver {
     private _canvas: HTMLCanvasElement;
     private _entities: EntityBase[] = [];
     private _paused: boolean = false;
@@ -28,6 +28,7 @@ class GameManager {
     private readonly _minimumUpdateDelta = 1 / 30; // Required to prevent some unwanted behaviors at extreme cases
     private _updateDelta: number = 0;
     private _oldUpdateTime: number = Date.now();
+    private _mousePosition: Vec2 = [0, 0];
 
     // Used for FPS display
     private _displayFps: boolean = Config.GetConfig('debug', false);
@@ -55,16 +56,22 @@ class GameManager {
             Audio.SetTagVolume(SoundTags.Music, 1);
     }
 
+    /** World relative mouse position */
+    get MousePosition(): Vec2 { return this._mousePosition; }
+
     Start(): void {
         this._canvas = document.getElementById("game-canvas") as HTMLCanvasElement;
         this._canvas.width = 600;
         this._canvas.height = 500;
 
-        Webgl.Init(ShaderSources.vertex, ShaderSources.fragment, this._canvas, Images.GetImageArray())
+        Rendering.Init(this._canvas);
+
+        Camera.Transform.Scale = [this._canvas.width, this._canvas.height];
+        Camera.Transform.Position = [0, 0];
+        Camera.Transform.Rotation = 0;
         Camera.ManualUpdate();
-        
-        Config.Subscribe('debug', (newValue: boolean) => this._displayFps = newValue);
-        Config.Subscribe('debugDraw', (newValue: boolean) => this._debugDraw = newValue);
+
+        Config.Observable.Subscribe(this);
 
         this._entities = [];
         let p = new PlayerEntity();
@@ -89,28 +96,41 @@ class GameManager {
         let test = new TestEntity();
         test.transform.Position = [100, 100];
         test.transform.Scale = [5, 5];
-        this.AddEntity(test);
+        // this.AddEntity(test);
 
-        for (let x = 0; x < 1; x++) {
-            for (let y = 0; y < 10; y++) {
+        const n = 20;
+        for (let x = 0; x < n; x++) {
+            for (let y = 0; y < n; y++) {
                 let test2 = new Test2Entity();
-                test2.transform.Position = [(-5 + x) * 10, (-5 + y) * 10];
+                test2.transform.Position = [(-n + x) * 7, (-n + y) * 7];
+                test2.transform.Scale = [0.25, 0.25];
                 this.AddEntity(test2);
             }
         }
 
-        Input.MouseElemet = this._canvas;
+        Input.MouseElement = this._canvas;
         Input.Keymap = Settings.GetSetting('controlsKeymap');
 
         Audio.PlaySound({
             soundSourceName: 'loop2',
-            volume: 0.5,
+            volume: 0.1,
             playbackRate: 1,
             loop: true,
             tag: SoundTags.Music,
         });
 
         requestAnimationFrame(this.Update.bind(this))
+    }
+
+    OnObservableNotified(args: IConfigEventArgs): void {
+        switch (args.field) {
+            case 'debug':
+                this._displayFps = args.newValue;
+                break;
+            case 'debugDraw':
+                this._debugDraw = args.newValue;
+                break;
+        }
     }
 
     // Add an entity to the root of the entity tree.
@@ -192,6 +212,9 @@ class GameManager {
         this._updateDelta = Math.min((newFrameTime - this._oldUpdateTime) / 1000, this._minimumUpdateDelta);
         this._oldUpdateTime = newFrameTime;
 
+        // Set world relative mouse position
+        this._mousePosition = Vec2Utils.Sum(Vec2Utils.RotatePoint(Input.MousePosition, -Camera.Transform.RotationRadian), Camera.Transform.Position);
+
         // Update all entities
         this.GetAllEntities().forEach(e => e.Update());
 
@@ -232,36 +255,52 @@ class GameManager {
 
         // Collect all drawing data:
         const dds = this.GetAllComponentsOfTypeFromEntityCollection(ImageDrawDirective, allEntities, true);
-        const drawData: { triangles: WebglDrawData[], lines: WebglDrawData[] } = {
-            triangles: [],
-            lines: []
-        };
 
-        for (let i = 0; i < dds.length; i++) {
-            const dd = dds[i] as ImageDrawDirective;
-            if (!drawData.triangles[dd.SpriteData.imageId])
-                drawData.triangles[dd.SpriteData.imageId] = { vertexes: [], indexes: [] };
+        const viewCenter = Camera.Transform.Position
+        const viewPolyline = Camera.ViewPolyline;
 
-            const s = drawData.triangles[dd.SpriteData.imageId].indexes.length / 6 * 4;
-            drawData.triangles[dd.SpriteData.imageId].vertexes.push(...(dds[i] as ImageDrawDirective).WebGlData);
-            drawData.triangles[dd.SpriteData.imageId].indexes.push(
-                s, s + 1, s + 2,
-                s, s + 2, s + 3
-            );
-        }
+        const drawData = {}
+        dds.forEach((dd: ImageDrawDirective) => {
+            // Skip directives outside of view
+            const dTrans = dd.Parent.worldRelativeTransform
+            const dRadius = Math.sqrt(Math.pow(dd.size[0] * dTrans.Scale[0], 2) + Math.pow(dd.size[1] * dTrans.Scale[1], 2))
 
-        // Draw collisions if the option is enabled
+            if (this.IsInView(dTrans.Position, dRadius)) {
+                if (!drawData[dd.SpriteData.imageId])
+                    drawData[dd.SpriteData.imageId] = { attributes: [], indexes: [] };
+
+                const s = drawData[dd.SpriteData.imageId].indexes.length / 6 * 4;
+                drawData[dd.SpriteData.imageId].attributes.push(...dd.WebGlData);
+                drawData[dd.SpriteData.imageId].indexes.push(
+                    s, s + 1, s + 2,
+                    s, s + 2, s + 3
+                );
+            }
+        });
+        Rendering.SetDrawData('scene', drawData)
+
+        const lines: { red: number[][], yellow: number[][] } = { red: [], yellow: [] };
         if (this._debugDraw) {
             const hitboxes = this.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities, true) as HitboxBase[];
-            for (let i = 0; i < hitboxes.length; i++) {
-                const hData: WebglDrawData | null = hitboxes[i].DebugDrawData;
-                if (hData) {
-                    drawData.lines.push(hData);
+            hitboxes.forEach((hb: HitboxBase) => {
+                // Skip draws outside of view
+                const hTrans = hb.Parent.worldRelativeTransform;
+                const hRadius = hb.HitboxOverallRadius * Math.max(hb.Parent.worldRelativeTransform.Scale[0], hb.Parent.worldRelativeTransform.Scale[1]);
+
+                if (this.IsInView(hTrans.Position, hRadius)) {
+                    const hData: number[] | null = hb.DebugDrawData;
+                    if (hData) {
+                        if (hb.TriggerState == TriggerState.NotTrigger) {
+                            lines.yellow.push(hData)
+                        } else {
+                            lines.red.push(hData)
+                        }
+                    }
                 }
-            }
+            })
         }
-        Webgl.DrawData = drawData;
-        Webgl.Draw();
+        Rendering.SetDrawData('debug', lines)
+        Rendering.Render()
 
         if (this._displayFps) {
             const fps = this.FPSUpdate();
@@ -289,6 +328,10 @@ class GameManager {
 
     FPSReletive(value: number): number {
         return value * this._updateDelta;
+    }
+
+    IsInView(point: Vec2, radius: number): boolean {
+        return IsPointInPolygon(Vec2Utils.MoveTowards(point, Camera.Transform.Position, radius, false), Camera.ViewPolyline);
     }
 }
 

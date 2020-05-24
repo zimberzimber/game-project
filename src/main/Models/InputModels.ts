@@ -1,23 +1,31 @@
-import { Vec2 } from "./Vec2";
+import { IObserver } from "./Observable";
+import { Vec2 } from "./Vectors";
 
-/** Only observes mapped keys, and accept the name mapped to the key code. */
-export interface IKeyboardInputObserver {
-    OnKeyDown(key: string): void;
-    OnKeyUp(key: string): void;
+export enum ButtonState { Down, Up }
+
+export interface IMouseEvent {
+    state: ButtonState;
+    button: number;
+    position: Vec2;
 }
 
-/** Observes and receives all keyboard events. Useful for rebinding and writing text. */
-export interface IKeyboardFullInputObserver {
-    OnKeyDown(event: KeyboardEvent): void;
-    OnKeyUp(event: KeyboardEvent): void;
+export interface IKeyboardEvent {
+    state: ButtonState;
+    keyName: string;
 }
 
-export interface IMouseInputObserver {
-    OnMouseDown(button: number, position: Vec2): void;
-    OnMouseUp(button: number, position: Vec2): void;
+export interface IMouseObserver extends IObserver<IMouseEvent>{
+    OnObservableNotified(args: IMouseEvent): void;
 }
 
-export interface IMouseFullInputObserver {
-    OnMouseDown(event: MouseEvent): void;
-    OnMouseUp(event: MouseEvent): void;
+export interface IKeyboardObserver extends IObserver<IKeyboardEvent>{
+    OnObservableNotified(args: IKeyboardEvent): void;
+}
+
+export class MouseObserverFull implements IObserver<MouseEvent>{
+    OnObservableNotified(args: MouseEvent): void { }
+}
+
+export class KeyboardObserverFull implements IObserver<KeyboardEvent>{
+    OnObservableNotified(args: KeyboardEvent): void { }
 }

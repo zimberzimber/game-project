@@ -1,4 +1,4 @@
-import { Vec2 } from "../Models/Vec2";
+import { Vec2 } from "../Models/Vectors";
 
 export class Vec2Utils {
     static Translate = (v: Vec2, x: number, y: number): Vec2 => [v[0] + x, v[1] + y];

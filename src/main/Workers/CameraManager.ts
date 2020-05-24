@@ -1,30 +1,46 @@
-import { Vec2 } from "../Models/Vec2";
-import { Webgl } from "./WebglManager";
+import { Vec2 } from "../Models/Vectors";
 import { Transform } from "../Models/Transform";
+import { Observable, IObserver } from "../Models/Observable";
+import { Vec2Utils } from "../Utility/Vec2";
 
-class CameraManager {
+export interface ICameraObserver extends IObserver<ICameraEventArgs> {
+    OnObservableNotified(args: ICameraEventArgs): void;
+}
+
+export interface ICameraEventArgs {
+    transform: Transform;
+    nearFar: Vec2;
+}
+
+class CameraManager extends Observable<ICameraObserver, ICameraEventArgs> {
     readonly Transform: Transform = new Transform();
+
     private _nearFar: Vec2 = [0.1, 1000];
+    get NearFar() { return this._nearFar; }
+    set NearFar(nearFar: Vec2) { this._nearFar = nearFar; }
+
+    private _viewPolyline: Vec2[] = [];
+    get ViewPolyline(): Vec2[] { return this._viewPolyline }
 
     constructor() {
-        this.Transform.onChanged = this.Update.bind(this);
+        super();
+        this.Transform.onChanged = this.OnUpdated.bind(this);
     }
 
-    set NearFar(nearFar: Vec2) {
-        this._nearFar = nearFar;
-        Webgl.SetCameraFrustum(this.Transform.Scale[0], this.Transform.Scale[1], this._nearFar[0], this._nearFar[1]);
-    }
-
-    get NearFar() { return this._nearFar; }
-
-    private Update(): void {
-        Webgl.SetCameraTranslation(this.Transform.Position[0], this.Transform.Position[1]);
-        Webgl.SetCameraRotation(this.Transform.Rotation);
-        Webgl.SetCameraFrustum(this.Transform.Scale[0], this.Transform.Scale[1], this._nearFar[0], this._nearFar[1]);
+    private OnUpdated(): void {
+        const tp = this.Transform.Position
+        const ts = this.Transform.Scale
+        this._viewPolyline = [
+            Vec2Utils.RotatePointAroundCenter([tp[0] + ts[0] / 2, tp[1] + ts[1] / 2], -this.Transform.RotationRadian, tp),
+            Vec2Utils.RotatePointAroundCenter([tp[0] - ts[0] / 2, tp[1] + ts[1] / 2], -this.Transform.RotationRadian, tp),
+            Vec2Utils.RotatePointAroundCenter([tp[0] - ts[0] / 2, tp[1] - ts[1] / 2], -this.Transform.RotationRadian, tp),
+            Vec2Utils.RotatePointAroundCenter([tp[0] + ts[0] / 2, tp[1] - ts[1] / 2], -this.Transform.RotationRadian, tp),
+        ]
+        this.Notify({ transform: this.Transform, nearFar: this._nearFar });
     }
 
     ManualUpdate(): void {
-        this.Update();
+        this.OnUpdated();
     }
 }
 

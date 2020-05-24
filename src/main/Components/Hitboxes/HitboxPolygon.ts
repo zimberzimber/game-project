@@ -1,9 +1,8 @@
-import { Vec2 } from "../../Models/Vec2";
+import { Vec2 } from "../../Models/Vectors";
 import { HitboxBase } from "./HitboxBase";
 import { EntityBase } from "../../Bases/EntityBase";
-import { TriggerState, HitboxType } from "../../Models/CollisionModels";
+import { TriggerState, HitboxType, DebugDrawColor } from "../../Models/CollisionModels";
 import { Vec2Utils } from "../../Utility/Vec2";
-import { WebglDrawData } from "../../Models/WebglDrawData";
 
 export class HitboxPolygon extends HitboxBase {
     HitboxType: HitboxType = HitboxType.Polygonal;
@@ -29,26 +28,22 @@ export class HitboxPolygon extends HitboxBase {
         const polyline: Vec2[] = [];
 
         for (let i = 0; i < this.Polyline.length; i++)
-            polyline[i] = Vec2Utils.Sum(trans.Position, Vec2Utils.RotatePoint(Vec2Utils.Mult(this.Polyline[i], trans.Scale), radian));
+            polyline.push(Vec2Utils.Sum(trans.Position, Vec2Utils.RotatePoint(Vec2Utils.Mult(this.Polyline[i], trans.Scale), radian)));
 
         return polyline;
     }
 
     // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
-    get DebugDrawData(): WebglDrawData | null {
+    get DebugDrawData(): number[] | null {
         if (this.Polyline.length < 2) return null;
 
         let vertexes: number[] = [];
-        let indexes: number[] = [];
-
-        const colorY = this.TriggerState == TriggerState.NotTrigger ? 0 : 0.01
         const polyline = this.CanvasReletivePolyline;
-        for (let i = 0; i < polyline.length; i++) {
-            vertexes.push(polyline[i][0], polyline[i][1], this.Parent.worldRelativeTransform.Depth, 0, 0, 0, 0, 1, colorY);
-            indexes.push(i);
-        }
-        indexes.push(0);
 
-        return { vertexes, indexes };
+        const colorIndex = this.TriggerState == TriggerState.NotTrigger ? DebugDrawColor.Default : DebugDrawColor.Red
+        for (let i = 0; i < polyline.length; i++)
+            vertexes.push(polyline[i][0], polyline[i][1], colorIndex);
+
+        return vertexes;
     };
 }

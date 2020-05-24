@@ -6,6 +6,7 @@ X Remove _G
 X Add images to IDB
 X Rewrite all get/set methods into properties
 X Try optimizing any large array operators, namely the one inside 'Draw()' in WebglDef
+X Make a generic observable class to be used in observable managers
 
 Systems:
 X Separate sound manager to sound managment, and sound playing components
@@ -16,11 +17,13 @@ X Revamp input handler into an independant observable.
 X Add mouse controls (canvas + world relative clicks/postions)
 X Add world relative mouse and click position
 X Add camera controls
-- Have the game only pass draw directives within camera view
+X Have the game only pass draw directives within camera view
 X Have sound and image manager be initialized by a centralized component
 X Add the ability to save settings between sessions
 X Add colission tags: A collider has his own tags, and colission tag targets it can collide with
 X Convert IDB to store ArraryBuffers for sound, and Base64 strings for images instead of blobs for both
+X Make camera observable. Hame game manager tie it into webgl
+X Add a method for converting element space click to world space coordinates
 
 Webgl:
 X Modify webgl so you can use multiple images as textures

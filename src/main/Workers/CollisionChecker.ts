@@ -2,7 +2,7 @@ import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { HitboxRectangle } from "../Components/Hitboxes/HitboxRectangle";
 import { HitboxCircle } from "../Components/Hitboxes/HitboxCircle";
 import { HitboxPolygon } from "../Components/Hitboxes/HitboxPolygon";
-import { Vec2 } from "../Models/Vec2";
+import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
 import { ScalarUtil } from "../Utility/Scalar";
 
@@ -209,7 +209,7 @@ const IsInCollisionRange = (a: HitboxBase, b: HitboxBase): boolean => {
 }
 
 // Checks if the given point is inside the given polygon
-const IsPointInPolygon = (point: Vec2, polyline: Vec2[]): boolean => {
+export const IsPointInPolygon = (point: Vec2, polyline: Vec2[]): boolean => {
     if (polyline.length < 3)
         return false;
 

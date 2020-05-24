@@ -12,7 +12,10 @@ import { SpriteDefinitions } from "./AssetDefinitions/SpriteDefinitions";
 import { Assets } from "./Proxies/AssetsProxy";
 import { Settings } from "./Workers/SettingsManager";
 import { PromiseUtil } from "./Utility/Promises";
-import { Webgl } from "./Workers/WebglManager";
+import { Rendering } from "./Workers/RenderingPipeline";
+import { Camera } from "./Workers/CameraManager";
+import { Vec2Utils } from "./Utility/Vec2";
+import { ScalarUtil } from "./Utility/Scalar";
 
 let domPromise: any = PromiseUtil.CreateCompletionPromise();
 window.addEventListener('DOMContentLoaded', domPromise.resolve);
@@ -50,25 +53,20 @@ if (Config.GetConfig('debug', false) === true) {
     window.GetEntityById = (id: number) => Game.GetEntityById(id);
 
     //@ts-ignore
-    window.sm = Sounds;
-    //@ts-ignore
-    window.idb = IDB;
-    //@ts-ignore
-    window.game = Game;
-    //@ts-ignore
-    window.log = Log;
-    //@ts-ignore
-    window.cfg = Config;
-    //@ts-ignore
-    window.images = Images;
-    //@ts-ignore
-    window.sprites = Sprites;
-    //@ts-ignore
-    window.sp = Audio;
-    //@ts-ignore
-    window.input = Input;
-    //@ts-ignore
-    window.settings = Settings;
-    //@ts-ignore
-    window.webgl = Webgl;
+    window.zz = {
+        sounds: Sounds,
+        idb: IDB,
+        game: Game,
+        log:Log,
+        cfg:Config,
+        images:Images,
+        sprites:Sprites,
+        audio:Audio,
+        input: Input,
+        settings: Settings,
+        rendering: Rendering,
+        camera: Camera,
+        vec2u: Vec2Utils,
+        scalaru: ScalarUtil
+    }
 }

@@ -90,6 +90,10 @@ class ImageManager {
         await Promise.all(promises);
     }
 
+    /**
+     * Returns the id of the given image, or -1 if no image follows that name
+     * @param name Name of the image
+     */
     GetImageIdFromName(name: string): number {
         return this.nameIndex[name] !== undefined ? this.nameIndex[name] : -1;
     }
@@ -106,6 +110,10 @@ class ImageManager {
 
     GetImageArray(): HTMLImageElement[] {
         return this.images;
+    }
+
+    GetImageById(id: number): HTMLImageElement | null {
+        return this.images[id] ? this.images[id] : null;
     }
 }
 

@@ -1,11 +1,16 @@
-import { Config } from "../Proxies/ConfigProxy";
+import { Config, IConfigObserver } from "../Proxies/ConfigProxy";
 
-class Logger {
+class Logger implements IConfigObserver {
     logLevel: LogLevel;
 
     constructor() {
         this.logLevel = Config.GetConfig('logLevel', LogLevel.Warn);
-        Config.Subscribe('logLevel', (newValue: LogLevel) => this.logLevel = newValue);
+        Config.Observable.Subscribe(this);
+    }
+
+    OnObservableNotified(args: import("../Proxies/ConfigProxy").IConfigEventArgs): void {
+        if (args.field == 'logLevel')
+            this.logLevel = args.newValue;
     }
 
     Error(message: any): void {

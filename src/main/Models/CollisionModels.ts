@@ -26,3 +26,8 @@ export enum CollisionGroup {
 }
 
 export type CollisionDelegate = (trigerredBy: HitboxBase) => void;
+
+export enum DebugDrawColor{
+    Default = 0,
+    Red = 1
+}

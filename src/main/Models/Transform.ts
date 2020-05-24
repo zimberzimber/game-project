@@ -1,7 +1,8 @@
-import { Vec2 } from "./Vec2";
+import { Vec2 } from "./Vectors";
 import { ScalarUtil } from "../Utility/Scalar";
 import { Vec2Utils } from "../Utility/Vec2";
 
+// Not using the observable pattern here because its too heavy for what it'll be used for
 export class Transform {
     /** Callback for whenever the transform changes. */
     onChanged: Function | undefined = undefined;

@@ -1,14 +1,21 @@
 import { Log } from "../Workers/Logger";
+import { Observable, IObserver } from "../Models/Observable";
 
-interface IConfigObserver { (newValue: any): void; }
+export interface IConfigEventArgs {
+    field: string;
+    newValue: any;
+}
+
+export interface IConfigObserver extends IObserver<IConfigEventArgs> {
+    OnObservableNotified(args: IConfigEventArgs): void;
+}
 
 class ConfigProxy {
     //@ts-ignore
     private _original = window.configuration;
-    private _observers: { [key: string]: IConfigObserver[] } = {};
+    Observable: Observable<IObserver<IConfigEventArgs>, IConfigEventArgs> = new Observable();
 
-    
-    constructor(){
+    constructor() {
         if (!this._original)
             Log.Error("Config proxy could not find field 'window.configuration'")
     }
@@ -29,33 +36,7 @@ class ConfigProxy {
      */
     SetConfig = (field: string, value: any): void => {
         this._original[field] = value;
-        this._observers[field].forEach(o => o(value));
-    }
-
-    /**
-     * Subscribe an observer to a certain field in the config.
-     * @param field Field name
-     * @param observer Observer method
-     */
-    Subscribe = (field: string, observer: IConfigObserver): void => {
-        if (!this._observers[field])
-            this._observers[field] = [];
-
-        if (this._observers[field].indexOf(observer) == -1)
-            this._observers[field].push(observer);
-    }
-
-    /**
-     * Unsubscribe an observer from a certain field in the config.
-     * @param field Field name
-     * @param observer Observer method
-     */
-    Unsubscribe = (field: string, observer: IConfigObserver): void => {
-        if (this._observers[field]) {
-            const index = this._observers[field].indexOf(observer, 0);
-            if (index > -1)
-                this._observers[field].splice(index, 1);
-        }
+        this.Observable.Notify({ field, newValue: value });
     }
 }
 
