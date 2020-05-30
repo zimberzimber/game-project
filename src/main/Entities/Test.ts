@@ -9,12 +9,13 @@ import { HitboxCircle } from "../Components/Hitboxes/HitboxCircle";
 import { HitboxRectangle } from "../Components/Hitboxes/HitboxRectangle";
 import { SoundTags } from "../Models/SoundModels";
 import { Audio } from "../Workers/SoundPlayer";
+import { StaticImageDrawDirective } from "../Components/DrawDirectives/StaticImageDrawDirective";
 
 export class TestEntity extends EntityBase {
     constructor(parent: EntityBase | void) {
         super(parent);
         this.transform.Depth = -5;
-        this.AddComponent(new ImageDrawDirective(this, "assetMissing", [10, 10]));
+        this.AddComponent(new StaticImageDrawDirective(this, "assetMissing", [10, 10]));
 
         // const hitbox = new HitboxRectangle(this, 10, 40);
         // const hitbox = new HitboxCircle(this, 10);

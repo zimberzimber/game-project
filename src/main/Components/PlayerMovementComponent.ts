@@ -21,7 +21,6 @@ export class PlayerMovementComponent extends ComponentBase implements IMouseObse
     }
 
     Update(): void {
-
         this.Parent.transform.TranslateByVec2(this._movement);
         Camera.Transform.TranslateByVec2(this._movement);
         // Camera.Transform.RotateTowards(Input.MousePosition);

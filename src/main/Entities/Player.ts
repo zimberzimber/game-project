@@ -8,15 +8,21 @@ import { ScalarUtil } from "../Utility/Scalar";
 import { HitboxCircle } from "../Components/Hitboxes/HitboxCircle";
 import { HitboxRectangle } from "../Components/Hitboxes/HitboxRectangle";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
+import { StaticImageDrawDirective } from "../Components/DrawDirectives/StaticImageDrawDirective";
+import { AnimatedImageDrawDirective } from "../Components/DrawDirectives/AnimatedImageDrawDirective";
+import { SpriteDefinitions } from "../AssetDefinitions/SpriteDefinitions";
 
 export class PlayerEntity extends EntityBase {
+    dd: AnimatedImageDrawDirective;
     constructor(parent: EntityBase | void) {
         super(parent);
         this.transform.Depth = -50;
-        this.transform.Scale = [0.5, 0.5];
+        this.transform.Scale = [3, 3];
 
         this.AddComponent(new PlayerMovementComponent(this));
-        this.AddComponent(new ImageDrawDirective(this, "heart", [10, 10]));
+        // this.AddComponent(new StaticImageDrawDirective(this, "heart", [10, 10]));
+        this.dd = new AnimatedImageDrawDirective(this, "dice", [10, 10])
+        this.AddComponent(this.dd);
 
         // const hitbox = new HitboxRectangle(this, 40, 10);
         // const hitbox = new HitboxCircle(this, 10);

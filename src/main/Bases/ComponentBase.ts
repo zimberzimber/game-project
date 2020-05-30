@@ -10,7 +10,7 @@ export abstract class ComponentBase {
         this._parent = parent;
     }
 
-    abstract Update(): void;
+    Update(): void { };
 
     Delete(): void {
         this._parent.RemoveComponent(this);

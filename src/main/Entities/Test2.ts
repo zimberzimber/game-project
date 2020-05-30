@@ -5,11 +5,12 @@ import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
 import { HitboxCircle } from "../Components/Hitboxes/HitboxCircle";
 import { SoundTags } from "../Models/SoundModels";
 import { Audio } from "../Workers/SoundPlayer";
+import { StaticImageDrawDirective } from "../Components/DrawDirectives/StaticImageDrawDirective";
 
 export class Test2Entity extends EntityBase {
     constructor(parent: EntityBase | void) {
         super(parent);
-        this.AddComponent(new ImageDrawDirective(this, "assetMissing", [10, 10]));
+        this.AddComponent(new StaticImageDrawDirective(this, "assetMissing", [10, 10]));
 
         const hitbox = new HitboxCircle(this, 10);
         hitbox.CollisionGroup = CollisionGroup.Hazard;

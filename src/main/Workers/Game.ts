@@ -77,22 +77,6 @@ class GameManager implements IConfigObserver {
         let p = new PlayerEntity();
         this.AddEntity(p);
 
-        const count = 0;
-        for (let i = 0; i < count; i++) {
-            let newE: EntityBase;
-
-            if (i % 2 == 0)
-                newE = new TestEntity();
-            else
-                newE = new PlayerEntity();
-
-            //newE.transform.Scale = [0.5, 1.5];
-            newE.transform.Position = [50, 50];
-            newE.transform.Rotation = 45;
-            p.AddChildEntity(newE);
-            p = newE;
-        }
-
         let test = new TestEntity();
         test.transform.Position = [100, 100];
         test.transform.Scale = [5, 5];
@@ -266,12 +250,12 @@ class GameManager implements IConfigObserver {
             const dRadius = Math.sqrt(Math.pow(dd.size[0] * dTrans.Scale[0], 2) + Math.pow(dd.size[1] * dTrans.Scale[1], 2))
 
             if (this.IsInView(dTrans.Position, dRadius)) {
-                if (!drawData[dd.SpriteData.imageId])
-                    drawData[dd.SpriteData.imageId] = { attributes: [], indexes: [] };
+                if (!drawData[dd.ImageId])
+                    drawData[dd.ImageId] = { attributes: [], indexes: [] };
 
-                const s = drawData[dd.SpriteData.imageId].indexes.length / 6 * 4;
-                drawData[dd.SpriteData.imageId].attributes.push(...dd.WebGlData);
-                drawData[dd.SpriteData.imageId].indexes.push(
+                const s = drawData[dd.ImageId].indexes.length / 6 * 4;
+                drawData[dd.ImageId].attributes.push(...dd.WebGlData);
+                drawData[dd.ImageId].indexes.push(
                     s, s + 1, s + 2,
                     s, s + 2, s + 3
                 );

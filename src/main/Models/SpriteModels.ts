@@ -3,9 +3,20 @@ export interface ISpriteFrame {
     size: [number, number];
 }
 
-export interface ISPriteData extends ISpriteFrame {
+export interface ISpriteStorage {
     imageId: number;
 }
+
+export interface ISingleFrameSpriteStorage extends ISpriteStorage {
+    frame: ISpriteFrame
+}
+
+export interface IMultiFrameSpriteStorage extends ISpriteStorage {
+    frames: ISpriteFrame[];
+    names?: string[];
+    aliases?: { [key: string]: string };
+}
+
 
 export interface ISpriteDefinition {
     sourceImageName: string;

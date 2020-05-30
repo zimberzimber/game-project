@@ -1,17 +1,11 @@
-import { ISpriteFrame, ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition, ISPriteData } from "../Models/SpriteModels";
+import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition, ISingleFrameSpriteStorage, IMultiFrameSpriteStorage } from "../Models/SpriteModels";
 import { Log, LogLevel } from "./Logger";
 import { OneTimeLog } from "./OneTimeLogger";
 import { Images } from "./ImageManager";
 
-interface ISPriteFramesStorage {
-    imageId: number;
-    frames: ISpriteFrame | ISpriteFrame[];
-    names?: string[];
-    aliases?: { [key: string]: string };
-}
 
 class SpriteManager {
-    private sprites: { [key: string]: ISPriteFramesStorage } = {};
+    private sprites: { [key: string]: ISingleFrameSpriteStorage | IMultiFrameSpriteStorage } = {};
     private initialized: boolean = false;
 
     Initialize(spriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition }): void {
@@ -23,18 +17,18 @@ class SpriteManager {
         this.initialized = true;
         for (const spriteName in spriteDefinitions) {
 
-            // Get the images ID. Default to 0 and print a message if its an invalid image.
+            // Get the images ID. Skip the sprite if its image doesn't exist
             let imageId = Images.GetImageIdFromName(spriteDefinitions[spriteName].sourceImageName);
             if (imageId == -1) {
-                Log.Error(`Attempted to fetch nonexistent image named '${spriteDefinitions[spriteName].sourceImageName}' for sprite: ${spriteName}`)
-                imageId = 0;
+                Log.Error(`Attempted to fetch nonexistent image named '${spriteDefinitions[spriteName].sourceImageName}' for sprite: ${spriteName}`);
+                continue;
             }
 
             if ((spriteDefinitions[spriteName] as ISingleFrameSpriteDefinition).frame) {
                 const def = spriteDefinitions[spriteName] as ISingleFrameSpriteDefinition;
                 this.sprites[spriteName] = {
                     imageId: imageId,
-                    frames: def.frame
+                    frame: def.frame
                 }
 
             } else if ((spriteDefinitions[spriteName] as IMultiFrameSpriteDefinition).frames) {
@@ -53,71 +47,29 @@ class SpriteManager {
         }
     }
 
-    GetFullImageAsSprite(image: string): ISPriteData {
+    GetFullImageAsSprite(image: string): ISingleFrameSpriteStorage {
         const id = Images.GetImageIdFromName(image);
         if (id > -1)
-            return { origin: [0, 0], size: Images.GetImageSize(id), imageId: id };
+            return { imageId: id, frame: { origin: [0, 0], size: Images.GetImageSize(id) } };
 
         OneTimeLog.Log(`nonexistentFullImage_${image}`, `Attempted to get non-existent image: ${image}`, LogLevel.Error);
-        return { origin: [0, 0], size: [0, 0], imageId: 0 };
+        return { imageId: 0, frame: { origin: [0, 0], size: [0, 0] } };
     }
 
-    GetSprite(name: string, frame: number | string | void): ISPriteData {
-        let result: ISPriteData = { origin: [0, 0], size: [0, 0], imageId: 0 };
+    GetStaticSpriteData(name: string): ISingleFrameSpriteStorage | null {
+        if (this.sprites[name] && (this.sprites[name] as ISingleFrameSpriteStorage).frame)
+            return this.sprites[name] as ISingleFrameSpriteStorage;
 
-        if (this.sprites[name]) {
-            const s: ISPriteFramesStorage = this.sprites[name];
+        OneTimeLog.Log(`bad_static_sprite_${name}`, `Attempted to get a non-existent or non-static sprite: ${name}`, LogLevel.Error);
+        return null;
+    }
 
-            if (typeof (frame) == 'number') {
-                if (s.frames[frame]) {
-                    result.origin = s.frames[frame].origin;
-                    result.size = s.frames[frame].size;
-                    result.imageId = s.imageId;
-                } else {
-                    OneTimeLog.Log(`getSprite_nonexistent_numerical_frame_${name}_${frame}`, `Nonexistent numerical frame ${frame} for sprite: ${name}`, LogLevel.Error);
-                }
-            } else if (typeof (frame) == 'string') {
-                if (s.names) {
-                    let index = -1;
-                    let alias = name;
-                    if (s.aliases && s.aliases[name])
-                        alias = s.aliases[name];
+    GetAnimatedSpriteData(name: string): IMultiFrameSpriteStorage | null {
+        if (this.sprites[name] && (this.sprites[name] as IMultiFrameSpriteStorage).frames)
+            return this.sprites[name] as IMultiFrameSpriteStorage;
 
-                    for (let i = 0; i < s.names.length; i++) {
-                        if (s.names[i] == alias) {
-                            index = i;
-                            break;
-                        }
-                    }
-
-                    if (index > -1) {
-                        if (s.frames[index]) {
-                            result.origin = s.frames[index].origin;
-                            result.size = s.frames[index].size;
-                            result.imageId = s.imageId;
-                        } else {
-                            OneTimeLog.Log(`getSprite_out_of_bound_frame_name_${name}_${frame}`, `Frame named '${frame}' is out of bounds for sprite info array in sprite: ${name}`, LogLevel.Error);
-                        }
-                    } else {
-                        OneTimeLog.Log(`getSprite_nonexistent_frame_name_${name}_${frame}`, `Nonexistent frame named '${frame}' for sprite: ${name}`, LogLevel.Error);
-                    }
-                } else {
-                    OneTimeLog.Log(`getSprite_no_frame_names_${name}`, `There are no frame names defined for sprite: ${name}`, LogLevel.Error);
-                }
-            } else {
-                if (s.frames instanceof Array) {
-                    OneTimeLog.Log(`getSprite_no_frame_requested_${name}`, `No frame was requested for multiframed sprite: ${name}`, LogLevel.Error);
-                } else {
-                    result.origin = s.frames.origin;
-                    result.size = s.frames.size;
-                    result.imageId = s.imageId;
-                }
-            }
-        } else {
-            OneTimeLog.Log(`nonexistentSprite_${name}`, `Attempted to get non-existent sprite: ${name}`, LogLevel.Error);
-        }
-
-        return result;
+        OneTimeLog.Log(`bad_animated_sprite_${name}`, `Attempted to get a non-existent or non-animated sprite: ${name}`, LogLevel.Error);
+        return null;
     }
 }
 
