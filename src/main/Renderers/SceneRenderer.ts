@@ -3,7 +3,6 @@ import { SceneRendererDrawData, RendererConfig } from "./_RendererInterfaces";
 
 export class WebglSceneRenderer extends WebglRenderer {
     private _textures: { [key: number]: WebGLTexture; } = {};
-
     private _drawData: SceneRendererDrawData = {};
 
     constructor(canvas: HTMLCanvasElement, config: RendererConfig, imagesArray: { [key: number]: HTMLImageElement; }) {
@@ -30,14 +29,7 @@ export class WebglSceneRenderer extends WebglRenderer {
             };
         }
     }
-
-    protected ActivateProgram(): void {
-        super.ActivateProgram();
-
-        this._context.bindBuffer(WebGLRenderingContext.ARRAY_BUFFER, this._attributeBuffer);
-        this._context.bindBuffer(WebGLRenderingContext.ELEMENT_ARRAY_BUFFER, this._indexBuffer);
-    }
-
+    
     Render() {
         this.ActivateProgram();
         const gl = this._context;

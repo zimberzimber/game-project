@@ -80,7 +80,7 @@ class GameManager implements IConfigObserver {
         let test = new TestEntity();
         test.transform.Position = [100, 100];
         test.transform.Scale = [5, 5];
-        // this.AddEntity(test);
+        this.AddEntity(test);
 
         const n = 20;
         for (let x = 0; x < n; x++) {

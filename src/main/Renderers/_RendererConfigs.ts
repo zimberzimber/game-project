@@ -52,5 +52,22 @@ export const RenderConfigs: { [key: string]: RendererConfig } = {
             u_projectionMatrix: 'Matrix4fv',
             u_viewMatrix: 'Matrix4fv',
         }
+    },
+
+    post: {
+        vertexSource: ShaderSources.post_vertex,
+        fragmentSource: ShaderSources.post_fragment,
+        attributes: {
+            a_position: {
+                size: 2,
+                type: WebGLRenderingContext.FLOAT,
+                normalized: false,
+                stride: 2 * Float32Array.BYTES_PER_ELEMENT,
+                offset: 0,
+            }
+        },
+        uniforms: { 
+            u_offsetPower: '1f'
+        }
     }
 }

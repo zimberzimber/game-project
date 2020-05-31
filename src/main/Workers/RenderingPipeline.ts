@@ -6,6 +6,7 @@ import { OneTimeLog } from "./OneTimeLogger";
 import { WebglDebugRenderer } from "../Renderers/DebugRenderer";
 import { RenderConfigs } from "../Renderers/_RendererConfigs";
 import { ICameraObserver, ICameraEventArgs, Camera } from "./CameraManager";
+import { WebglPostRenderer } from "../Renderers/PostRenderer";
 
 //@ts-ignore
 const glMatrix = window.glMatrix;
@@ -22,21 +23,6 @@ const GetEmptyMatrix2D = (): Float32Array => {
 class RenderingPipeline implements ICameraObserver {
     private _context: WebGLRenderingContext;
     private _renderers: { [key: string]: WebglRenderer } = {}
-
-    OnObservableNotified(args: ICameraEventArgs): void {
-        if (!this._context) return;
-
-        const worldMatrix = GetEmptyMatrix2D();
-        glMatrix.mat4.rotate(worldMatrix, worldMatrix, args.transform.RotationRadian, [0, 0, 1]);
-        glMatrix.mat4.translate(worldMatrix, worldMatrix, [-args.transform.Position[0], -args.transform.Position[1], 0]);
-        this.SetUniformData('scene', 'u_worldMatrix', [false, worldMatrix]);
-        this.SetUniformData('debug', 'u_worldMatrix', [false, worldMatrix]);
-
-        const projectionMatrix = GetEmptyMatrix();
-        glMatrix.mat4.ortho(projectionMatrix, args.transform.Scale[0] / -2, args.transform.Scale[0] / 2, args.transform.Scale[1] / -2, args.transform.Scale[1] / 2, args.nearFar[0], args.nearFar[1]);
-        this.SetUniformData('scene', 'u_projectionMatrix', [false, projectionMatrix]);
-        this.SetUniformData('debug', 'u_projectionMatrix', [false, projectionMatrix]);
-    }
 
     Init(canvas: HTMLCanvasElement): void {
         let gl = canvas.getContext('webgl');
@@ -56,16 +42,37 @@ class RenderingPipeline implements ICameraObserver {
         this._context = gl;
         this._renderers.scene = new WebglSceneRenderer(canvas, RenderConfigs.scene, Images.GetImageArray());
         this._renderers.debug = new WebglDebugRenderer(canvas, RenderConfigs.debug);
+        this._renderers.post = new WebglPostRenderer(canvas, RenderConfigs.post);
 
-        var viewMatrix = GetEmptyMatrix();
+
+        const empty = GetEmptyMatrix()
+        let viewMatrix = GetEmptyMatrix();
         glMatrix.mat4.lookAt(viewMatrix, [0, 0, 900], [0, 0, 0], [0, 1, 0]);
+
         this.SetUniformData('scene', 'u_viewMatrix', [false, viewMatrix])
+        this.SetUniformData('scene', 'u_worldMatrix', [false, empty]);
+        this.SetUniformData('scene', 'u_projectionMatrix', [false, empty]);
+
         this.SetUniformData('debug', 'u_viewMatrix', [false, viewMatrix])
-        
-        this.SetUniformData('scene', 'u_worldMatrix', [false, GetEmptyMatrix()]);
-        this.SetUniformData('debug', 'u_worldMatrix', [false, GetEmptyMatrix()]);
-        this.SetUniformData('scene', 'u_projectionMatrix', [false, GetEmptyMatrix()]);
-        this.SetUniformData('debug', 'u_projectionMatrix', [false, GetEmptyMatrix()]);
+        this.SetUniformData('debug', 'u_worldMatrix', [false, empty]);
+        this.SetUniformData('debug', 'u_projectionMatrix', [false, empty]);
+
+        this.SetUniformData('post', 'u_offsetPower', [0]);
+    }
+
+    OnObservableNotified(args: ICameraEventArgs): void {
+        if (!this._context) return;
+
+        const worldMatrix = GetEmptyMatrix2D();
+        glMatrix.mat4.rotate(worldMatrix, worldMatrix, args.transform.RotationRadian, [0, 0, 1]);
+        glMatrix.mat4.translate(worldMatrix, worldMatrix, [-args.transform.Position[0], -args.transform.Position[1], 0]);
+        this.SetUniformData('scene', 'u_worldMatrix', [false, worldMatrix]);
+        this.SetUniformData('debug', 'u_worldMatrix', [false, worldMatrix]);
+
+        const projectionMatrix = GetEmptyMatrix();
+        glMatrix.mat4.ortho(projectionMatrix, args.transform.Scale[0] / -2, args.transform.Scale[0] / 2, args.transform.Scale[1] / -2, args.transform.Scale[1] / 2, args.nearFar[0], args.nearFar[1]);
+        this.SetUniformData('scene', 'u_projectionMatrix', [false, projectionMatrix]);
+        this.SetUniformData('debug', 'u_projectionMatrix', [false, projectionMatrix]);
     }
 
     Render(): void {
@@ -74,10 +81,19 @@ class RenderingPipeline implements ICameraObserver {
             return;
         }
 
-        this._context.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null)
         this._context.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
-        this._renderers.debug.Render();
+
+        // To PostRenderer frame buffer
+        this._context.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, (this._renderers.post as WebglPostRenderer).FrameBuffer);
+        this._context.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
+
         this._renderers.scene.Render();
+
+        // To canvas
+        this._context.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null);
+        this._renderers.post.Render();
+        this._context.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        this._renderers.debug.Render();
     }
 
     private CheckExists(rendererName: string): boolean {

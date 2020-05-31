@@ -6,7 +6,7 @@ class AssetsProxy {
     //@ts-ignore
     private _original = window.assets;
 
-    constructor(){
+    constructor() {
         if (!this._original)
             Log.Error("Asset proxy could not find field 'window.assets'")
     }

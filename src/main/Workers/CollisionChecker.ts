@@ -216,13 +216,10 @@ export const IsPointInPolygon = (point: Vec2, polyline: Vec2[]): boolean => {
     let intersections = 0;
 
     for (let i = 0; i < polyline.length; i++)
-        // Thats the max safe integer. No idea why TS doesn't recognize it.
-        if (LineIntersection(point, [point[0], 9007199254740991], polyline[i], polyline[(i + 1) % polyline.length]))
+        if (LineIntersection(point, [point[0], Number.MAX_SAFE_INTEGER], polyline[i], polyline[(i + 1) % polyline.length]))
             intersections++;
 
-    if (intersections % 2 == 1)
-        return true;
-    return false;
+    return intersections % 2 == 1;
 }
 
 // Checks whether two lines intersect. Taken from:
