@@ -1,16 +1,16 @@
 
-export interface RendererUniformContainer {
+export interface IRendererUniformContainer {
     index: WebGLUniformLocation;
     type: string;
     data: any[];
 }
 
-export interface RendererAttributeContainer {
+export interface IRendererAttributeContainer {
     index: number;
-    definition: WebglAttributeDefinition;
+    definition: IWebglAttributeDefinition;
 }
 
-export interface WebglAttributeDefinition {
+export interface IWebglAttributeDefinition {
     readonly size: number;
     readonly type: number;
     readonly normalized: boolean;
@@ -18,24 +18,26 @@ export interface WebglAttributeDefinition {
     readonly offset: number;
 }
 
-export interface RendererAttributeDefinitions {
-    [key: string]: WebglAttributeDefinition;
+export interface IRendererAttributeDefinitions {
+    [key: string]: IWebglAttributeDefinition;
 }
 
-export interface RendererUniformDefinitions {
+export interface IRendererUniformDefinitions {
     [key: string]: string;
 }
 
-export interface SceneRendererDrawData {
-    [key: number]: {
-        attributes: Float32Array,
-        indexes: Uint16Array,
-    }
+export interface ISceneRendererDrawData {
+    [key: number]: IAttributesIndexes;
 }
 
-export interface RendererConfig {
+export interface IAttributesIndexes {
+    attributes: Float32Array,
+    indexes: Uint16Array,
+}
+
+export interface IRendererConfig {
     vertexSource: string;
     fragmentSource: string;
-    attributes: RendererAttributeDefinitions;
-    uniforms: RendererUniformDefinitions;
+    attributes: IRendererAttributeDefinitions;
+    uniforms: IRendererUniformDefinitions;
 }

@@ -109,4 +109,83 @@ void main() {
     color.a = 1.;
     gl_FragColor = color;
 }`,
+
+    mix_vertex: `
+precision mediump float;
+
+attribute vec4 a_position;
+
+varying vec2 v_texCoord;
+
+void main() {
+float xTex = 0.;
+if (a_position.x > 0.)
+{ xTex = 1.; }
+
+float yTex = 0.;
+if (a_position.y > 0.)
+{ yTex = 1.; }
+
+v_texCoord = vec2(xTex, yTex);
+gl_Position = a_position;
+}`,
+
+    mix_fragment: `
+precision mediump float;
+
+varying vec2 v_texCoord;
+
+uniform sampler2D u_sampler_0;
+uniform sampler2D u_sampler_1;
+
+void main() {
+    gl_FragColor = texture2D(u_sampler_0, v_texCoord) * texture2D(u_sampler_1, v_texCoord);
+}`,
+
+    // x, y, r, g, b, radius, hardness
+    lighting_vertex: `
+precision mediump float;
+
+attribute vec2 a_position;
+attribute vec3 a_color;
+attribute float a_radius;
+attribute float a_hardness;
+
+uniform mat4 u_worldMatrix;
+uniform mat4 u_viewMatrix;
+uniform mat4 u_projectionMatrix;
+
+varying vec2 v_position;
+varying vec3 v_color;
+varying float v_radius;
+varying float v_hardness;
+
+void main() {
+    v_color = a_color;
+    v_radius = a_radius;
+    v_hardness = a_hardness;
+    
+    gl_Position = u_projectionMatrix * u_viewMatrix * u_worldMatrix * vec4(a_position, 1., 1.);
+    gl_PointSize = a_radius * 2.;
+    v_position = a_position + vec2(300., 250.);
+}
+`,
+
+    lighting_fragment: `
+precision mediump float;
+
+varying vec2 v_position;
+varying vec3 v_color;
+varying float v_radius;
+varying float v_hardness;
+
+void main() {
+    float dist = distance(v_position, gl_FragCoord.xy);
+    if (dist > v_radius)
+        discard;
+
+    float alpha = smoothstep(1., 0., dist / v_radius);
+    gl_FragColor = vec4(v_color, alpha);
+}
+`
 };

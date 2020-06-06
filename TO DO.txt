@@ -3,4 +3,10 @@
 - Add the ability to control sound panning and volume based on its origin and camera position
 - Add pitch controls to sound
 - Have the colission checker return a point of colission or null instead of a boolean of whether there was a colission or not
-- Add lighting
+X Add lighting
+- Cleanup and organize renderer texture handling
+- Move Webgl render option enabling to the respective render functions, enabling disabling them based on the specific renderer
+
+- Rewrite some components to store data for webgl instead of calculating it all the time. Update it when relevant data was changed.
+    OR
+- Have a coordinator compile, store, and supply Webgl data. Have it populate through the Game class, and retrieve data through the rendering pipeline

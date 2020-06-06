@@ -1,5 +1,5 @@
 import { WebglRenderer } from "./BaseRenderer";
-import { RendererConfig } from "./_RendererInterfaces";
+import { IRendererConfig } from "./_RendererInterfaces";
 
 interface DebugRendererDrawData {
     yellow: Float32Array[],
@@ -8,9 +8,9 @@ interface DebugRendererDrawData {
 
 export class WebglDebugRenderer extends WebglRenderer {
     private _drawData: DebugRendererDrawData = { yellow: [], red: [] };
-    private _attributeCount: number = 0;
+    private readonly _attributeCount: number = 0;
 
-    constructor(canvas: HTMLCanvasElement, config: RendererConfig) {
+    constructor(canvas: HTMLCanvasElement, config: IRendererConfig) {
         super(canvas, config)
 
         for (const attribute in config.attributes)

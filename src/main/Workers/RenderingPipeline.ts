@@ -7,6 +7,8 @@ import { WebglDebugRenderer } from "../Renderers/DebugRenderer";
 import { RenderConfigs } from "../Renderers/_RendererConfigs";
 import { ICameraObserver, ICameraEventArgs, Camera } from "./CameraManager";
 import { WebglPostRenderer } from "../Renderers/PostRenderer";
+import { WebglLightingRenderer } from "../Renderers/LightingRenderer";
+import { WebglMixRenderer } from "../Renderers/MixRenderer";
 
 //@ts-ignore
 const glMatrix = window.glMatrix;
@@ -43,7 +45,8 @@ class RenderingPipeline implements ICameraObserver {
         this._renderers.scene = new WebglSceneRenderer(canvas, RenderConfigs.scene, Images.GetImageArray());
         this._renderers.debug = new WebglDebugRenderer(canvas, RenderConfigs.debug);
         this._renderers.post = new WebglPostRenderer(canvas, RenderConfigs.post);
-
+        this._renderers.lighting = new WebglLightingRenderer(canvas, RenderConfigs.lighting);
+        this._renderers.mix = new WebglMixRenderer(canvas, RenderConfigs.mix);
 
         const empty = GetEmptyMatrix()
         let viewMatrix = GetEmptyMatrix();
@@ -57,6 +60,10 @@ class RenderingPipeline implements ICameraObserver {
         this.SetUniformData('debug', 'u_worldMatrix', [false, empty]);
         this.SetUniformData('debug', 'u_projectionMatrix', [false, empty]);
 
+        this.SetUniformData('lighting', 'u_viewMatrix', [false, viewMatrix])
+        this.SetUniformData('lighting', 'u_worldMatrix', [false, empty]);
+        this.SetUniformData('lighting', 'u_projectionMatrix', [false, empty]);
+
         this.SetUniformData('post', 'u_offsetPower', [0]);
     }
 
@@ -68,11 +75,13 @@ class RenderingPipeline implements ICameraObserver {
         glMatrix.mat4.translate(worldMatrix, worldMatrix, [-args.transform.Position[0], -args.transform.Position[1], 0]);
         this.SetUniformData('scene', 'u_worldMatrix', [false, worldMatrix]);
         this.SetUniformData('debug', 'u_worldMatrix', [false, worldMatrix]);
+        this.SetUniformData('lighting', 'u_worldMatrix', [false, worldMatrix]);
 
         const projectionMatrix = GetEmptyMatrix();
         glMatrix.mat4.ortho(projectionMatrix, args.transform.Scale[0] / -2, args.transform.Scale[0] / 2, args.transform.Scale[1] / -2, args.transform.Scale[1] / 2, args.nearFar[0], args.nearFar[1]);
         this.SetUniformData('scene', 'u_projectionMatrix', [false, projectionMatrix]);
         this.SetUniformData('debug', 'u_projectionMatrix', [false, projectionMatrix]);
+        this.SetUniformData('lighting', 'u_projectionMatrix', [false, projectionMatrix]);
     }
 
     Render(): void {
@@ -80,19 +89,30 @@ class RenderingPipeline implements ICameraObserver {
             OneTimeLog.Log('no_rendering_context', 'Rendering pipeline does not have a rendering context. Aborting render calls.', LogLevel.Error);
             return;
         }
+        const gl = this._context;
 
-        this._context.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
-
-        // To PostRenderer frame buffer
-        this._context.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, (this._renderers.post as WebglPostRenderer).FrameBuffer);
-        this._context.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
-
+        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null);
+        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        
+        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, (this._renderers.mix as WebglMixRenderer).FrameBuffer1);
+        gl.clearColor(0.2, 0.2, 0.2, 1);
+        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.scene.Render();
+        
+        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, (this._renderers.mix as WebglMixRenderer).FrameBuffer2);
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        this._renderers.lighting.Render();
 
-        // To canvas
-        this._context.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null);
+        
+        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, (this._renderers.post as WebglPostRenderer).FrameBuffer);
+        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        this._renderers.mix.Render();
+        
+        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null);
+        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.post.Render();
-        this._context.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.debug.Render();
     }
 

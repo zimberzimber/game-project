@@ -11,6 +11,7 @@ import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { StaticImageDrawDirective } from "../Components/DrawDirectives/StaticImageDrawDirective";
 import { AnimatedImageDrawDirective } from "../Components/DrawDirectives/AnimatedImageDrawDirective";
 import { SpriteDefinitions } from "../AssetDefinitions/SpriteDefinitions";
+import { Light } from "../Components/Light/Light";
 
 export class PlayerEntity extends EntityBase {
     dd: AnimatedImageDrawDirective;
@@ -35,6 +36,7 @@ export class PlayerEntity extends EntityBase {
             // e.Parent.transform.MoveTowards(this.transform.Position, -5);
         }
         this.AddComponent(hitbox);
+        this.AddComponent(new Light(this, [1, 1, 1], 100, 1));
     }
 
     Update() {

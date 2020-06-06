@@ -17,6 +17,7 @@ import { Rendering } from "./RenderingPipeline";
 import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
 import { ScalarUtil } from "../Utility/Scalar";
+import { Light } from "../Components/Light/Light";
 
 class GameManager implements IConfigObserver {
     private _canvas: HTMLCanvasElement;
@@ -82,7 +83,7 @@ class GameManager implements IConfigObserver {
         test.transform.Scale = [5, 5];
         this.AddEntity(test);
 
-        const n = 20;
+        const n = 0;
         for (let x = 0; x < n; x++) {
             for (let y = 0; y < n; y++) {
                 let test2 = new Test2Entity();
@@ -284,6 +285,13 @@ class GameManager implements IConfigObserver {
             })
         }
         Rendering.SetDrawData('debug', lines)
+
+        const lights: number[] = [];
+        this.GetAllComponentsOfTypeFromEntityCollection(Light, allEntities, true).forEach((l: Light) => lights.push(...l.WebglData));
+        Rendering.SetDrawData('lighting', lights)
+
+
+        // Rendering.SetUniformData('post', 'u_offsetPower', [Math.abs(Math.sin(Date.now() * 0.001)) / 2]);
         Rendering.Render()
 
         if (this._displayFps) {

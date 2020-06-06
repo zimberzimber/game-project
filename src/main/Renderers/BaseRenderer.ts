@@ -1,15 +1,16 @@
 import { Log } from "../Workers/Logger";
-import { RendererAttributeContainer, RendererUniformContainer, RendererConfig } from "./_RendererInterfaces";
+import { IRendererAttributeContainer, IRendererUniformContainer, IRendererConfig } from "./_RendererInterfaces";
 
 export abstract class WebglRenderer {
+    private static _nextTextureId: number = 0;
     protected _context: WebGLRenderingContext;
     protected _program: WebGLProgram;
-    protected _attributes: { [key: string]: RendererAttributeContainer } = {};
-    protected _uniforms: { [key: string]: RendererUniformContainer } = {};
+    protected _attributes: { [key: string]: IRendererAttributeContainer } = {};
+    protected _uniforms: { [key: string]: IRendererUniformContainer } = {};
     protected _attributeBuffer: WebGLBuffer;
     protected _indexBuffer: WebGLBuffer;
 
-    constructor(canvas: HTMLCanvasElement, config: RendererConfig) {
+    constructor(canvas: HTMLCanvasElement, config: IRendererConfig) {
         let gl = canvas.getContext('webgl');
         {
             if (!gl) {
@@ -56,7 +57,6 @@ export abstract class WebglRenderer {
 
         // Enabling certain settings
         {
-            gl.clearColor(0.2, 0.2, 0.2, 1);
             //@ts-ignore Weird case where typescript refused to aknowledge the spread operator
             // gl.clearColor(...this._clearColor);
             // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -65,8 +65,8 @@ export abstract class WebglRenderer {
             gl.frontFace(gl.CCW);
             gl.cullFace(gl.BACK);
 
-            gl.enable(gl.BLEND);
             gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+            gl.enable(gl.BLEND);
         }
 
         //@ts-ignore Can't be null
@@ -139,6 +139,10 @@ export abstract class WebglRenderer {
         for (const uniform in this._uniforms) {
             gl[`uniform${this._uniforms[uniform].type}`](this._uniforms[uniform].index, ...this._uniforms[uniform].data);
         }
+    }
+
+    protected get NextTextureId(): number {
+        return WebglRenderer._nextTextureId++;
     }
 
     abstract SetDrawData(data: any): void;
