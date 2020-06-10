@@ -41,3 +41,8 @@ export interface IRendererConfig {
     attributes: IRendererAttributeDefinitions;
     uniforms: IRendererUniformDefinitions;
 }
+
+export interface IWebglTextureInfo{
+    uniformLocation: WebGLUniformLocation;
+    textureUnit: number;
+}

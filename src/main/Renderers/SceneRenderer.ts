@@ -1,9 +1,10 @@
 import { WebglRenderer } from "./BaseRenderer";
-import { ISceneRendererDrawData, IRendererConfig } from "./_RendererInterfaces";
+import { ISceneRendererDrawData, IRendererConfig, IWebglTextureInfo } from "./_RendererInterfaces";
 
 export class WebglSceneRenderer extends WebglRenderer {
     private _textures: { [key: number]: WebGLTexture; } = {};
     private _drawData: ISceneRendererDrawData = {};
+    private _textureInfo: IWebglTextureInfo;
 
     constructor(canvas: HTMLCanvasElement, config: IRendererConfig, imagesArray: { [key: number]: HTMLImageElement; }) {
         super(canvas, config);
@@ -21,14 +22,14 @@ export class WebglSceneRenderer extends WebglRenderer {
         }
 
         gl.useProgram(this._program);
-        this.t1 = gl.getUniformLocation(this._program, "u_sampler")!;
-        this.nt1 = this.NextTextureId;
-        gl.uniform1i(this.t1, this.nt1);
+        this._textureInfo = {
+            uniformLocation: gl.getUniformLocation(this._program, "u_sampler")!,
+            textureUnit: this.NextTextureId
+        };
+        gl.uniform1i(this._textureInfo.uniformLocation, this._textureInfo.textureUnit);
         gl.useProgram(null);
     }
 
-    t1: WebGLUniformLocation;
-    nt1: number;
 
     SetDrawData(data: { [key: number]: { attributes: number[], indexes: number[] } }): void {
         for (const index in data) {
@@ -39,21 +40,25 @@ export class WebglSceneRenderer extends WebglRenderer {
         }
     }
 
+    ActivateProgram():void{
+        super.ActivateProgram();
+        const gl = this._context;
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        gl.enable(gl.BLEND);
+        gl.enable(gl.DEPTH_TEST);
+    }
+
     Render() {
         this.ActivateProgram();
         const gl = this._context;
 
-        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-        gl.enable(gl.BLEND);
-        gl.enable(gl.DEPTH_TEST);
-
         for (const textureId in this._drawData) {
-            this._context.activeTexture(gl.TEXTURE0 + this.nt1);
-            this._context.bindTexture(gl.TEXTURE_2D, this._textures[textureId]);
-            this._context.bufferData(gl.ARRAY_BUFFER, this._drawData[textureId].attributes, gl.DYNAMIC_DRAW);
-            this._context.bufferData(gl.ELEMENT_ARRAY_BUFFER, this._drawData[textureId].indexes, gl.DYNAMIC_DRAW);
-            this._context.drawElements(gl.TRIANGLES, this._drawData[textureId].indexes.length, gl.UNSIGNED_SHORT, 0);
+            gl.activeTexture(gl.TEXTURE0 + this._textureInfo.textureUnit);
+            gl.bindTexture(gl.TEXTURE_2D, this._textures[textureId]);
+            gl.bufferData(gl.ARRAY_BUFFER, this._drawData[textureId].attributes, gl.DYNAMIC_DRAW);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this._drawData[textureId].indexes, gl.DYNAMIC_DRAW);
+            gl.drawElements(gl.TRIANGLES, this._drawData[textureId].indexes.length, gl.UNSIGNED_SHORT, 0);
         }
-        this._context.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindTexture(gl.TEXTURE_2D, null);
     }
 }

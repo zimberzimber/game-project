@@ -1,14 +1,14 @@
 import { WebglRenderer } from "./BaseRenderer";
-import { IRendererConfig } from "./_RendererInterfaces";
+import { IRendererConfig, IWebglTextureInfo } from "./_RendererInterfaces";
 
 export class WebglPostRenderer extends WebglRenderer {
     private _frameBuffer: WebGLFramebuffer;
     private _frameTexture: WebGLTexture;
     private _verts: Float32Array = new Float32Array([1, 1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1]);
+    private _textureInfo: IWebglTextureInfo;
 
     get FrameBuffer(): WebGLFramebuffer { return this._frameBuffer; }
     get FrameTexture(): WebGLTexture { return this._frameTexture; }
-
 
     constructor(canvas: HTMLCanvasElement, config: IRendererConfig) {
         super(canvas, config);
@@ -31,14 +31,14 @@ export class WebglPostRenderer extends WebglRenderer {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         gl.useProgram(this._program);
-        this.t1 = gl.getUniformLocation(this._program, "u_sampler")!;
-        this.nt1 = this.NextTextureId;
-        gl.uniform1i(this.t1, this.nt1);
+        
+        this._textureInfo = {
+            uniformLocation: gl.getUniformLocation(this._program, "u_sampler")!,
+            textureUnit: this.NextTextureId
+        };
+        gl.uniform1i(this._textureInfo.uniformLocation, this._textureInfo.textureUnit);
         gl.useProgram(null);
     }
-
-    t1: WebGLUniformLocation;
-    nt1: number;
 
     SetDrawData(): void { }
 
@@ -46,7 +46,7 @@ export class WebglPostRenderer extends WebglRenderer {
         this.ActivateProgram();
         const gl = this._context;
 
-        this._context.activeTexture(gl.TEXTURE0 + this.nt1);
+        this._context.activeTexture(gl.TEXTURE0 + this._textureInfo.textureUnit);
         gl.bindTexture(gl.TEXTURE_2D, this._frameTexture);
 
         gl.bufferData(gl.ARRAY_BUFFER, this._verts, gl.DYNAMIC_DRAW);

@@ -36,7 +36,7 @@ export class PlayerEntity extends EntityBase {
             // e.Parent.transform.MoveTowards(this.transform.Position, -5);
         }
         this.AddComponent(hitbox);
-        this.AddComponent(new Light(this, [1, 1, 1], 100, 1));
+        this.AddComponent(new Light(this, [1, 1, 1], 100, 0.5));
     }
 
     Update() {

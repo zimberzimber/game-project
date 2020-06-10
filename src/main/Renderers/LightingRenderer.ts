@@ -16,13 +16,17 @@ export class WebglLightingRenderer extends WebglRenderer {
         this._drawData = new Float32Array(data);
     }
 
-    Render(): void {
-        this.ActivateProgram();
+    ActivateProgram(): void {
+        super.ActivateProgram();
         const gl = this._context;
-
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         gl.enable(gl.BLEND);
         gl.disable(gl.DEPTH_TEST);
+    }
+
+    Render(): void {
+        this.ActivateProgram();
+        const gl = this._context;
 
         gl.bufferData(gl.ARRAY_BUFFER, this._drawData, gl.DYNAMIC_DRAW);
         gl.drawArrays(gl.POINTS, 0, this._drawData.length / this._attributeCount);

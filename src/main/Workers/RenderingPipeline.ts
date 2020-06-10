@@ -22,9 +22,17 @@ const GetEmptyMatrix2D = (): Float32Array => {
     return empty;
 }
 
+interface IRenderersContainer {
+    scene: WebglSceneRenderer;
+    debug: WebglDebugRenderer;
+    post: WebglPostRenderer;
+    lighting: WebglLightingRenderer;
+    mix: WebglMixRenderer;
+}
+
 class RenderingPipeline implements ICameraObserver {
     private _context: WebGLRenderingContext;
-    private _renderers: { [key: string]: WebglRenderer } = {}
+    private _renderers: IRenderersContainer;
 
     Init(canvas: HTMLCanvasElement): void {
         let gl = canvas.getContext('webgl');
@@ -42,27 +50,21 @@ class RenderingPipeline implements ICameraObserver {
 
         Camera.Subscribe(this);
         this._context = gl;
-        this._renderers.scene = new WebglSceneRenderer(canvas, RenderConfigs.scene, Images.GetImageArray());
-        this._renderers.debug = new WebglDebugRenderer(canvas, RenderConfigs.debug);
-        this._renderers.post = new WebglPostRenderer(canvas, RenderConfigs.post);
-        this._renderers.lighting = new WebglLightingRenderer(canvas, RenderConfigs.lighting);
-        this._renderers.mix = new WebglMixRenderer(canvas, RenderConfigs.mix);
+        this._renderers = {
+            scene: new WebglSceneRenderer(canvas, RenderConfigs.scene, Images.GetImageArray()),
+            debug: new WebglDebugRenderer(canvas, RenderConfigs.debug),
+            post: new WebglPostRenderer(canvas, RenderConfigs.post),
+            lighting: new WebglLightingRenderer(canvas, RenderConfigs.lighting),
+            mix: new WebglMixRenderer(canvas, RenderConfigs.mix),
+        };
 
         const empty = GetEmptyMatrix()
         let viewMatrix = GetEmptyMatrix();
         glMatrix.mat4.lookAt(viewMatrix, [0, 0, 900], [0, 0, 0], [0, 1, 0]);
 
-        this.SetUniformData('scene', 'u_viewMatrix', [false, viewMatrix])
-        this.SetUniformData('scene', 'u_worldMatrix', [false, empty]);
-        this.SetUniformData('scene', 'u_projectionMatrix', [false, empty]);
-
-        this.SetUniformData('debug', 'u_viewMatrix', [false, viewMatrix])
-        this.SetUniformData('debug', 'u_worldMatrix', [false, empty]);
-        this.SetUniformData('debug', 'u_projectionMatrix', [false, empty]);
-
-        this.SetUniformData('lighting', 'u_viewMatrix', [false, viewMatrix])
-        this.SetUniformData('lighting', 'u_worldMatrix', [false, empty]);
-        this.SetUniformData('lighting', 'u_projectionMatrix', [false, empty]);
+        this.SetUniformData(['scene', 'debug', 'lighting'], 'u_viewMatrix', [false, viewMatrix])
+        this.SetUniformData(['scene', 'debug', 'lighting'], 'u_worldMatrix', [false, empty]);
+        this.SetUniformData(['scene', 'debug', 'lighting'], 'u_projectionMatrix', [false, empty]);
 
         this.SetUniformData('post', 'u_offsetPower', [0]);
     }
@@ -73,15 +75,11 @@ class RenderingPipeline implements ICameraObserver {
         const worldMatrix = GetEmptyMatrix2D();
         glMatrix.mat4.rotate(worldMatrix, worldMatrix, args.transform.RotationRadian, [0, 0, 1]);
         glMatrix.mat4.translate(worldMatrix, worldMatrix, [-args.transform.Position[0], -args.transform.Position[1], 0]);
-        this.SetUniformData('scene', 'u_worldMatrix', [false, worldMatrix]);
-        this.SetUniformData('debug', 'u_worldMatrix', [false, worldMatrix]);
-        this.SetUniformData('lighting', 'u_worldMatrix', [false, worldMatrix]);
+        this.SetUniformData(['scene', 'debug', 'lighting'], 'u_worldMatrix', [false, worldMatrix]);
 
         const projectionMatrix = GetEmptyMatrix();
         glMatrix.mat4.ortho(projectionMatrix, args.transform.Scale[0] / -2, args.transform.Scale[0] / 2, args.transform.Scale[1] / -2, args.transform.Scale[1] / 2, args.nearFar[0], args.nearFar[1]);
-        this.SetUniformData('scene', 'u_projectionMatrix', [false, projectionMatrix]);
-        this.SetUniformData('debug', 'u_projectionMatrix', [false, projectionMatrix]);
-        this.SetUniformData('lighting', 'u_projectionMatrix', [false, projectionMatrix]);
+        this.SetUniformData(['scene', 'debug', 'lighting'], 'u_projectionMatrix', [false, projectionMatrix]);
     }
 
     Render(): void {
@@ -93,22 +91,22 @@ class RenderingPipeline implements ICameraObserver {
 
         gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null);
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
-        
-        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, (this._renderers.mix as WebglMixRenderer).FrameBuffer1);
+
+        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, this._renderers.mix.FrameBuffer1);
         gl.clearColor(0.2, 0.2, 0.2, 1);
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.scene.Render();
-        
-        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, (this._renderers.mix as WebglMixRenderer).FrameBuffer2);
+
+        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, this._renderers.mix.FrameBuffer2);
         gl.clearColor(0, 0, 0, 1);
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.lighting.Render();
 
-        
-        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, (this._renderers.post as WebglPostRenderer).FrameBuffer);
+
+        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, this._renderers.post.FrameBuffer);
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.mix.Render();
-        
+
         gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null);
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.post.Render();
@@ -129,9 +127,13 @@ class RenderingPipeline implements ICameraObserver {
         this._renderers[rendererName].SetDrawData(data);
     }
 
-    SetUniformData(rendererName: string, uniformName: string, data: any): void {
-        if (!this.CheckExists(rendererName)) return;
-        this._renderers[rendererName].SetUniformData(uniformName, data);
+    SetUniformData(rendererName: string | string[], uniformName: string, data: any): void {
+        if (typeof (rendererName) == 'string') {
+            if (this.CheckExists(rendererName))
+                this._renderers[rendererName].SetUniformData(uniformName, data);
+        }
+        else
+            rendererName.forEach(r => this.SetUniformData(r, uniformName, data));
     }
 }
 

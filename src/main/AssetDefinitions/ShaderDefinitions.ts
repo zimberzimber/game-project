@@ -103,10 +103,10 @@ float Flashlight()
 
 void main() {
     vec4 color = texture2D(u_sampler, v_texCoord);
-    color.r = texture2D(u_sampler, v_texCoord + vec2(u_offsetPower, 0.)).r;
-    color.b = texture2D(u_sampler, v_texCoord - vec2(u_offsetPower, 0.)).b;
-    color *= Flashlight();
-    color.a = 1.;
+    // color.r = texture2D(u_sampler, v_texCoord + vec2(u_offsetPower, 0.)).r;
+    // color.b = texture2D(u_sampler, v_texCoord - vec2(u_offsetPower, 0.)).b;
+    // color *= Flashlight();
+    // color.a = 1.;
     gl_FragColor = color;
 }`,
 
@@ -180,11 +180,22 @@ varying float v_radius;
 varying float v_hardness;
 
 void main() {
-    float dist = distance(v_position, gl_FragCoord.xy);
+    float dist = distance(gl_FragCoord.xy, v_position);
     if (dist > v_radius)
         discard;
 
-    float alpha = smoothstep(1., 0., dist / v_radius);
+    float alpha = 1.;
+    float min_distance = v_radius * v_hardness;
+
+    if (dist > min_distance)
+    {
+        float angle = atan(gl_FragCoord.y - v_position.y, gl_FragCoord.x - v_position.x);
+        vec2 p2 = vec2(v_position.x + cos(angle) * min_distance, v_position.y + sin(angle) * min_distance);
+
+        float dist2 = distance(gl_FragCoord.xy, p2);
+        alpha = smoothstep(1., 0., dist2 / (v_radius - min_distance));
+    }
+
     gl_FragColor = vec4(v_color, alpha);
 }
 `
