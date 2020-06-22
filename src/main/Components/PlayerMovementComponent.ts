@@ -1,9 +1,9 @@
-import { ComponentBase } from "../Bases/ComponentBase";
+import { ComponentBase } from "./ComponentBase";
 import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
 import { Game } from "../Workers/Game";
 import { Input } from "../Workers/InputHandler";
-import { EntityBase } from "../Bases/EntityBase";
+import { EntityBase } from "../Entities/EntityBase";
 import { Camera } from "../Workers/CameraManager";
 import { IMouseObserver, IKeyboardObserver, IKeyboardEvent, IMouseEvent, ButtonState } from "../Models/InputModels";
 import { Test2Entity } from "../Entities/Test2";
@@ -22,10 +22,11 @@ export class PlayerMovementComponent extends ComponentBase implements IMouseObse
 
     Update(): void {
         this.Parent.transform.TranslateByVec2(this._movement);
-        // Camera.Transform.TranslateByVec2(this._movement);
+        Camera.Transform.TranslateByVec2(this._movement);
         // Camera.Transform.RotateTowards(Input.MousePosition);
 
         this.Parent.transform.Rotate(1);
+        Camera.Transform.Rotate(1);
     }
 
     OnObservableNotified(args: IKeyboardEvent | IMouseEvent): void {
@@ -46,7 +47,7 @@ export class PlayerMovementComponent extends ComponentBase implements IMouseObse
     }
 
     private OnMouseDown(button: number, position: Vec2): void {
-        const zz = new Test2Entity();
+        const zz = new Test2Entity(null, Game.MousePosition);
         Game.AddEntity(zz);
         zz.transform.Position = Game.MousePosition;
     }

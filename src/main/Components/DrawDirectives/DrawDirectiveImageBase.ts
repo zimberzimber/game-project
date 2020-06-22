@@ -1,9 +1,9 @@
-import { DrawDirectiveBase } from "../../Bases/DrawDirectiveBase";
-import { EntityBase } from "../../Bases/EntityBase";
+import { DrawDirectiveBase } from "./DrawDirectiveBase";
+import { EntityBase } from "../../Entities/EntityBase";
 import { Vec2 } from "../../Models/Vectors";
 import { ISpriteStorage } from "../../Models/SpriteModels";
 
-export abstract class ImageDrawDirective extends DrawDirectiveBase {
+export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
     size: Vec2;
     protected readonly _spriteData: ISpriteStorage;
 

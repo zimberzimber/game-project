@@ -205,10 +205,14 @@ const IsInCollisionRange = (a: HitboxBase, b: HitboxBase): boolean => {
     const aTrans = a.Parent.worldRelativeTransform;
     const bTrans = b.Parent.worldRelativeTransform;
     const distance = Vec2Utils.Distance(aTrans.Position, bTrans.Position);
-    return distance <= a._hitboxOverallRadius * Math.max(aTrans.Scale[0], aTrans.Scale[1]) + b._hitboxOverallRadius * Math.max(bTrans.Scale[0], bTrans.Scale[1]);
+    return distance <= a.BoundingRadius * Math.max(aTrans.Scale[0], aTrans.Scale[1]) + b.BoundingRadius * Math.max(bTrans.Scale[0], bTrans.Scale[1]);
 }
 
-// Checks if the given point is inside the given polygon
+/**
+ * Check if the point is inside the polygon
+ * @param point Subject point
+ * @param polyline Subject polygon
+ */
 export const IsPointInPolygon = (point: Vec2, polyline: Vec2[]): boolean => {
     if (polyline.length < 3)
         return false;
@@ -222,16 +226,29 @@ export const IsPointInPolygon = (point: Vec2, polyline: Vec2[]): boolean => {
     return intersections % 2 == 1;
 }
 
-// Checks whether two lines intersect. Taken from:
-// https://stackoverflow.com/questions/9043805/test-if-two-lines-intersect-javascript-function
-const LineIntersection = (line1start: Vec2, line1end: Vec2, line2start: Vec2, line2end: Vec2): boolean => {
-    const det = (line1end[0] - line1start[0]) * (line2end[1] - line2start[1]) - (line2end[0] - line2start[0]) * (line1end[1] - line1start[1]);
-    if (det == 0) return false;
+// Taken from: https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect#answer-1968345
+/**
+ * Get the point of intersection between two lines, or null if they do not intersect.
+ * @param l1p1 Line 1 start
+ * @param l1p2 Line 1 end
+ * @param l2p1 Line 2 start
+ * @param l2p2 Line 2 end
+ */
+const LineIntersection = (l1p1: Vec2, l1p2: Vec2, l2p1: Vec2, l2p2: Vec2): Vec2 | null => {
+    const s1: Vec2 = [l1p2[0] - l1p1[0], l1p2[1] - l1p1[1]];
+    const s2: Vec2 = [l2p2[0] - l2p1[0], l2p2[1] - l2p1[1]];
+    const det = -s2[0] * s1[1] + s1[0] * s2[1];
 
-    const lambda = ((line2end[1] - line2start[1]) * (line2end[0] - line1start[0]) + (line2start[0] - line2end[0]) * (line2end[1] - line1start[1])) / det;
-    const gamma = ((line1start[1] - line1end[1]) * (line2end[0] - line1start[0]) + (line1end[0] - line1start[0]) * (line2end[1] - line1start[1])) / det;
-    return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
-};
+    if (det != 0) {
+        const s = (-s1[1] * (l1p1[0] - l2p1[0]) + s1[0] * (l1p1[1] - l2p1[1])) / det;
+        const t = (s2[0] * (l1p1[1] - l2p1[1]) - s2[1] * (l1p1[0] - l2p1[0])) / det;
+
+        if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+            return [l1p1[0] + (t * s1[0]), l1p1[1] + (t * s1[1])];
+    }
+
+    return null;
+}
 
 // Checks is two polygons have intersecting lines
 const DoPolygonsIntersect = (p1: Vec2[], p2: Vec2[]): boolean => {

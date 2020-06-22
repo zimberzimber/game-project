@@ -1,5 +1,5 @@
-import { ComponentBase } from "../../Bases/ComponentBase";
-import { EntityBase } from "../../Bases/EntityBase";
+import { ComponentBase } from "../ComponentBase";
+import { EntityBase } from "../../Entities/EntityBase";
 import { Vec3 } from "../../Models/Vectors";
 
 export class Light extends ComponentBase {
@@ -23,7 +23,8 @@ export class Light extends ComponentBase {
         this._hardness = hardness;
     }
 
-    get WebglData() {
-        return [...this.Parent.worldRelativeTransform.Position, ...this._color, this._radius, this._hardness]
+    get WebglData(): number[] {
+        if (!this.Enabled) return [];
+        return [...this.Parent.worldRelativeTransform.Position, ...this._color, this._radius, this._hardness];
     }
 }

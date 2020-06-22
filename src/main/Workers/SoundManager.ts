@@ -67,7 +67,7 @@ class SoundManager {
     }
 
     GetSoundSourceByName(name: string): ArrayBuffer | null {
-        return this.soundSourceNameIndexes[name] ? this.GetSoundSource(this.soundSourceNameIndexes[name]) : null;
+        return this.soundSourceNameIndexes[name] !== undefined ? this.GetSoundSource(this.soundSourceNameIndexes[name]) : null;
     }
 }
 

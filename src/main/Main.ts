@@ -57,11 +57,11 @@ if (Config.GetConfig('debug', false) === true) {
         sounds: Sounds,
         idb: IDB,
         game: Game,
-        log:Log,
-        cfg:Config,
-        images:Images,
-        sprites:Sprites,
-        audio:Audio,
+        log: Log,
+        cfg: Config,
+        images: Images,
+        sprites: Sprites,
+        audio: Audio,
         input: Input,
         settings: Settings,
         rendering: Rendering,
@@ -69,4 +69,7 @@ if (Config.GetConfig('debug', false) === true) {
         vec2u: Vec2Utils,
         scalaru: ScalarUtil
     }
+
+    //@ts-ignore
+    window.stop = () => Game.Paused = true;
 }

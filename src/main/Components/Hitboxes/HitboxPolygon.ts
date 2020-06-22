@@ -1,24 +1,24 @@
 import { Vec2 } from "../../Models/Vectors";
 import { HitboxBase } from "./HitboxBase";
-import { EntityBase } from "../../Bases/EntityBase";
+import { EntityBase } from "../../Entities/EntityBase";
 import { TriggerState, HitboxType, DebugDrawColor } from "../../Models/CollisionModels";
 import { Vec2Utils } from "../../Utility/Vec2";
 
 export class HitboxPolygon extends HitboxBase {
-    HitboxType: HitboxType = HitboxType.Polygonal;
+    readonly HitboxType: HitboxType = HitboxType.Polygonal;
     private Polyline: Vec2[];
 
     constructor(parent: EntityBase, ...points: Vec2[]) {
         super(parent);
         this.Polyline = points;
-        this.CalculateOverallHitboxRadius();
+        this.CalculateBoundingRadius();
     }
 
-    protected CalculateOverallHitboxRadius() {
+    protected CalculateBoundingRadius() {
         this.Polyline.forEach(p => {
             let distance = Vec2Utils.DistanceFrom00(p);
-            if (distance > this._hitboxOverallRadius)
-                this._hitboxOverallRadius = distance;
+            if (distance > this._boundingRadius)
+                this._boundingRadius = distance;
         });
     }
 

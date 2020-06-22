@@ -1,11 +1,11 @@
-import { ComponentBase } from "../../Bases/ComponentBase";
+import { ComponentBase } from "../ComponentBase";
 import { CheckCollision } from "../../Workers/CollisionChecker";
 import { HitboxType, TriggerState, CollisionGroup, CollisionDelegate } from "../../Models/CollisionModels";
 
 export abstract class HitboxBase extends ComponentBase {
     readonly HitboxType: HitboxType = HitboxType.Base;
-    _hitboxOverallRadius: number = 0;
-    get HitboxOverallRadius(): number { return this._hitboxOverallRadius; }
+    protected _boundingRadius: number = 0;
+    get BoundingRadius(): number { return this._boundingRadius; }
 
     CollisionGroup: CollisionGroup = CollisionGroup.None;
     CollideWithGroup: CollisionGroup = CollisionGroup.None;
@@ -44,8 +44,6 @@ export abstract class HitboxBase extends ComponentBase {
 
     get TriggerState(): TriggerState { return this._triggerState }
     set TriggerState(newState: TriggerState) {
-        if (this.TriggerState == newState) return;
-
         this._triggerState = newState;
         switch (newState) {
             case TriggerState.NotTrigger:
@@ -86,6 +84,11 @@ export abstract class HitboxBase extends ComponentBase {
             this.CollisionScript(collidedWith);
     }
 
-    protected abstract CalculateOverallHitboxRadius(): void;
+    OnDisabled(): void {
+        if (this._triggerState == TriggerState.OneTimeTrigger || this._triggerState == TriggerState.OnEnterTrigger)
+            this.PreviousCollisions = [];
+    }
+
+    protected abstract CalculateBoundingRadius(): void;
     abstract get DebugDrawData(): number[] | null;
 }

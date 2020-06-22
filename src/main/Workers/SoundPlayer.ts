@@ -1,5 +1,5 @@
 import { LogLevel } from "./Logger";
-import { SoundTags, IActiveSound, ISoundDefinition, ControllerType, ISoundplayerMasterCallback, ISoundplayerIndividualCallback } from '../Models/SoundModels';
+import { SoundType, IActiveSound, ISoundDefinition, ControllerType, ISoundplayerMasterCallback, ISoundplayerIndividualCallback } from '../Models/SoundModels';
 import { OneTimeLog } from './OneTimeLogger';
 import { Sounds } from './SoundManager';
 import { ScalarUtil } from "../Utility/Scalar";
@@ -34,7 +34,7 @@ class SoundPlayer {
         this.masterPanNode.connect(this.masterGainNode).connect(this.context.destination);
         this.nodeConnectionPoint = this.masterPanNode;
 
-        for (let tag in SoundTags)
+        for (let tag in SoundType)
             if (!isNaN(Number(tag))) {
                 this.tagGainNodes[tag] = this.context.createGain();
                 this.tagGainNodes[tag].connect(this.nodeConnectionPoint);
@@ -67,7 +67,7 @@ class SoundPlayer {
     }
 
     StopSound(id: number): void {
-        if (!this.IsActive(id)) return;
+        if (!this.IsActiveInternal(id)) return;
         this.activeSounds[id].sourceNode.stop(0);
     }
 
@@ -83,22 +83,23 @@ class SoundPlayer {
         const gain = this.context.createGain();
         const pan = this.context.createStereoPanner();
 
-        const acttivityInfo: IActiveSound = {
+        const activityInfo: IActiveSound = {
             sourceSoundId: id,
+            sourceName: config.soundSourceName,
             sourceNode: source,
             gainNode: gain,
             panNode: pan,
             playbackRate: config.playbackRate,
-            looping: config.loop,
-            tag: config.tag
+            loop: config.loop,
+            type: config.type
         };
 
         gain.gain.value = config.volume;
         source.loop = config.loop;
-        this.UpdatePlaybackRate(acttivityInfo);
+        this.UpdatePlaybackRate(activityInfo);
 
         this.activeSoundIds.push(id);
-        this.activeSounds[id] = acttivityInfo;
+        this.activeSounds[id] = activityInfo;
 
         this.context.decodeAudioData(buffer, (audioBuffer) => {
             source.buffer = audioBuffer;
@@ -108,9 +109,33 @@ class SoundPlayer {
 
         source.connect(pan);
         pan.connect(gain);
-        gain.connect(this.tagGainNodes[config.tag]);
+        gain.connect(this.tagGainNodes[config.type]);
 
         return id;
+    }
+
+    RestartSound(id: number): void {
+        if (!this.IsActiveInternal(id)) return;
+
+        const a = this.activeSounds[id];
+        const buffer = Sounds.GetSoundSourceByName(a.sourceName);
+        if (!buffer) {
+            OneTimeLog.Log(`soundPlayer_failedLoading_${a.sourceName}`, `Failed retrieving sound named '${a.sourceName}' from sound manager.`, LogLevel.Error);
+            return;
+        }
+        
+        const newSource = this.context.createBufferSource();
+        this.context.decodeAudioData(buffer, (audioBuffer) => {
+            newSource.buffer = audioBuffer;
+            newSource.start(0);
+            newSource.onended = a.sourceNode.onended;
+            newSource.connect(a.panNode);
+    
+            a.sourceNode.onended = null;
+            a.sourceNode.stop();
+            a.sourceNode.disconnect();
+            a.sourceNode = newSource;
+        });
     }
 
     GetMasterControllerValue(controller: ControllerType): number {
@@ -141,16 +166,16 @@ class SoundPlayer {
         }
     }
 
-    GetTagVolume(tag: SoundTags): number {
+    GetTagVolume(tag: SoundType): number {
         return this.tagGainNodes[tag].gain.value;
     }
 
-    SetTagVolume(tag: SoundTags, volume: number) {
+    SetTagVolume(tag: SoundType, volume: number) {
         this.tagGainNodes[tag].gain.value = volume;
     }
 
     GetControllerValueForSound(soundId: number, controller: ControllerType): number {
-        if (!this.IsActive(soundId)) return 0;
+        if (!this.IsActiveInternal(soundId)) return 0;
 
         switch (controller) {
             case ControllerType.Volume:
@@ -163,7 +188,7 @@ class SoundPlayer {
     }
 
     SetControllerValueForSound(soundId: number, controller: ControllerType, value: number): void {
-        if (!this.IsActive(soundId)) return;
+        if (!this.IsActiveInternal(soundId)) return;
 
         switch (controller) {
             case ControllerType.Volume:
@@ -180,21 +205,26 @@ class SoundPlayer {
     }
 
     GetLooping(soundId: number): boolean {
-        if (!this.IsActive(soundId)) return false;
+        if (!this.IsActiveInternal(soundId)) return false;
 
         return this.activeSounds[soundId].sourceNode.loop;
     }
 
     SetLooping(soundId: number, value: boolean): void {
-        if (!this.IsActive(soundId)) return;
+        if (!this.IsActiveInternal(soundId)) return;
 
         this.activeSounds[soundId].sourceNode.loop = value;
     }
 
-    private IsActive(id: number): boolean {
-        if (this.activeSounds[id]) return true;
+    IsActive(soundId: number): boolean {
+        return this.activeSounds[soundId] != undefined;
+    }
 
-        OneTimeLog.Log(`inactive_sound_%{id}`, `Attempted to interact with inactive sound ID: ${id}`, LogLevel.Error);
+    // Same as IsActive, but only called from inside this class so it would log an error should the sound be inactive
+    private IsActiveInternal(soundId: number): boolean {
+        if (this.activeSounds[soundId]) return true;
+
+        OneTimeLog.Log(`inactive_sound_${soundId}`, `Attempted to interact with inactive sound ID: ${soundId}`, LogLevel.Error);
         return false;
     }
 
@@ -203,7 +233,7 @@ class SoundPlayer {
     }
 
     private DisposeSound(id: number): void {
-        if (!this.IsActive(id)) return;
+        if (!this.IsActiveInternal(id)) return;
 
         this.activeSounds[id].sourceNode.loop = false;
         this.activeSounds[id].sourceNode.disconnect();
@@ -260,7 +290,7 @@ class SoundPlayer {
     }
 
     FadeVolumeForSound(soundId: number, volume: number, duration: number, callback: ISoundplayerIndividualCallback | void): void {
-        if (!this.IsActive(soundId)) return;
+        if (!this.IsActiveInternal(soundId)) return;
         this.activeSounds[soundId].gainNode.gain.setValueCurveAtTime([this.activeSounds[soundId].gainNode.gain.value, volume], 0, duration)
         if (callback) setTimeout(callback, duration * 1000, soundId);
     }

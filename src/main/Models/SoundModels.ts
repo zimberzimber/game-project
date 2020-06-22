@@ -1,27 +1,28 @@
-export enum SoundTags {
-    Default, // Paused when the game is paused.
+export enum SoundType {
+    Default, // Paused when the game is paused
     Music, // Plays at a lower volume when the game is paused.
     UI // Unaffected by pausing.
 }
 
-export interface IActiveSound {
+interface ISoundBase {
+    loop: boolean;
+    type: SoundType;
+    playbackRate: number;
+}
+
+export interface IActiveSound extends ISoundBase {
     sourceSoundId: number;
+    sourceName: string,
     sourceNode: AudioBufferSourceNode;
     gainNode: GainNode;
     panNode: StereoPannerNode;
-    tag: SoundTags;
-
-    // Stored separetly as there are no nodes for these control, and to affect that the source has to be modified
-    playbackRate: number;
-    looping: boolean;
 }
 
-export interface ISoundDefinition {
+export interface ISoundDefinition extends ISoundBase {
     soundSourceName: string;
     volume: number;
-    playbackRate: number;
-    loop: boolean;
-    tag: SoundTags;
+    falloffStartDistance: number;
+    falloffDistance: number;
 }
 
 export enum ControllerType {

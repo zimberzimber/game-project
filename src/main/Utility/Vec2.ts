@@ -1,4 +1,5 @@
 import { Vec2 } from "../Models/Vectors";
+import { ScalarUtil } from "./Scalar";
 
 export class Vec2Utils {
     static Translate = (v: Vec2, x: number, y: number): Vec2 => [v[0] + x, v[1] + y];
@@ -52,5 +53,17 @@ export class Vec2Utils {
             Math.cos(radian) * point[0] - Math.sin(radian) * point[1],
             Math.sin(radian) * point[0] + Math.cos(radian) * point[1],
         ];
+    }
+
+    static GetMiddle = (p1: Vec2, p2: Vec2): Vec2 => {
+        return [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2];
+    }
+
+    static GetAngle = (p1: Vec2, p2: Vec2): number => {
+        return ScalarUtil.ToAngle(Vec2Utils.GetRadian(p1, p2));
+    }
+
+    static GetRadian = (p1: Vec2, p2: Vec2): number => {
+        return Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
     }
 }

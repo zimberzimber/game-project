@@ -1,13 +1,13 @@
-import { EntityBase } from "../Bases/EntityBase";
+import { EntityBase } from "../Entities/EntityBase";
 import { PlayerEntity } from "../Entities/Player";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
-import { ComponentBase } from "../Bases/ComponentBase";
+import { ComponentBase } from "../Components/ComponentBase";
 import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
 import { CheckCollision, IsPointInCollider, IsPointInPolygon } from "./CollisionChecker";
-import { ImageDrawDirective } from "../Components/DrawDirectives/ImageDrawDirective";
+import { DrawDirectiveImageBase } from "../Components/DrawDirectives/DrawDirectiveImageBase";
 import { TestEntity } from "../Entities/Test";
 import { Config, IConfigObserver, IConfigEventArgs } from "../Proxies/ConfigProxy";
-import { SoundTags } from "../Models/SoundModels";
+import { SoundType } from "../Models/SoundModels";
 import { Audio } from "./SoundPlayer";
 import { Input } from "./InputHandler";
 import { Settings } from "./SettingsManager";
@@ -18,6 +18,7 @@ import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
 import { ScalarUtil } from "../Utility/Scalar";
 import { Light } from "../Components/Light/Light";
+import { SoundDefinitions } from "../AssetDefinitions/SoundDefinitions";
 
 class GameManager implements IConfigObserver {
     private _canvas: HTMLCanvasElement;
@@ -43,18 +44,12 @@ class GameManager implements IConfigObserver {
         if (this._paused == paused) return;
 
         this._paused = paused;
-        Audio.PlaySound({
-            soundSourceName: 'ui',
-            volume: 1,
-            playbackRate: 1,
-            loop: false,
-            tag: SoundTags.UI
-        });
+        Audio.PlaySound(SoundDefinitions.ui);
 
         if (paused)
-            Audio.SetTagVolume(SoundTags.Music, 0.5);
+            Audio.SetTagVolume(SoundType.Music, 0.5);
         else
-            Audio.SetTagVolume(SoundTags.Music, 1);
+            Audio.SetTagVolume(SoundType.Music, 1);
     }
 
     /** World relative mouse position */
@@ -70,7 +65,6 @@ class GameManager implements IConfigObserver {
         Camera.Transform.Scale = [this._canvas.width, this._canvas.height];
         Camera.Transform.Position = [0, 0];
         Camera.Transform.Rotation = 0;
-        Camera.ManualUpdate();
 
         Config.Observable.Subscribe(this);
 
@@ -96,13 +90,7 @@ class GameManager implements IConfigObserver {
         Input.MouseElement = this._canvas;
         Input.Keymap = Settings.GetSetting('controlsKeymap');
 
-        Audio.PlaySound({
-            soundSourceName: 'loop2',
-            volume: 0.1,
-            playbackRate: 1,
-            loop: true,
-            tag: SoundTags.Music,
-        });
+        // Audio.PlaySound(SoundDefinitions.loop2);
 
         requestAnimationFrame(this.Update.bind(this))
     }
@@ -239,18 +227,18 @@ class GameManager implements IConfigObserver {
         }
 
         // Collect all drawing data:
-        const dds = this.GetAllComponentsOfTypeFromEntityCollection(ImageDrawDirective, allEntities, true);
+        const dds = this.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveImageBase, allEntities, true);
 
         const viewCenter = Camera.Transform.Position
         const viewPolyline = Camera.ViewPolyline;
 
         const drawData = {}
-        dds.forEach((dd: ImageDrawDirective) => {
+        dds.forEach((dd: DrawDirectiveImageBase) => {
             // Skip directives outside of view
             const dTrans = dd.Parent.worldRelativeTransform
             const dRadius = Math.sqrt(Math.pow(dd.size[0] * dTrans.Scale[0], 2) + Math.pow(dd.size[1] * dTrans.Scale[1], 2))
 
-            if (this.IsInView(dTrans.Position, dRadius)) {
+            if (Camera.IsInView(dTrans.Position, dRadius)) {
                 if (!drawData[dd.ImageId])
                     drawData[dd.ImageId] = { attributes: [], indexes: [] };
 
@@ -270,9 +258,9 @@ class GameManager implements IConfigObserver {
             hitboxes.forEach((hb: HitboxBase) => {
                 // Skip draws outside of view
                 const hTrans = hb.Parent.worldRelativeTransform;
-                const hRadius = hb.HitboxOverallRadius * Math.max(hb.Parent.worldRelativeTransform.Scale[0], hb.Parent.worldRelativeTransform.Scale[1]);
+                const hRadius = hb.BoundingRadius * Math.max(hb.Parent.worldRelativeTransform.Scale[0], hb.Parent.worldRelativeTransform.Scale[1]);
 
-                if (this.IsInView(hTrans.Position, hRadius)) {
+                if (Camera.IsInView(hTrans.Position, hRadius)) {
                     const hData: number[] | null = hb.DebugDrawData;
                     if (hData) {
                         if (hb.TriggerState == TriggerState.NotTrigger) {
@@ -287,7 +275,10 @@ class GameManager implements IConfigObserver {
         Rendering.SetDrawData('debug', lines)
 
         const lights: number[] = [];
-        this.GetAllComponentsOfTypeFromEntityCollection(Light, allEntities, true).forEach((l: Light) => lights.push(...l.WebglData));
+        this.GetAllComponentsOfTypeFromEntityCollection(Light, allEntities, true).forEach((l: Light) => {
+            if (Camera.IsInView(l.Parent.worldRelativeTransform.Position, l.Radius))
+                lights.push(...l.WebglData);
+        });
         Rendering.SetDrawData('lighting', lights)
 
 
@@ -320,10 +311,6 @@ class GameManager implements IConfigObserver {
 
     FPSReletive(value: number): number {
         return value * this._updateDelta;
-    }
-
-    IsInView(point: Vec2, radius: number): boolean {
-        return IsPointInPolygon(Vec2Utils.MoveTowards(point, Camera.Transform.Position, radius, false), Camera.ViewPolyline);
     }
 }
 

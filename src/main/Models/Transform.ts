@@ -1,38 +1,58 @@
 import { Vec2 } from "./Vectors";
 import { ScalarUtil } from "../Utility/Scalar";
 import { Vec2Utils } from "../Utility/Vec2";
+import { IObserver, Observable } from "./Observable";
 
-// Not using the observable pattern here because its too heavy for what it'll be used for
-export class Transform {
-    /** Callback for whenever the transform changes. */
-    onChanged: Function | undefined = undefined;
+export enum TransformField {
+    None = 0,
+    Position = 1 << 0,
+    Rotation = 1 << 1,
+    Scale = 1 << 2,
+    Depth = 1 << 3,
+    All = ~(~0 << 4)
+}
 
+export interface ITransformObserver extends IObserver<ITransformEventArgs> {
+    OnObservableNotified(args: ITransformEventArgs): void;
+}
+
+export interface ITransformEventArgs {
+    oldValue: number | Vec2;
+    newValue: number | Vec2;
+    field: TransformField;
+}
+
+export class Transform extends Observable<ITransformObserver, ITransformEventArgs> {
     private _position: Vec2 = [0, 0];
     get Position(): Vec2 { return this._position; }
     set Position(position: Vec2) {
+        const old = this._position;
         this._position = position;
-        if (this.onChanged) this.onChanged();
+        this.Notify({ oldValue: old, newValue: position, field: TransformField.Position });
     }
 
     private _depth: number = 0;
     get Depth(): number { return this._depth; }
     set Depth(depth: number) {
+        const old = this._depth;
         this._depth = depth;
-        if (this.onChanged) this.onChanged();
+        this.Notify({ oldValue: old, newValue: depth, field: TransformField.Depth });
     }
 
     private _scale: Vec2 = [1, 1];
     get Scale(): Vec2 { return this._scale; }
     set Scale(scale: Vec2) {
+        const old = this._scale;
         this._scale = scale;
-        if (this.onChanged) this.onChanged();
+        this.Notify({ oldValue: old, newValue: scale, field: TransformField.Scale });
     }
 
     private _rotation: number = 0;
     get Rotation(): number { return this._rotation; }
     set Rotation(angle: number) {
+        const old = this._rotation;
         this._rotation = angle % 360;
-        if (this.onChanged) this.onChanged();
+        this.Notify({ oldValue: old, newValue: this._rotation, field: TransformField.Rotation });
     };
 
     get RotationRadian(): number { return ScalarUtil.ToRadian(this._rotation); }
@@ -108,19 +128,16 @@ export class Transform {
         result.Rotation = subject._rotation + operator._rotation;
         result._scale = Vec2Utils.Mult(subject._scale, operator._scale);
         result._depth = subject._depth + operator._depth;
-        
+
         return result;
     }
 
-    static Copy(original: Transform, includeCallback: boolean = false): Transform {
+    static Copy(original: Transform): Transform {
         const copy = new Transform();
         copy._position = original._position;
         copy._rotation = original._rotation;
         copy._scale = original._scale;
         copy._depth = original._depth;
-
-        if (includeCallback)
-            copy.onChanged = original.onChanged;
 
         return copy;
     }

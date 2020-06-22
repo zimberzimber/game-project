@@ -1,7 +1,8 @@
-import { ComponentBase } from "./ComponentBase";
-import { Transform } from "../Models/Transform";
+import { ComponentBase } from "../Components/ComponentBase";
+import { Transform, ITransformObserver, ITransformEventArgs } from "../Models/Transform";
+import { Vec2 } from "../Models/Vectors";
 
-export class EntityBase {
+export class EntityBase implements ITransformObserver {
     private static NextEntityId: number = 0;
 
     readonly entityId: number;
@@ -16,12 +17,19 @@ export class EntityBase {
     get Parent(): EntityBase | undefined { return this._parent; }
     get Children(): EntityBase[] { return this._children; }
 
-    constructor(parent: EntityBase | void) {
+    constructor(parent: EntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
         this._parent = parent || undefined;
         this.entityId = EntityBase.NextEntityId++;
 
+        this.transform.Position = position;
+        this.transform.Rotation = rotation;
+        this.transform.Scale = scale;
+        this.transform.Subscribe(this);
         EntityBase.CalculateWorlRelativeTransform(this);
-        this.transform.onChanged = () => EntityBase.CalculateWorlRelativeTransform(this);
+    }
+
+    OnObservableNotified(args: ITransformEventArgs): void {
+        EntityBase.CalculateWorlRelativeTransform(this);
     }
 
     Update(): void {
@@ -81,7 +89,7 @@ export class EntityBase {
                 current = current.Parent;
             }
         }
-        
+
         entity.worldRelativeTransform = relative;
         entity._children.forEach(c => EntityBase.CalculateWorlRelativeTransform(c));
     }

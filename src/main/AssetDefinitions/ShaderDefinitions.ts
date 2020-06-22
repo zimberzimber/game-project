@@ -142,7 +142,8 @@ void main() {
     gl_FragColor = texture2D(u_sampler_0, v_texCoord) * texture2D(u_sampler_1, v_texCoord);
 }`,
 
-    // x, y, r, g, b, radius, hardness
+    // Resolution extraction from projection matrix:
+    // https://stackoverflow.com/a/12926655
     lighting_vertex: `
 precision mediump float;
 
@@ -167,7 +168,11 @@ void main() {
     
     gl_Position = u_projectionMatrix * u_viewMatrix * u_worldMatrix * vec4(a_position, 1., 1.);
     gl_PointSize = a_radius * 2.;
-    v_position = a_position + vec2(300., 250.);
+
+    vec2 half_resolution = vec2(
+        (1. - u_projectionMatrix[0][3]) / u_projectionMatrix[0][0],
+        (1. - u_projectionMatrix[1][3]) / u_projectionMatrix[1][1]);
+    v_position = (u_worldMatrix * vec4(a_position, 1., 1.)).xy + half_resolution;
 }
 `,
 

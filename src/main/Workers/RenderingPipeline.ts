@@ -5,10 +5,11 @@ import { Log, LogLevel } from "./Logger";
 import { OneTimeLog } from "./OneTimeLogger";
 import { WebglDebugRenderer } from "../Renderers/DebugRenderer";
 import { RenderConfigs } from "../Renderers/_RendererConfigs";
-import { ICameraObserver, ICameraEventArgs, Camera } from "./CameraManager";
+import { Camera } from "./CameraManager";
 import { WebglPostRenderer } from "../Renderers/PostRenderer";
 import { WebglLightingRenderer } from "../Renderers/LightingRenderer";
 import { WebglMixRenderer } from "../Renderers/MixRenderer";
+import { ITransformObserver, ITransformEventArgs } from "../Models/Transform";
 
 //@ts-ignore
 const glMatrix = window.glMatrix;
@@ -30,7 +31,7 @@ interface IRenderersContainer {
     mix: WebglMixRenderer;
 }
 
-class RenderingPipeline implements ICameraObserver {
+class RenderingPipeline implements ITransformObserver {
     private _context: WebGLRenderingContext;
     private _renderers: IRenderersContainer;
 
@@ -48,7 +49,7 @@ class RenderingPipeline implements ICameraObserver {
             return;
         }
 
-        Camera.Subscribe(this);
+        Camera.Transform.Subscribe(this);
         this._context = gl;
         this._renderers = {
             scene: new WebglSceneRenderer(canvas, RenderConfigs.scene, Images.GetImageArray()),
@@ -69,16 +70,16 @@ class RenderingPipeline implements ICameraObserver {
         this.SetUniformData('post', 'u_offsetPower', [0]);
     }
 
-    OnObservableNotified(args: ICameraEventArgs): void {
+    OnObservableNotified(args: ITransformEventArgs): void {
         if (!this._context) return;
-
+        
         const worldMatrix = GetEmptyMatrix2D();
-        glMatrix.mat4.rotate(worldMatrix, worldMatrix, args.transform.RotationRadian, [0, 0, 1]);
-        glMatrix.mat4.translate(worldMatrix, worldMatrix, [-args.transform.Position[0], -args.transform.Position[1], 0]);
+        glMatrix.mat4.rotate(worldMatrix, worldMatrix, Camera.Transform.RotationRadian, [0, 0, 1]);
+        glMatrix.mat4.translate(worldMatrix, worldMatrix, [-Camera.Transform.Position[0], -Camera.Transform.Position[1], 0]);
         this.SetUniformData(['scene', 'debug', 'lighting'], 'u_worldMatrix', [false, worldMatrix]);
 
         const projectionMatrix = GetEmptyMatrix();
-        glMatrix.mat4.ortho(projectionMatrix, args.transform.Scale[0] / -2, args.transform.Scale[0] / 2, args.transform.Scale[1] / -2, args.transform.Scale[1] / 2, args.nearFar[0], args.nearFar[1]);
+        glMatrix.mat4.ortho(projectionMatrix, Camera.Transform.Scale[0] / -2, Camera.Transform.Scale[0] / 2, Camera.Transform.Scale[1] / -2, Camera.Transform.Scale[1] / 2, Camera.NearFar[0], Camera.NearFar[1]);
         this.SetUniformData(['scene', 'debug', 'lighting'], 'u_projectionMatrix', [false, projectionMatrix]);
     }
 
@@ -112,6 +113,11 @@ class RenderingPipeline implements ICameraObserver {
         this._renderers.post.Render();
         gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.debug.Render();
+
+        // gl.clearColor(0, 0, 0, 1);
+        // gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        // this._renderers.lighting.Render();
+        // this._renderers.scene.Render();
     }
 
     private CheckExists(rendererName: string): boolean {

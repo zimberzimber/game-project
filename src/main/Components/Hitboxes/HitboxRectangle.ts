@@ -1,9 +1,9 @@
 import { HitboxBase } from "./HitboxBase";
 import { TriggerState, HitboxType, DebugDrawColor } from "../../Models/CollisionModels";
-import { EntityBase } from "../../Bases/EntityBase";
+import { EntityBase } from "../../Entities/EntityBase";
 
 export class HitboxRectangle extends HitboxBase {
-    HitboxType: HitboxType = HitboxType.Rectangular;
+    readonly HitboxType: HitboxType = HitboxType.Rectangular;
     private _width: number;
     private _height: number;
 
@@ -11,24 +11,24 @@ export class HitboxRectangle extends HitboxBase {
         super(parent);
         this._width = width;
         this._height = height;
-        this.CalculateOverallHitboxRadius();
+        this.CalculateBoundingRadius();
     }
 
-    protected CalculateOverallHitboxRadius(): void {
-        this._hitboxOverallRadius = Math.sqrt(Math.pow(this._width, 2) + Math.pow(this._height, 2)) / 2;
+    protected CalculateBoundingRadius(): void {
+        this._boundingRadius = Math.sqrt(Math.pow(this._width, 2) + Math.pow(this._height, 2)) / 2;
     }
 
     get Height(): number { return this._height; }
     set Height(height: number) {
         this._height = height;
-        this.CalculateOverallHitboxRadius();
+        this.CalculateBoundingRadius();
     }
 
 
     get Width(): number { return this._width; }
     set Width(width: number) {
         this._width = width;
-        this.CalculateOverallHitboxRadius();
+        this.CalculateBoundingRadius();
     }
 
     // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY

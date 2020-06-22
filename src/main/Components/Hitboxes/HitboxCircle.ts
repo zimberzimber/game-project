@@ -1,27 +1,27 @@
 import { HitboxBase } from "./HitboxBase";
 import { TriggerState, HitboxType, DebugDrawColor } from "../../Models/CollisionModels";
-import { EntityBase } from "../../Bases/EntityBase";
+import { EntityBase } from "../../Entities/EntityBase";
 import { Vec2Utils } from "../../Utility/Vec2";
 import { ScalarUtil } from "../../Utility/Scalar";
 
 export class HitboxCircle extends HitboxBase {
-    HitboxType: HitboxType = HitboxType.Circular;
+    readonly HitboxType: HitboxType = HitboxType.Circular;
     private _radius: number;
 
     constructor(parent: EntityBase, radius: number) {
         super(parent);
         this._radius = radius;
-        this.CalculateOverallHitboxRadius();
+        this.CalculateBoundingRadius();
     }
 
-    protected CalculateOverallHitboxRadius(): void {
-        this._hitboxOverallRadius = this._radius;
+    protected CalculateBoundingRadius(): void {
+        this._boundingRadius = this._radius;
     }
 
     get Radius(): number { return this._radius; }
     set Radius(radius: number) {
         this._radius = radius;
-        this.CalculateOverallHitboxRadius();
+        this.CalculateBoundingRadius();
     }
 
     get DebugDrawData(): number[] | null {

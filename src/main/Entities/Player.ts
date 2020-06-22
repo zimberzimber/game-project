@@ -1,6 +1,6 @@
-import { EntityBase } from "../Bases/EntityBase";
+import { EntityBase } from "./EntityBase";
 import { PlayerMovementComponent } from "../Components/PlayerMovementComponent";
-import { ImageDrawDirective } from "../Components/DrawDirectives/ImageDrawDirective";
+import { DrawDirectiveImageBase } from "../Components/DrawDirectives/DrawDirectiveImageBase";
 import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
 import { HitboxPolygon } from "../Components/Hitboxes/HitboxPolygon";
 import { Vec2Utils } from "../Utility/Vec2";
@@ -8,21 +8,22 @@ import { ScalarUtil } from "../Utility/Scalar";
 import { HitboxCircle } from "../Components/Hitboxes/HitboxCircle";
 import { HitboxRectangle } from "../Components/Hitboxes/HitboxRectangle";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
-import { StaticImageDrawDirective } from "../Components/DrawDirectives/StaticImageDrawDirective";
-import { AnimatedImageDrawDirective } from "../Components/DrawDirectives/AnimatedImageDrawDirective";
+import { DrawDirectiveStaticImage } from "../Components/DrawDirectives/DrawDirectiveStaticImage";
+import { DrawDirectiveAnimatedImage } from "../Components/DrawDirectives/DrawDirectiveAnimatedImage";
 import { SpriteDefinitions } from "../AssetDefinitions/SpriteDefinitions";
 import { Light } from "../Components/Light/Light";
+import { Vec2 } from "../Models/Vectors";
 
 export class PlayerEntity extends EntityBase {
-    dd: AnimatedImageDrawDirective;
-    constructor(parent: EntityBase | void) {
-        super(parent);
+    dd: DrawDirectiveAnimatedImage;
+    constructor(parent: EntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
+        super(parent, position, rotation, scale);
         this.transform.Depth = -50;
         this.transform.Scale = [3, 3];
 
         this.AddComponent(new PlayerMovementComponent(this));
         // this.AddComponent(new StaticImageDrawDirective(this, "heart", [10, 10]));
-        this.dd = new AnimatedImageDrawDirective(this, "dice", [10, 10])
+        this.dd = new DrawDirectiveAnimatedImage(this, "dice", [10, 10])
         this.AddComponent(this.dd);
 
         // const hitbox = new HitboxRectangle(this, 40, 10);
