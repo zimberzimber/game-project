@@ -1,7 +1,7 @@
 import { WebglRenderer } from "./BaseRenderer";
-import { IRendererConfig, IWebglTextureInfo } from "./_RendererInterfaces";
+import { IRendererConfig, IWebglActiveTextureInfo } from "./_RendererInterfaces";
 
-interface IMixSubjectInfo extends IWebglTextureInfo {
+interface IMixSubjectInfo extends IWebglActiveTextureInfo {
     buffer: WebGLFramebuffer;
     texture: WebGLTexture;
 }

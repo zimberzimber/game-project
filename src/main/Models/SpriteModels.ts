@@ -1,6 +1,8 @@
+import { Vec2 } from "./Vectors";
+
 export interface ISpriteFrame {
-    origin: [number, number];
-    size: [number, number];
+    origin: Vec2;
+    size: Vec2;
 }
 
 export interface ISpriteStorage {
@@ -43,6 +45,7 @@ export const GetFrameFromMultiFrameStorage = (frameStorage: IMultiFrameSpriteSto
 
 export interface ISpriteDefinition {
     sourceImageName: string;
+    isPixelCoordinates?: boolean;
 }
 
 export interface ISingleFrameSpriteDefinition extends ISpriteDefinition {

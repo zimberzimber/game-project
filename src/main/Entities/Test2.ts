@@ -1,4 +1,4 @@
-import { EntityBase } from "./EntityBase";
+import { GameEntityBase } from "./EntityBase";
 import { DrawDirectiveImageBase } from "../Components/DrawDirectives/DrawDirectiveImageBase";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
@@ -10,8 +10,8 @@ import { Camera } from "../Workers/CameraManager";
 import { Vec2 } from "../Models/Vectors";
 import { SoundComponent } from "../Components/Sound/SoundBase";
 
-export class Test2Entity extends EntityBase {
-    constructor(parent: EntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
+export class Test2Entity extends GameEntityBase {
+    constructor(parent: GameEntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
         super(parent, position, rotation, scale);
         this.AddComponent(new DrawDirectiveStaticImage(this, "assetMissing", [10, 10]));
 

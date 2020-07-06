@@ -5,12 +5,17 @@ import { IMultiFrameSpriteStorage, GetFrameFromMultiFrameStorage } from "../../M
 import { EntityBase } from "../../Entities/EntityBase";
 import { Vec2 } from "../../Models/Vectors";
 import { Vec2Utils } from "../../Utility/Vec2";
+import { Images } from "../../Workers/ImageManager";
+import { IAttributesIndexes } from "../../Renderers/_RendererInterfaces";
 
 export enum TextAlignmentHorizontal { Left, Center, Right }
 export enum TextAlignmentVertical { Top, Center, Bottom }
 
 export class DrawDirectiveText extends DrawDirectiveBase {
     protected readonly _spriteData: IMultiFrameSpriteStorage;
+
+    private static _fontImageId: number = -2;
+    get ImageId(): number { return DrawDirectiveText._fontImageId; }
 
     constructor(parent: EntityBase, size: number, text: string, horizontalAlignment: TextAlignmentHorizontal = TextAlignmentHorizontal.Left, verticalAlignment: TextAlignmentVertical = TextAlignmentVertical.Top) {
         super(parent);
@@ -20,6 +25,12 @@ export class DrawDirectiveText extends DrawDirectiveBase {
         this._horizontalAlignment = horizontalAlignment;
         this._verticalAlignment = verticalAlignment;
         this.CalculateDrawData();
+
+        if (DrawDirectiveText._fontImageId == -2)
+            DrawDirectiveText._fontImageId = Images.GetImageIdFromName('font');
+
+        // TEMPORARY
+        this._boundingRadius = 10;
     }
 
     private _text: string = '';
@@ -56,7 +67,10 @@ export class DrawDirectiveText extends DrawDirectiveBase {
 
     private CalculateDrawData() {
         const trans = this._parent.worldRelativeTransform;
-        const data: number[] = [];
+        this._webglData = {
+            attributes: [],
+            indexes: []
+        };
 
         let currentLine = 0;
         let lineOffsets: Vec2[] = [[0, -this._size]]
@@ -114,15 +128,18 @@ export class DrawDirectiveText extends DrawDirectiveBase {
                 }
 
                 const frame = this._spriteData.frames[f];
-                data.push(p1[0], p1[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1]);
-                data.push(p2[0], p2[1], trans.Depth, frame.origin[0], frame.origin[1]);
-                data.push(p3[0], p3[1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1]);
-                data.push(p4[0], p4[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1]);
+                this._webglData.attributes.push(p1[0], p1[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1]);
+                this._webglData.attributes.push(p2[0], p2[1], trans.Depth, frame.origin[0], frame.origin[1]);
+                this._webglData.attributes.push(p3[0], p3[1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1]);
+                this._webglData.attributes.push(p4[0], p4[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1]);
+
+                const o = i * 4;
+                this._webglData.indexes.push(...[
+                    o, o + 1, o + 2,
+                    o, o + 2, o + 3]);
 
                 offset[0] += this._size;
             }
         }
-
-        this._webglData = data;
     }
 }

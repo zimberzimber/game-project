@@ -1,5 +1,5 @@
 import { WebglRenderer } from "./BaseRenderer";
-import { IAttributesIndexes, IRendererConfig } from "./_RendererInterfaces";
+import { IAttributesIndexesTyped, IRendererConfig } from "./_RendererInterfaces";
 
 export class WebglLightingRenderer extends WebglRenderer {
     private _drawData: Float32Array = new Float32Array([]);

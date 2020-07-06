@@ -15,7 +15,7 @@ import { SoundDefinitions } from "../AssetDefinitions/SoundDefinitions";
 import { PlayerEntity } from "../Entities/Player";
 import { TestEntity } from "../Entities/Test";
 import { Test2Entity } from "../Entities/Test2";
-import { EntityBase } from "../Entities/EntityBase";
+import { GameEntityBase, UiEntityBase } from "../Entities/EntityBase";
 
 
 export abstract class GameStateBase {
@@ -154,13 +154,13 @@ class GameStateGame extends GameStateBase implements IConfigObserver {
 }
 
 class GameStatePaused extends GameStateBase {
-    temp: EntityBase | undefined = undefined;
+    temp: UiEntityBase | undefined = undefined;
 
     OnActivated(): void {
         Audio.SetTagVolume(SoundType.Music, 0.5);
         Audio.PlaySound(SoundDefinitions.ui);
 
-        this.temp = new EntityBase();
+        this.temp = new UiEntityBase();
         this.temp.transform.Position = Camera.Transform.Position;
         const t = new DrawDirectiveText(this.temp, 20, 'PAUSED', TextAlignmentHorizontal.Center, TextAlignmentVertical.Center);
         this.temp.AddComponent(t);

@@ -1,4 +1,4 @@
-import { EntityBase } from "./EntityBase";
+import { GameEntityBase } from "./EntityBase";
 import { DrawDirectiveImageBase } from "../Components/DrawDirectives/DrawDirectiveImageBase";
 import { HitboxPolygon } from "../Components/Hitboxes/HitboxPolygon";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
@@ -15,8 +15,8 @@ import { Vec2 } from "../Models/Vectors";
 import { SoundComponent } from "../Components/Sound/SoundBase";
 import { DrawDirectiveText } from "../Components/DrawDirectives/DrawDirectiveText";
 
-export class TestEntity extends EntityBase {
-    constructor(parent: EntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
+export class TestEntity extends GameEntityBase {
+    constructor(parent: GameEntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
         super(parent, position, rotation, scale);
         this.transform.Depth = -5;
         this.AddComponent(new DrawDirectiveStaticImage(this, "heart", [10, 10]));

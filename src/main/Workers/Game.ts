@@ -1,4 +1,4 @@
-import { EntityBase } from "../Entities/EntityBase";
+import { EntityBase, GameEntityBase, UiEntityBase } from "../Entities/EntityBase";
 import { ComponentBase } from "../Components/ComponentBase";
 import { Config, IConfigObserver, IConfigEventArgs } from "../Proxies/ConfigProxy";
 import { Input } from "./InputHandler";
@@ -11,9 +11,9 @@ import { DrawDirectiveImageBase } from "../Components/DrawDirectives/DrawDirecti
 import { DrawDirectiveText } from "../Components/DrawDirectives/DrawDirectiveText";
 import { Images } from "./ImageManager";
 import { Light } from "../Components/Light/Light";
+import { DrawDirectiveBase } from "../Components/DrawDirectives/DrawDirectiveBase";
 
 class GameManager implements IConfigObserver {
-    private _canvas: HTMLCanvasElement;
     private _entities: EntityBase[] = [];
 
     // Used for game logic
@@ -146,51 +146,87 @@ class GameManager implements IConfigObserver {
 
         this.state.Update(this._updateDelta);
 
-        // Collect all drawing data:
+        // Split entities into game and ui collections
         const allEntities = Game.GetAllEntities();
-        const dds = Game.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveImageBase, allEntities, true);
-        const tds = Game.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveText, allEntities, true);
+        const gameEntities: GameEntityBase[] = [];
+        const uiEntities: UiEntityBase[] = [];
 
-        const drawData = {}
-        dds.forEach((dd: DrawDirectiveImageBase) => {
+        allEntities.forEach(e => {
+            if (e instanceof GameEntityBase)
+                gameEntities.push(e);
+            else if (e instanceof UiEntityBase)
+                uiEntities.push(e);
+        });
+
+
+        // Collect scene draw data
+        const sceneDDs = Game.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveBase, gameEntities, true);
+        const sceneData = {}
+
+        sceneDDs.forEach((dd: DrawDirectiveBase) => {
             // Skip directives outside of view
             const dTrans = dd.Parent.worldRelativeTransform
-            const dRadius = Math.sqrt(Math.pow(dd.size[0] * dTrans.Scale[0], 2) + Math.pow(dd.size[1] * dTrans.Scale[1], 2))
 
-            if (Camera.IsInView(dTrans.Position, dRadius)) {
-                if (!drawData[dd.ImageId])
-                    drawData[dd.ImageId] = { attributes: [], indexes: [] };
+            if (Camera.IsInView(dTrans.Position, dd.BoundingRadius)) {
+                let indexOffset = 0;
 
-                const s = drawData[dd.ImageId].indexes.length / 6 * 4;
-                drawData[dd.ImageId].attributes.push(...dd.WebGlData);
-                drawData[dd.ImageId].indexes.push(
-                    s, s + 1, s + 2,
-                    s, s + 2, s + 3
-                );
+                if (sceneData[dd.ImageId])
+                    indexOffset = sceneData[dd.ImageId].indexes[sceneData[dd.ImageId].indexes.length - 1] + 1;
+                else
+                    sceneData[dd.ImageId] = { attributes: [], indexes: [] };
+
+                sceneData[dd.ImageId].attributes.push(...dd.WebGlData.attributes);
+                for (const ind of dd.WebGlData.indexes)
+                    sceneData[dd.ImageId].indexes.push(ind + indexOffset);
             }
         });
 
-        const uiDrawData = {}
-        const charsId = Images.GetImageIdFromName('font');
-        let chars = 0;
-        uiDrawData[charsId] = { attributes: [], indexes: [] };
-        tds.forEach((td: DrawDirectiveText) => {
-            uiDrawData[charsId].attributes.push(...td.WebGlData);
-            for (let i = 0; i < td.WebGlData.length / (5 * 4); i++) {
-                const s = chars * 4;
-                uiDrawData[charsId].indexes.push(
-                    s, s + 1, s + 2,
-                    s, s + 2, s + 3
-                );
-                chars++;
+        Rendering.SetDrawData('scene', sceneData)
+
+        const uiDDs = Game.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveBase, uiEntities, true);
+        const uiData = {}
+
+        // Collect UI draw data
+        uiDDs.forEach((dd: DrawDirectiveBase) => {
+            // Skip directives outside of view
+            const dTrans = dd.Parent.worldRelativeTransform
+
+            if (Camera.IsInView(dTrans.Position, dd.BoundingRadius)) {
+                let indexOffset = 0;
+
+                if (uiData[dd.ImageId])
+                    indexOffset = uiData[dd.ImageId].indexes[uiData[dd.ImageId].indexes.length - 1] + 1;
+                else
+                    uiData[dd.ImageId] = { attributes: [], indexes: [] };
+
+                uiData[dd.ImageId].attributes.push(...dd.WebGlData.attributes);
+                for (const ind of dd.WebGlData.indexes)
+                    uiData[dd.ImageId].indexes.push(ind + indexOffset);
             }
         });
 
-        Rendering.SetDrawData('scene', drawData)
-        Rendering.SetDrawData('ui', uiDrawData)
+        Rendering.SetDrawData('ui', uiData)
 
+        // // Collect UI draw data
+        // const uiDrawData = {}
+        // uiDrawData[charsId] = { attributes: [], indexes: [] };
+        // tds.forEach((td: DrawDirectiveText) => {
+        //     uiDrawData[charsId].attributes.push(...td.WebGlData);
+        //     for (let i = 0; i < td.WebGlData.length / (5 * 4); i++) {
+        //         const s = chars * 4;
+        //         uiDrawData[charsId].indexes.push(
+        //             s, s + 1, s + 2,
+        //             s, s + 2, s + 3
+        //         );
+        //         chars++;
+        //     }
+        // });
+
+        // Rendering.SetDrawData('ui', uiDrawData)
+
+        // Collect lighting data for scene (UI doesn't support lighting)
         const lights: number[] = [];
-        Game.GetAllComponentsOfTypeFromEntityCollection(Light, allEntities, true).forEach((l: Light) => {
+        Game.GetAllComponentsOfTypeFromEntityCollection(Light, gameEntities, true).forEach((l: Light) => {
             if (Camera.IsInView(l.Parent.worldRelativeTransform.Position, l.Radius))
                 lights.push(...l.WebglData);
         });
@@ -199,7 +235,7 @@ class GameManager implements IConfigObserver {
 
         // Rendering.SetUniformData('post', 'u_offsetPower', [Math.abs(Math.sin(Date.now() * 0.001)) / 2]);
         Rendering.Render()
-        
+
         if (this._displayFps) {
             const time = Date.now();
 

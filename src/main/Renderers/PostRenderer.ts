@@ -1,11 +1,11 @@
 import { WebglRenderer } from "./BaseRenderer";
-import { IRendererConfig, IWebglTextureInfo } from "./_RendererInterfaces";
+import { IRendererConfig, IWebglActiveTextureInfo } from "./_RendererInterfaces";
 
 export class WebglPostRenderer extends WebglRenderer {
     private _frameBuffer: WebGLFramebuffer;
     private _frameTexture: WebGLTexture;
     private _verts: Float32Array = new Float32Array([1, 1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1]);
-    private _textureInfo: IWebglTextureInfo;
+    private _textureInfo: IWebglActiveTextureInfo;
 
     get FrameBuffer(): WebGLFramebuffer { return this._frameBuffer; }
     get FrameTexture(): WebGLTexture { return this._frameTexture; }

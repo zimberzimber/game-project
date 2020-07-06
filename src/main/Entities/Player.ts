@@ -1,23 +1,16 @@
-import { EntityBase } from "./EntityBase";
+import { GameEntityBase } from "./EntityBase";
 import { PlayerMovementComponent } from "../Components/PlayerMovementComponent";
-import { DrawDirectiveImageBase } from "../Components/DrawDirectives/DrawDirectiveImageBase";
 import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
-import { HitboxPolygon } from "../Components/Hitboxes/HitboxPolygon";
-import { Vec2Utils } from "../Utility/Vec2";
-import { ScalarUtil } from "../Utility/Scalar";
 import { HitboxCircle } from "../Components/Hitboxes/HitboxCircle";
-import { HitboxRectangle } from "../Components/Hitboxes/HitboxRectangle";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
-import { DrawDirectiveStaticImage } from "../Components/DrawDirectives/DrawDirectiveStaticImage";
 import { DrawDirectiveAnimatedImage } from "../Components/DrawDirectives/DrawDirectiveAnimatedImage";
-import { SpriteDefinitions } from "../AssetDefinitions/SpriteDefinitions";
 import { Light } from "../Components/Light/Light";
 import { Vec2 } from "../Models/Vectors";
 import { DrawDirectiveText, TextAlignmentHorizontal, TextAlignmentVertical } from "../Components/DrawDirectives/DrawDirectiveText";
 
-export class PlayerEntity extends EntityBase {
+export class PlayerEntity extends GameEntityBase {
     dd: DrawDirectiveAnimatedImage;
-    constructor(parent: EntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
+    constructor(parent: GameEntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
         super(parent, position, rotation, scale);
         this.transform.Depth = -50;
         this.transform.Scale = [3, 3];

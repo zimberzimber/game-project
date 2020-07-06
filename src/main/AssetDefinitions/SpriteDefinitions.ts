@@ -1,23 +1,26 @@
 import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition } from "../Models/SpriteModels";
 import { MiscUtil } from "../Utility/Misc";
 
-export const SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition } = {
+export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition } = {
     assetMissing: {
         sourceImageName: 'colors',
+        isPixelCoordinates: true,
         frame: {
             origin: [0, 0],
-            size: [0.125, 0.125]
+            size: [16, 16]
         }
     },
     heart: {
         sourceImageName: 'sprites',
+        isPixelCoordinates: true,
         frame: {
-            origin: [0.125, 0],
-            size: [0.125, 0.125]
+            origin: [16, 0],
+            size: [16, 16]
         }
     },
     dice: {
         sourceImageName: 'sprites',
+        isPixelCoordinates: true,
         names: ['one', 'two', 'three', 'four', 'five', 'six'],
         aliases: {
             odin: 'one',
@@ -29,28 +32,28 @@ export const SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | 
         },
         frames: [
             {
-                origin: [0, 0.125],
-                size: [0.125, 0.125],
+                origin: [0, 16],
+                size: [16, 16],
             },
             {
-                origin: [0.125, 0.125],
-                size: [0.125, 0.125],
+                origin: [16, 16],
+                size: [16, 16],
             },
             {
-                origin: [0.250, 0.125],
-                size: [0.125, 0.125],
+                origin: [32, 16],
+                size: [16, 16],
             },
             {
-                origin: [0.375, 0.125],
-                size: [0.125, 0.125],
+                origin: [48, 16],
+                size: [16, 16],
             },
             {
-                origin: [0.500, 0.125],
-                size: [0.125, 0.125],
+                origin: [64, 16],
+                size: [16, 16],
             },
             {
-                origin: [0.625, 0.125],
-                size: [0.125, 0.125],
+                origin: [80, 16],
+                size: [16, 16],
             },
         ]
     },
@@ -88,3 +91,5 @@ export const SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | 
         frames: MiscUtil.GenerateTiles(8, 5, 8, 8, [64, 40]),
     }
 }
+
+export const ClearSpriteDefinitions = () => SpriteDefinitions = {};

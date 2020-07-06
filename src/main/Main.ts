@@ -8,7 +8,7 @@ import { Sprites } from "./Workers/SpriteManager";
 import { Images } from "./Workers/ImageManager";
 import { Audio } from "./Workers/SoundPlayer";
 import { Input } from "./Workers/InputHandler";
-import { SpriteDefinitions } from "./AssetDefinitions/SpriteDefinitions";
+import { SpriteDefinitions, ClearSpriteDefinitions } from "./AssetDefinitions/SpriteDefinitions";
 import { Assets } from "./Proxies/AssetsProxy";
 import { Settings } from "./Workers/SettingsManager";
 import { PromiseUtil } from "./Utility/Promises";
@@ -30,6 +30,7 @@ IDB.OpenDatabase(gameSchema)
 
         imagesPromise.then(() => {
             Sprites.Initialize(SpriteDefinitions);
+            ClearSpriteDefinitions();
             spritesPromise.resolve();
         });
 
@@ -43,7 +44,7 @@ IDB.OpenDatabase(gameSchema)
             canvas.height = 500;
 
             Rendering.Init(canvas);
-            
+
             Camera.Transform.Scale = [canvas.width, canvas.height];
             Camera.Transform.Position = [0, 0];
             Camera.Transform.Rotation = 0;

@@ -2,6 +2,7 @@ import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition, ISingleFrame
 import { Log, LogLevel } from "./Logger";
 import { OneTimeLog } from "./OneTimeLogger";
 import { Images } from "./ImageManager";
+import { Vec2Utils } from "../Utility/Vec2";
 
 
 class SpriteManager {
@@ -24,21 +25,52 @@ class SpriteManager {
                 continue;
             }
 
+            if (this.sprites[spriteName]) {
+                Log.Error(`Sprite named '${spriteName}' was already defined.`);
+                continue;
+            }
+
             if ((spriteDefinitions[spriteName] as ISingleFrameSpriteDefinition).frame) {
                 const def = spriteDefinitions[spriteName] as ISingleFrameSpriteDefinition;
-                this.sprites[spriteName] = {
-                    imageId: imageId,
-                    frame: def.frame
+                if (def.isPixelCoordinates) {
+                    const imageSize = Images.GetImageSize(imageId);
+                    this.sprites[spriteName] = {
+                        imageId: imageId,
+                        frame: {
+                            origin: Vec2Utils.Div(def.frame.origin, imageSize),
+                            size: Vec2Utils.Div(def.frame.size, imageSize),
+                        }
+                    }
+                } else {
+                    this.sprites[spriteName] = {
+                        imageId: imageId,
+                        frame: def.frame
+                    }
                 }
 
             } else if ((spriteDefinitions[spriteName] as IMultiFrameSpriteDefinition).frames) {
                 const def = spriteDefinitions[spriteName] as IMultiFrameSpriteDefinition;
-                this.sprites[spriteName] = {
+
+                const sprite: IMultiFrameSpriteStorage = {
                     imageId: imageId,
-                    frames: def.frames,
+                    frames: [],
                     names: def.names || undefined, // Adding an underfined in case of the definition having an empty array
                     aliases: def.aliases || undefined, // Adding an underfined in case of the definition having an empty array
                 }
+
+                if (def.isPixelCoordinates) {
+                    const imageSize = Images.GetImageSize(imageId);
+                    for (const f of def.frames) {
+                        sprite.frames.push({
+                            origin: Vec2Utils.Div(f.origin, imageSize),
+                            size: Vec2Utils.Div(f.size, imageSize),
+                        })
+                    }
+                } else {
+                    sprite.frames = def.frames;
+                }
+
+                this.sprites[spriteName] = sprite;
 
             } else { // Also covers empty frames array
                 Log.Error(`Sprite definition for ${spriteName} lacks frame definitions. Ignoring.`)

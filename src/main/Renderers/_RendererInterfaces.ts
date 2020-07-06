@@ -27,10 +27,15 @@ export interface IRendererUniformDefinitions {
 }
 
 export interface ISceneRendererDrawData {
-    [key: number]: IAttributesIndexes;
+    [key: number]: IAttributesIndexesTyped;
 }
 
 export interface IAttributesIndexes {
+    attributes: number[],
+    indexes: number[],
+}
+
+export interface IAttributesIndexesTyped {
     attributes: Float32Array,
     indexes: Uint16Array,
 }
@@ -42,7 +47,7 @@ export interface IRendererConfig {
     uniforms: IRendererUniformDefinitions;
 }
 
-export interface IWebglTextureInfo{
+export interface IWebglActiveTextureInfo {
     uniformLocation: WebGLUniformLocation;
     textureUnit: number;
 }

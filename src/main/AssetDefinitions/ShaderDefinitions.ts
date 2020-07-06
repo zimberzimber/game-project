@@ -204,4 +204,19 @@ void main() {
     gl_FragColor = vec4(v_color, alpha);
 }`,
 
+    ui_vertex: `
+precision mediump float;
+
+attribute vec3 a_position;
+attribute vec2 a_texCoord;
+
+uniform mat4 u_viewMatrix;
+uniform mat4 u_projectionMatrix;
+
+varying vec2 v_texCoord;
+
+void main() {
+    v_texCoord = a_texCoord;
+    gl_Position = u_projectionMatrix * u_viewMatrix * vec4(a_position, 1.);
+}`,
 };

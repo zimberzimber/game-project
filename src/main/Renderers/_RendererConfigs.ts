@@ -124,5 +124,30 @@ export const RenderConfigs: { [key: string]: IRendererConfig } = {
             }
         },
         uniforms: {}
+    },
+
+    ui: {
+        vertexSource: ShaderSources.ui_vertex,
+        fragmentSource: ShaderSources.scene_fragment,
+        attributes: {
+            a_position: {
+                size: 3,
+                type: WebGLRenderingContext.FLOAT,
+                normalized: false,
+                stride: 5 * Float32Array.BYTES_PER_ELEMENT,
+                offset: 0,
+            },
+            a_texCoord: {
+                size: 2,
+                type: WebGLRenderingContext.FLOAT,
+                normalized: false,
+                stride: 5 * Float32Array.BYTES_PER_ELEMENT,
+                offset: 3 * Float32Array.BYTES_PER_ELEMENT,
+            }
+        },
+        uniforms: {
+            u_projectionMatrix: 'Matrix4fv',
+            u_viewMatrix: 'Matrix4fv',
+        }
     }
 }

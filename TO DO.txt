@@ -1,20 +1,8 @@
 
-- Have the sprite definitions go by pixels, and get converted to 0-1 in runtime
-X Add a UI renderer
-- Find a solution to Scene and UI renderers doubling texture IDs
-X Convert into a state machine, where each states can be defined separetly, and manage the game in their own way
-- Scene and UI rendering should be based on entity type
-X Add the ability to control sound panning and volume based on its origin and camera position
+X Have the sprite definitions go by pixels, and get converted to 0-1 in runtime
+X Find a solution to Scene and UI renderers doubling webgl textures
+X Scene and UI rendering should be based on entity type
+X Add a UI entity type
+- Find out why text doesn't hide when the component is disabled
+- Find out why the paused text doesn't get deleted on unpause
 - Add pitch controls to sound
-X Add lighting
-X Have lighting be affected by hardness
-X Cleanup and organize renderer texture handling
-X Move Webgl render option enabling to the respective render functions, enabling disabling them based on the specific renderer
-X Have sound definitions be pulled from a readonly dictionary by ID, instead of having to pass an object each time
-X Rewrite some components to store data for webgl instead of calculating it all the time. Update it when relevant data was changed.
-    Shouldn't apply the DebugDraw as they won't be visible in regular gameplay
-    but attaching an extra observer to a transform and notifying it will impact performence
-    Setting everything up to subscribe/unsibscribe when debugDraw changes is too much effort for too little gain
-
-(SCRAPED) Have the colission checker return a point of colission or null instead of a boolean of whether there was a colission or not
-(SCRAPED) Have the transform observer pass the old transform as a parameter

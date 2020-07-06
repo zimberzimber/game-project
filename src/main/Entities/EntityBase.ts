@@ -3,7 +3,7 @@ import { Transform, ITransformObserver, ITransformEventArgs } from "../Models/Tr
 import { Vec2 } from "../Models/Vectors";
 import { Game } from "../Workers/Game";
 
-export class EntityBase implements ITransformObserver {
+export abstract class EntityBase implements ITransformObserver {
     private static NextEntityId: number = 0;
 
     readonly entityId: number;
@@ -120,5 +120,45 @@ export class EntityBase implements ITransformObserver {
 
         entity.worldRelativeTransform = relative;
         entity._children.forEach(c => EntityBase.CalculateWorlRelativeTransform(c));
+    }
+}
+
+export class UiEntityBase extends EntityBase {
+    protected _parent: UiEntityBase | undefined;
+    protected _children: UiEntityBase[] = [];
+
+    get Parent(): UiEntityBase | undefined { return this._parent; }
+    get Children(): UiEntityBase[] { return this._children; }
+    
+    constructor(parent: UiEntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
+        super(parent, position, rotation, scale);
+    }
+    
+    AddChildEntity(child: UiEntityBase): void {
+        super.AddChildEntity(child);
+    }
+
+    RemoveChildEntity(child: UiEntityBase): void {
+        super.RemoveChildEntity(child);
+    }
+}
+
+export class GameEntityBase extends EntityBase {
+    protected _parent: GameEntityBase | undefined;
+    protected _children: GameEntityBase[] = [];
+
+    get Parent(): GameEntityBase | undefined { return this._parent; }
+    get Children(): GameEntityBase[] { return this._children; }
+
+    constructor(parent: GameEntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
+        super(parent, position, rotation, scale);
+    }
+    
+    AddChildEntity(child: GameEntityBase): void {
+        super.AddChildEntity(child);
+    }
+
+    RemoveChildEntity(child: GameEntityBase): void {
+        super.RemoveChildEntity(child);
     }
 }
