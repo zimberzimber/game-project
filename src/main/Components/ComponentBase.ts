@@ -22,11 +22,7 @@ export abstract class ComponentBase {
 
     OnEnabled(): void { };
     OnDisabled(): void { };
-    Update(): void { };
-
-    Delete(): void {
-        this._parent.RemoveComponent(this);
-    }
+    Update(delta: number): void { };
 
     Unitialize(): void {
         delete this._parent;

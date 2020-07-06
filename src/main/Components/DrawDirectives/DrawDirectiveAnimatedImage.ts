@@ -2,7 +2,7 @@ import { EntityBase } from "../../Entities/EntityBase";
 import { Vec2 } from "../../Models/Vectors";
 import { Sprites } from "../../Workers/SpriteManager";
 import { Vec2Utils } from "../../Utility/Vec2";
-import { IMultiFrameSpriteStorage } from "../../Models/SpriteModels";
+import { IMultiFrameSpriteStorage, GetFrameFromMultiFrameStorage } from "../../Models/SpriteModels";
 import { DrawDirectiveImageBase } from "./DrawDirectiveImageBase";
 import { ITransformEventArgs } from "../../Models/Transform";
 
@@ -18,26 +18,9 @@ export class DrawDirectiveAnimatedImage extends DrawDirectiveImageBase {
 
     get FrameId(): number { return this._currentFrame; }
     set Frame(frame: string | number) {
-        if (typeof (frame) == "number") {
-            if (this._spriteData.frames[frame])
-                this._currentFrame = frame;
-        }
-        else {
-            if (this._spriteData.names) {
-                const f = this._spriteData.names.indexOf(frame)
-                if (f > -1)
-                    this._currentFrame = f;
-                else if (this._spriteData.aliases) {
-                    for (const alias in this._spriteData.aliases) {
-                        if (alias == frame) {
-                            const f = this._spriteData.names.indexOf(this._spriteData.aliases[alias])
-                            if (f > -1)
-                                this._currentFrame = f;
-                        }
-                    }
-                }
-            }
-        }
+        const f = GetFrameFromMultiFrameStorage(this._spriteData, frame);
+        if (f > -1)
+            this._currentFrame = f;
     }
 
     OnObservableNotified(args: ITransformEventArgs): void {

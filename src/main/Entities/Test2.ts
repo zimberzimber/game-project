@@ -23,13 +23,13 @@ export class Test2Entity extends EntityBase {
         // hitbox.CollisionScript = (trigerredBy: HitboxBase) => sound.Play();
         // this.AddComponent(hitbox);
 
-        
+
         const h1 = new HitboxCircle(this, 50);
         this.AddComponent(h1);
-        
+
         const h2 = new HitboxCircle(this, 100);
         this.AddComponent(h2);
-        
+
         const h3 = new HitboxCircle(this, 200);
         this.AddComponent(h3);
 
@@ -38,7 +38,7 @@ export class Test2Entity extends EntityBase {
         sound.Play();
     }
 
-    Update() {
-        super.Update();
+    Update(delta: number) {
+        super.Update(delta);
     }
 }

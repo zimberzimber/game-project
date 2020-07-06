@@ -16,15 +16,13 @@ import { Rendering } from "./Workers/RenderingPipeline";
 import { Camera } from "./Workers/CameraManager";
 import { Vec2Utils } from "./Utility/Vec2";
 import { ScalarUtil } from "./Utility/Scalar";
+import { GameStateDictionary } from "./GameStates/GameStateBase";
 
 let domPromise: any = PromiseUtil.CreateCompletionPromise();
 window.addEventListener('DOMContentLoaded', domPromise.resolve);
 
 IDB.OpenDatabase(gameSchema)
-    .catch((e) => {
-        Log.Warn('(0) Caught')
-        Log.Warn(e);
-    })
+    .catch((e) => Log.Error(e))
     .then(() => {
         const imagesPromise = Images.Initialize(Assets.GetAndTerminateImages());
         const audioPromise = Sounds.Initialize(Assets.GetAndTerminateAudio());
@@ -39,7 +37,22 @@ IDB.OpenDatabase(gameSchema)
             window.removeEventListener('DOMContentLoaded', domPromise.resolve);
             domPromise = undefined;
             Assets.FinalTermination();
-            Game.Start();
+
+            const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
+            canvas.width = 600;
+            canvas.height = 500;
+
+            Rendering.Init(canvas);
+            
+            Camera.Transform.Scale = [canvas.width, canvas.height];
+            Camera.Transform.Position = [0, 0];
+            Camera.Transform.Rotation = 0;
+
+            Input.MouseElement = canvas;
+            Input.Keymap = Settings.GetSetting('controlsKeymap');
+
+            Game.GameState = GameStateDictionary.Game;
+            requestAnimationFrame(Game.Update.bind(Game))
         });
     });
 
@@ -67,9 +80,25 @@ if (Config.GetConfig('debug', false) === true) {
         rendering: Rendering,
         camera: Camera,
         vec2u: Vec2Utils,
-        scalaru: ScalarUtil
+        scalaru: ScalarUtil,
+        states: GameStateDictionary
     }
 
     //@ts-ignore
     window.stop = () => Game.Paused = true;
+
+    //@ts-ignore
+    window.formatArray = (arr, jump) => {
+        let str = '';
+
+        for (let i = 0; i < arr.length; i++) {
+            if (i % jump == 0 && i > 0)
+                str += '\n';
+
+            str += arr[i].toString();
+            str += '\t';
+        }
+
+        console.log(str);
+    }
 }

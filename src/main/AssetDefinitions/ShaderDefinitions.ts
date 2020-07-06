@@ -103,8 +103,8 @@ float Flashlight()
 
 void main() {
     vec4 color = texture2D(u_sampler, v_texCoord);
-    // color.r = texture2D(u_sampler, v_texCoord + vec2(u_offsetPower, 0.)).r;
-    // color.b = texture2D(u_sampler, v_texCoord - vec2(u_offsetPower, 0.)).b;
+    color.r = texture2D(u_sampler, v_texCoord + vec2(u_offsetPower, 0.)).r;
+    color.b = texture2D(u_sampler, v_texCoord - vec2(u_offsetPower, 0.)).b;
     // color *= Flashlight();
     // color.a = 1.;
     gl_FragColor = color;
@@ -202,6 +202,6 @@ void main() {
     }
 
     gl_FragColor = vec4(v_color, alpha);
-}
-`
+}`,
+
 };

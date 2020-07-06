@@ -25,6 +25,7 @@ const GetEmptyMatrix2D = (): Float32Array => {
 
 interface IRenderersContainer {
     scene: WebglSceneRenderer;
+    ui: WebglSceneRenderer;
     debug: WebglDebugRenderer;
     post: WebglPostRenderer;
     lighting: WebglLightingRenderer;
@@ -40,7 +41,7 @@ class RenderingPipeline implements ITransformObserver {
 
         if (!gl) {
             Log.Warn('Browser does not support WebGL, moving to experimental.');
-            //@ts-ignore Doesn't recognize 'experimental-webgl'
+            //@ts-ignore TypeScript doesn't recognize 'experimental-webgl'
             gl = canvas.getContext('experimental-webgl');
         }
 
@@ -53,6 +54,7 @@ class RenderingPipeline implements ITransformObserver {
         this._context = gl;
         this._renderers = {
             scene: new WebglSceneRenderer(canvas, RenderConfigs.scene, Images.GetImageArray()),
+            ui: new WebglSceneRenderer(canvas, RenderConfigs.scene, Images.GetImageArray()),
             debug: new WebglDebugRenderer(canvas, RenderConfigs.debug),
             post: new WebglPostRenderer(canvas, RenderConfigs.post),
             lighting: new WebglLightingRenderer(canvas, RenderConfigs.lighting),
@@ -63,24 +65,24 @@ class RenderingPipeline implements ITransformObserver {
         let viewMatrix = GetEmptyMatrix();
         glMatrix.mat4.lookAt(viewMatrix, [0, 0, 900], [0, 0, 0], [0, 1, 0]);
 
-        this.SetUniformData(['scene', 'debug', 'lighting'], 'u_viewMatrix', [false, viewMatrix])
-        this.SetUniformData(['scene', 'debug', 'lighting'], 'u_worldMatrix', [false, empty]);
-        this.SetUniformData(['scene', 'debug', 'lighting'], 'u_projectionMatrix', [false, empty]);
+        this.SetUniformData(['scene', 'debug', 'lighting', 'ui'], 'u_viewMatrix', [false, viewMatrix])
+        this.SetUniformData(['scene', 'debug', 'lighting', 'ui'], 'u_worldMatrix', [false, empty]);
+        this.SetUniformData(['scene', 'debug', 'lighting', 'ui'], 'u_projectionMatrix', [false, empty]);
 
         this.SetUniformData('post', 'u_offsetPower', [0]);
     }
 
     OnObservableNotified(args: ITransformEventArgs): void {
         if (!this._context) return;
-        
+
         const worldMatrix = GetEmptyMatrix2D();
         glMatrix.mat4.rotate(worldMatrix, worldMatrix, Camera.Transform.RotationRadian, [0, 0, 1]);
         glMatrix.mat4.translate(worldMatrix, worldMatrix, [-Camera.Transform.Position[0], -Camera.Transform.Position[1], 0]);
-        this.SetUniformData(['scene', 'debug', 'lighting'], 'u_worldMatrix', [false, worldMatrix]);
+        this.SetUniformData(['scene', 'debug', 'lighting', 'ui'], 'u_worldMatrix', [false, worldMatrix]);
 
         const projectionMatrix = GetEmptyMatrix();
         glMatrix.mat4.ortho(projectionMatrix, Camera.Transform.Scale[0] / -2, Camera.Transform.Scale[0] / 2, Camera.Transform.Scale[1] / -2, Camera.Transform.Scale[1] / 2, Camera.NearFar[0], Camera.NearFar[1]);
-        this.SetUniformData(['scene', 'debug', 'lighting'], 'u_projectionMatrix', [false, projectionMatrix]);
+        this.SetUniformData(['scene', 'debug', 'lighting', 'ui'], 'u_projectionMatrix', [false, projectionMatrix]);
     }
 
     Render(): void {
@@ -112,12 +114,9 @@ class RenderingPipeline implements ITransformObserver {
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.post.Render();
         gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        this._renderers.ui.Render();
+        gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.debug.Render();
-
-        // gl.clearColor(0, 0, 0, 1);
-        // gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
-        // this._renderers.lighting.Render();
-        // this._renderers.scene.Render();
     }
 
     private CheckExists(rendererName: string): boolean {

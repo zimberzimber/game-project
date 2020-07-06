@@ -13,6 +13,11 @@ export class Observable<ObserverType extends IObserver<ArgType>, ArgType>{
             this._observers.splice(index, 1);
     }
 
+    UnsubscribeAll(): void {
+        delete this._observers;
+        this._observers = [];
+    }
+
     Notify(args: ArgType): void {
         this._observers.forEach(o => o.OnObservableNotified(args));
     }

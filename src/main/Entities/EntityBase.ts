@@ -1,6 +1,7 @@
 import { ComponentBase } from "../Components/ComponentBase";
 import { Transform, ITransformObserver, ITransformEventArgs } from "../Models/Transform";
 import { Vec2 } from "../Models/Vectors";
+import { Game } from "../Workers/Game";
 
 export class EntityBase implements ITransformObserver {
     private static NextEntityId: number = 0;
@@ -32,8 +33,8 @@ export class EntityBase implements ITransformObserver {
         EntityBase.CalculateWorlRelativeTransform(this);
     }
 
-    Update(): void {
-        this._components.forEach(c => c.Update());
+    Update(delta: number): void {
+        this._components.forEach(c => c.Update(delta));
     }
 
     AddComponent(component: ComponentBase): void {
@@ -48,6 +49,11 @@ export class EntityBase implements ITransformObserver {
             }
             return true;
         });
+    }
+
+    RemoveAllComponents(): void {
+        this._components.forEach(c => c.Unitialize());
+        this._components = [];
     }
 
     GetComponentsOfType(type: any, activeOnly: boolean = false): ComponentBase[] {
@@ -72,6 +78,28 @@ export class EntityBase implements ITransformObserver {
             }
             return true;
         });
+    }
+
+    RemoveAllChildEntities(): void {
+        this._children.forEach(c => {
+            delete c._parent;
+            c.Delete();
+        });
+    }
+
+    Delete(): void {
+        if (Game.IsRootEntity(this)) {
+            // Reroute the deletion process to Game. This is terrible.
+            Game.RemoveEntity(this);
+            return;
+        } else if (this._parent) {
+            this._parent.RemoveChildEntity(this);
+            delete this._parent;
+        }
+
+        this.transform.UnsubscribeAll();
+        this.RemoveAllComponents();
+        this.RemoveAllChildEntities();
     }
 
     // Method for calculating an entities world relative transform, which is based on its parent chain

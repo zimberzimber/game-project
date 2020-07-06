@@ -1,14 +1,11 @@
 import { ComponentBase } from "./ComponentBase";
 import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
-import { Game } from "../Workers/Game";
 import { Input } from "../Workers/InputHandler";
 import { EntityBase } from "../Entities/EntityBase";
-import { Camera } from "../Workers/CameraManager";
-import { IMouseObserver, IKeyboardObserver, IKeyboardEvent, IMouseEvent, ButtonState } from "../Models/InputModels";
-import { Test2Entity } from "../Entities/Test2";
+import { IKeyboardObserver, IKeyboardEvent, ButtonState } from "../Models/InputModels";
 
-export class PlayerMovementComponent extends ComponentBase implements IMouseObserver, IKeyboardObserver {
+export class PlayerMovementComponent extends ComponentBase implements IKeyboardObserver {
     private _verticalDirection: number = 0;
     private _horizontalDirection: number = 0;
     private _movement: Vec2 = [0, 0];
@@ -17,43 +14,17 @@ export class PlayerMovementComponent extends ComponentBase implements IMouseObse
     constructor(parent: EntityBase) {
         super(parent);
         Input.KeyboardObservable.Subscribe(this);
-        Input.MouseObservable.Subscribe(this);
     }
 
-    Update(): void {
-        this.Parent.transform.TranslateByVec2(this._movement);
-        Camera.Transform.TranslateByVec2(this._movement);
-        // Camera.Transform.RotateTowards(Input.MousePosition);
-
-        this.Parent.transform.Rotate(1);
-        Camera.Transform.Rotate(1);
+    Update(delta: number): void {
+        this.Parent.transform.TranslateByVec2(Vec2Utils.MultS(this._movement, this._speed * delta));
     }
 
-    OnObservableNotified(args: IKeyboardEvent | IMouseEvent): void {
-        // Check if its a keyboard or mouse event
-        if ((args as IKeyboardEvent).keyName) {
-            const e = args as IKeyboardEvent;
-            if (args.state == ButtonState.Down)
-                this.OnKeyDown(e.keyName)
-            else
-                this.OnKeyUp(e.keyName)
-        } else {
-            const e = args as IMouseEvent;
-            if (args.state == ButtonState.Down)
-                this.OnMouseDown(e.button, e.position)
-            else
-                this.OnMouseUp(e.button, e.position)
-        }
-    }
-
-    private OnMouseDown(button: number, position: Vec2): void {
-        const zz = new Test2Entity(null, Game.MousePosition);
-        Game.AddEntity(zz);
-        zz.transform.Position = Game.MousePosition;
-    }
-
-    private OnMouseUp(button: number, position: Vec2): void {
-
+    OnObservableNotified(args: IKeyboardEvent): void {
+        if (args.state == ButtonState.Down)
+            this.OnKeyDown(args.keyName)
+        else
+            this.OnKeyUp(args.keyName)
     }
 
     private OnKeyDown(key: string): void {
@@ -79,12 +50,11 @@ export class PlayerMovementComponent extends ComponentBase implements IMouseObse
     }
 
     private RecalculateMovement(): void {
-        this._movement = Vec2Utils.MultS(Vec2Utils.Normalize([this._horizontalDirection, this._verticalDirection]), Game.FPSReletive(this._speed));
+        this._movement = Vec2Utils.Normalize([this._horizontalDirection, this._verticalDirection]);
     }
 
     Unitialize(): void {
         super.Unitialize();
         Input.KeyboardObservable.Unsubscribe(this);
-        Input.MouseObservable.Unsubscribe(this);
     }
 }

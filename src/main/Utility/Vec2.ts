@@ -66,4 +66,6 @@ export class Vec2Utils {
     static GetRadian = (p1: Vec2, p2: Vec2): number => {
         return Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
     }
+
+    static Equals = (p1: Vec2, p2: Vec2): boolean => (p1[0] == p2[0] && p1[1] == p2[1])
 }

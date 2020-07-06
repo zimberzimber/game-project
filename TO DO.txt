@@ -1,5 +1,9 @@
 
-- Convert into a state machine, where each states can be defined separetly, and manage the game in their own way
+- Have the sprite definitions go by pixels, and get converted to 0-1 in runtime
+X Add a UI renderer
+- Find a solution to Scene and UI renderers doubling texture IDs
+X Convert into a state machine, where each states can be defined separetly, and manage the game in their own way
+- Scene and UI rendering should be based on entity type
 X Add the ability to control sound panning and volume based on its origin and camera position
 - Add pitch controls to sound
 X Add lighting

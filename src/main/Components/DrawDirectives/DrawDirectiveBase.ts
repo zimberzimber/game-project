@@ -12,8 +12,8 @@ export abstract class DrawDirectiveBase extends ComponentBase implements ITransf
     }
 
     Unitialize() {
-        super.Unitialize();
         this.Parent.transform.Unsubscribe(this);
+        super.Unitialize();
     }
 
     abstract OnObservableNotified(args: ITransformEventArgs): void;

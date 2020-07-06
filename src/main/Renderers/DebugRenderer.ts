@@ -17,14 +17,18 @@ export class WebglDebugRenderer extends WebglRenderer {
             this._attributeCount += config.attributes[attribute].size;
     }
 
-    SetDrawData(data: { yellow: number[][], red: number[][] }): void {
+    SetDrawData(data: { yellow: number[][], red: number[][] } | null): void {
         this._drawData = { yellow: [], red: [] };
 
-        data.yellow.forEach(numArr => this._drawData.yellow.push(new Float32Array(numArr)));
-        data.red.forEach(numArr => this._drawData.red.push(new Float32Array(numArr)));
+        if (data !== null) {
+            data.yellow.forEach(numArr => this._drawData.yellow.push(new Float32Array(numArr)));
+            data.red.forEach(numArr => this._drawData.red.push(new Float32Array(numArr)));
+        }
     }
 
     Render(): void {
+        if (!this._drawData) return;
+
         this.ActivateProgram();
         const gl = this._context;
 

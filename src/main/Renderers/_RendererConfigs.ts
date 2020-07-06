@@ -123,7 +123,6 @@ export const RenderConfigs: { [key: string]: IRendererConfig } = {
                 offset: 0,
             }
         },
-        uniforms: {
-        }
-    },
+        uniforms: {}
+    }
 }

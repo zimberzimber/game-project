@@ -26,6 +26,7 @@ export class Transform extends Observable<ITransformObserver, ITransformEventArg
     private _position: Vec2 = [0, 0];
     get Position(): Vec2 { return this._position; }
     set Position(position: Vec2) {
+        if (Vec2Utils.Equals(this._position, position)) return;
         const old = this._position;
         this._position = position;
         this.Notify({ oldValue: old, newValue: position, field: TransformField.Position });
@@ -34,6 +35,7 @@ export class Transform extends Observable<ITransformObserver, ITransformEventArg
     private _depth: number = 0;
     get Depth(): number { return this._depth; }
     set Depth(depth: number) {
+        if (this._depth == depth) return;
         const old = this._depth;
         this._depth = depth;
         this.Notify({ oldValue: old, newValue: depth, field: TransformField.Depth });
@@ -42,6 +44,7 @@ export class Transform extends Observable<ITransformObserver, ITransformEventArg
     private _scale: Vec2 = [1, 1];
     get Scale(): Vec2 { return this._scale; }
     set Scale(scale: Vec2) {
+        if (this._scale == scale) return;
         const old = this._scale;
         this._scale = scale;
         this.Notify({ oldValue: old, newValue: scale, field: TransformField.Scale });
@@ -50,6 +53,7 @@ export class Transform extends Observable<ITransformObserver, ITransformEventArg
     private _rotation: number = 0;
     get Rotation(): number { return this._rotation; }
     set Rotation(angle: number) {
+        if (this._rotation == angle) return;
         const old = this._rotation;
         this._rotation = angle % 360;
         this.Notify({ oldValue: old, newValue: this._rotation, field: TransformField.Rotation });

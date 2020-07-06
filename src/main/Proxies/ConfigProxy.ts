@@ -1,4 +1,3 @@
-import { Log } from "../Workers/Logger";
 import { Observable, IObserver } from "../Models/Observable";
 
 export interface IConfigEventArgs {
@@ -17,7 +16,8 @@ class ConfigProxy {
 
     constructor() {
         if (!this._original)
-            Log.Error("Config proxy could not find field 'window.configuration'")
+            // Preventing a circular dependency between config and logger by directly calling console
+            console.error("Config proxy could not find field 'window.configuration'")
     }
 
     /**

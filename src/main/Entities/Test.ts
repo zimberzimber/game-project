@@ -13,6 +13,7 @@ import { DrawDirectiveStaticImage } from "../Components/DrawDirectives/DrawDirec
 import { Light } from "../Components/Light/Light";
 import { Vec2 } from "../Models/Vectors";
 import { SoundComponent } from "../Components/Sound/SoundBase";
+import { DrawDirectiveText } from "../Components/DrawDirectives/DrawDirectiveText";
 
 export class TestEntity extends EntityBase {
     constructor(parent: EntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
@@ -37,7 +38,7 @@ export class TestEntity extends EntityBase {
         this.AddComponent(new Light(this, [1, 0, 0], 50, 1));
     }
 
-    Update() {
-        super.Update();
+    Update(delta: number) {
+        super.Update(delta);
     }
 }
