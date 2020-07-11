@@ -36,6 +36,7 @@ export class WebglSceneRenderer extends WebglRenderer {
     }
 
     SetDrawData(data: { [key: number]: { attributes: number[], indexes: number[] } }): void {
+        this._drawData = {};
         for (const index in data) {
             this._drawData[index] = {
                 attributes: new Float32Array(data[index].attributes),

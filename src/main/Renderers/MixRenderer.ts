@@ -2,7 +2,8 @@ import { WebglRenderer } from "./BaseRenderer";
 import { IRendererConfig, IWebglActiveTextureInfo } from "./_RendererInterfaces";
 
 interface IMixSubjectInfo extends IWebglActiveTextureInfo {
-    buffer: WebGLFramebuffer;
+    frameBuffer: WebGLFramebuffer;
+    renderBuffer: WebGLRenderbuffer;
     texture: WebGLTexture;
 }
 
@@ -10,8 +11,15 @@ export class WebglMixRenderer extends WebglRenderer {
     private _mixSubjects: IMixSubjectInfo[] = [];
     private _verts: Float32Array = new Float32Array([1, 1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1]);
 
-    get FrameBuffer1(): WebGLFramebuffer { return this._mixSubjects[0].buffer; }
-    get FrameBuffer2(): WebGLFramebuffer { return this._mixSubjects[1].buffer; }
+    BindToSceneBuffer() {
+        this._context.bindRenderbuffer(this._context.RENDERBUFFER, this._mixSubjects[0].renderBuffer);
+        this._context.bindFramebuffer(this._context.FRAMEBUFFER, this._mixSubjects[0].frameBuffer);
+    }
+
+    BindToLightBuffer() {
+        this._context.bindRenderbuffer(this._context.RENDERBUFFER, this._mixSubjects[1].renderBuffer);
+        this._context.bindFramebuffer(this._context.FRAMEBUFFER, this._mixSubjects[1].frameBuffer);
+    }
 
     constructor(canvas: HTMLCanvasElement, config: IRendererConfig) {
         super(canvas, config);
@@ -19,10 +27,12 @@ export class WebglMixRenderer extends WebglRenderer {
 
         gl.useProgram(this._program);
         for (let i = 0; i < 2; i++) {
-            const buffer = gl.createFramebuffer()!;
+            const frameBuffer = gl.createFramebuffer()!;
             const texture = gl.createTexture()!;
+            const renderBuffer = gl.createRenderbuffer()!;
 
-            gl.bindFramebuffer(gl.FRAMEBUFFER, buffer);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
             gl.bindTexture(gl.TEXTURE_2D, texture);
 
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -32,18 +42,29 @@ export class WebglMixRenderer extends WebglRenderer {
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, canvas.width, canvas.height);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderBuffer);
+
             const uniformLocation = gl.getUniformLocation(this._program, `u_sampler_${i}`)!;
             const textureUnit = this.NextTextureId;
 
             gl.uniform1i(uniformLocation, textureUnit);
-            this._mixSubjects.push({ buffer, texture, uniformLocation, textureUnit });
+            this._mixSubjects.push({ frameBuffer, renderBuffer, texture, uniformLocation, textureUnit });
         }
 
         gl.useProgram(null);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
     }
 
     SetDrawData(): void { }
+
+    // ActivateProgram(): void {
+    //     super.ActivateProgram();
+    //     const gl = this._context;
+    //     gl.disable(gl.BLEND);
+    //     gl.enable(gl.DEPTH_TEST);
+    // }
 
     Render(): void {
         this.ActivateProgram();

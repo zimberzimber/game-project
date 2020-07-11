@@ -7,6 +7,7 @@ export interface ISpriteFrame {
 
 export interface ISpriteStorage {
     imageId: number;
+    metadata?: any;
 }
 
 export interface ISingleFrameSpriteStorage extends ISpriteStorage {
@@ -46,6 +47,7 @@ export const GetFrameFromMultiFrameStorage = (frameStorage: IMultiFrameSpriteSto
 export interface ISpriteDefinition {
     sourceImageName: string;
     isPixelCoordinates?: boolean;
+    metadata?: any;
 }
 
 export interface ISingleFrameSpriteDefinition extends ISpriteDefinition {

@@ -92,4 +92,9 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     }
 }
 
+export let FontDefinitions: { [key: string]: { font: string, size: number, outlineWidth: number } } = {
+    font_arial: { font: 'Arial', size: 20, outlineWidth: 2.5 }
+}
+
 export const ClearSpriteDefinitions = () => SpriteDefinitions = {};
+export const ClearFontDefinitions = () => FontDefinitions = {};

@@ -26,6 +26,13 @@ export class WebglDebugRenderer extends WebglRenderer {
         }
     }
 
+    ActivateProgram(): void {
+        super.ActivateProgram();
+        const gl = this._context;
+        gl.disable(gl.BLEND);
+        gl.disable(gl.DEPTH_TEST);
+    }
+
     Render(): void {
         if (!this._drawData) return;
 

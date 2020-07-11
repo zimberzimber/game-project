@@ -1,7 +1,4 @@
-import { IDB } from './IndexeddbManager';
-import { CDN } from './CdnManager';
 import { Log } from "./Logger";
-import { IDBSoundDataModel } from '../Models/IndexedDbSchemas';
 import { MiscUtil } from '../Utility/Misc';
 
 class SoundManager {
@@ -9,7 +6,7 @@ class SoundManager {
     private soundSourceStorage: ArrayBuffer[] = [];
     private soundSourceNameIndexes: { [key: string]: number } = {};
 
-    async Initialize(soundSourceDefinitions: { [key: string]: string }): Promise<void> {
+    Initialize(soundSourceDefinitions: { [key: string]: ArrayBuffer }): void {
         if (this.initialized) {
             Log.Warn('SoundManager is already initialized.');
             return;
@@ -17,48 +14,11 @@ class SoundManager {
         this.initialized = true;
 
         let nextId = 0;
-        const promises: Promise<void>[] = [];
         for (const sourceName in soundSourceDefinitions) {
-            const url = soundSourceDefinitions[sourceName];
-            const sourceId = nextId++;
-
-            const method = async (): Promise<void> => {
-                const exists = await IDB.CheckExistence('game', 'sounds', url)
-                let arrayBuffer: ArrayBuffer;
-
-                if (exists) {
-                    const result = await IDB.GetData('game', 'sounds', url);
-                    if (result.error) {
-                        Log.Error(`Failed fetching existing sound resource from IDB: ${url}`);
-                        Log.Error(result.error);
-                        return;
-                    }
-                    else {
-                        arrayBuffer = (result.data as IDBSoundDataModel).buffer;
-                    }
-                } else {
-                    const result = await CDN.GetContentFromUrl(url);
-                    if (result.error) {
-                        Log.Error(`Failed fetching sound resource from url: ${url}`);
-                        Log.Error(result.error);
-                        return;
-                    }
-                    else {
-                        arrayBuffer = await result.data.arrayBuffer();
-                        await IDB.StoreData('game', 'sounds', new IDBSoundDataModel(url, arrayBuffer));
-                    }
-                }
-
-                this.soundSourceStorage[sourceId] = arrayBuffer;
-                this.soundSourceNameIndexes[sourceName] = sourceId;
-            };
-
-            promises.push(method());
+            this.soundSourceStorage[nextId] = soundSourceDefinitions[sourceName];
+            this.soundSourceNameIndexes[sourceName] = nextId;
+            nextId++;
         }
-
-        // Wait for the loading to complete
-        await Promise.all(promises);
-        return;
     }
 
     GetSoundSource(id: number): ArrayBuffer | null {

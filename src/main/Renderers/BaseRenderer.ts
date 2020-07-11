@@ -2,7 +2,7 @@ import { Log } from "../Workers/Logger";
 import { IRendererAttributeContainer, IRendererUniformContainer, IRendererConfig } from "./_RendererInterfaces";
 
 export abstract class WebglRenderer {
-    private static _nextTextureId: number = 0;
+    private _nextTextureId: number = 0;
     protected _context: WebGLRenderingContext;
     protected _program: WebGLProgram;
     protected _attributes: { [key: string]: IRendererAttributeContainer } = {};
@@ -142,7 +142,7 @@ export abstract class WebglRenderer {
     }
 
     protected get NextTextureId(): number {
-        return WebglRenderer._nextTextureId++;
+        return this._nextTextureId++;
     }
 
     abstract SetDrawData(data: any): void;

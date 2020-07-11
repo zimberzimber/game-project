@@ -47,6 +47,7 @@ class SpriteManager {
                         frame: def.frame
                     }
                 }
+                this.sprites[spriteName].metadata = def.metadata;
 
             } else if ((spriteDefinitions[spriteName] as IMultiFrameSpriteDefinition).frames) {
                 const def = spriteDefinitions[spriteName] as IMultiFrameSpriteDefinition;
@@ -56,6 +57,7 @@ class SpriteManager {
                     frames: [],
                     names: def.names || undefined, // Adding an underfined in case of the definition having an empty array
                     aliases: def.aliases || undefined, // Adding an underfined in case of the definition having an empty array
+                    metadata: def.metadata
                 }
 
                 if (def.isPixelCoordinates) {

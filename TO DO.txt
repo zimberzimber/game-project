@@ -3,6 +3,13 @@ X Have the sprite definitions go by pixels, and get converted to 0-1 in runtime
 X Find a solution to Scene and UI renderers doubling webgl textures
 X Scene and UI rendering should be based on entity type
 X Add a UI entity type
-- Find out why text doesn't hide when the component is disabled
-- Find out why the paused text doesn't get deleted on unpause
-- Add pitch controls to sound
+X Find out why text doesn't hide when the component is disabled
+X Find out why the paused text doesn't get deleted on unpause
+X Have the sound manager not rely on IDB
+X Convert a font file into an image to be used as text texture
+X Fix text character spacing to rely on character width
+X Fix rendering to a buffer losing depth
+X Fix funky new line behavior in text
+X Implement proper bounding box for text drawing
+
+(SCRAPPED) Add pitch controls to sound

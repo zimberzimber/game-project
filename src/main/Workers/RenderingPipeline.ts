@@ -10,6 +10,7 @@ import { WebglPostRenderer } from "../Renderers/PostRenderer";
 import { WebglLightingRenderer } from "../Renderers/LightingRenderer";
 import { WebglMixRenderer } from "../Renderers/MixRenderer";
 import { ITransformObserver, ITransformEventArgs } from "../Models/Transform";
+import { Config } from "../Proxies/ConfigProxy";
 
 //@ts-ignore
 const glMatrix = window.glMatrix;
@@ -68,8 +69,9 @@ class RenderingPipeline implements ITransformObserver {
         this.SetUniformData(['scene', 'debug', 'lighting', 'ui'], 'u_viewMatrix', [false, viewMatrix]);
         this.SetUniformData(['scene', 'debug', 'lighting', 'ui'], 'u_projectionMatrix', [false, empty]);
         this.SetUniformData(['scene', 'debug', 'lighting'], 'u_worldMatrix', [false, empty]);
-
         this.SetUniformData('post', 'u_offsetPower', [0]);
+
+        this.ResetClearColor();
     }
 
     OnObservableNotified(args: ITransformEventArgs): void {
@@ -85,6 +87,15 @@ class RenderingPipeline implements ITransformObserver {
         this.SetUniformData(['scene', 'debug', 'lighting', 'ui'], 'u_projectionMatrix', [false, projectionMatrix]);
     }
 
+    private UnbindBuffers() {
+        this._context.bindRenderbuffer(this._context.RENDERBUFFER, null);
+        this._context.bindFramebuffer(this._context.FRAMEBUFFER, null);
+    }
+
+    private ResetClearColor() {
+        this._context.clearColor(0.2, 0.2, 0.2, 1);
+    }
+
     Render(): void {
         if (!this._context) {
             OneTimeLog.Log('no_rendering_context', 'Rendering pipeline does not have a rendering context. Aborting render calls.', LogLevel.Error);
@@ -92,31 +103,37 @@ class RenderingPipeline implements ITransformObserver {
         }
         const gl = this._context;
 
-        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null);
-        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
-
-        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, this._renderers.mix.FrameBuffer1);
-        gl.clearColor(0.2, 0.2, 0.2, 1);
+        // Render the scene into the mix scene buffer
+        this._renderers.mix.BindToSceneBuffer();
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.scene.Render();
 
-        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, this._renderers.mix.FrameBuffer2);
+        // Render the lighting into the mix lighting buffer
+        this._renderers.mix.BindToLightBuffer();
         gl.clearColor(0, 0, 0, 1);
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.lighting.Render();
 
-
-        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, this._renderers.post.FrameBuffer);
+        // Render the scene and lighting together into the post buffer
+        this._renderers.post.BindToBuffer();
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.mix.Render();
 
-        gl.bindFramebuffer(WebGLRenderingContext.FRAMEBUFFER, null);
+        // Render post processing result on to the canvas
+        this.UnbindBuffers();
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.post.Render();
+        this.ResetClearColor();
+
+        // Render the UI on to the canvas
         gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.ui.Render();
-        gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
-        this._renderers.debug.Render();
+
+        if (Config.GetConfig('debugDraw', false)) {
+            // Render debug data ontp the canvas
+            gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
+            this._renderers.debug.Render();
+        }
     }
 
     private CheckExists(rendererName: string): boolean {

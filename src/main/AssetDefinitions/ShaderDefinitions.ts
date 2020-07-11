@@ -23,7 +23,10 @@ varying vec2 v_texCoord;
 uniform sampler2D u_sampler;
 
 void main() {
-    gl_FragColor = texture2D(u_sampler, v_texCoord);
+    vec4 color = texture2D(u_sampler, v_texCoord);
+    if (color.a == 0.)
+        discard;
+    gl_FragColor = color;
 }`,
 
     debug_vertex: `
