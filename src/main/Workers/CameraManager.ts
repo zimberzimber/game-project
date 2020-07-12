@@ -37,7 +37,7 @@ class CameraManager implements ITransformObserver {
         else if (d >= falloffStartDistance && d < falloffDistance)
             result.volumeMultiplier = 1 - (d - falloffStartDistance) / (falloffDistance - falloffStartDistance);
 
-        if (d > 50){
+        if (d > 50) {
             const p2 = Vec2Utils.MoveTowards(this.Transform.Position, soundOrigin, 50, false);
             const angle = Vec2Utils.GetAngle(p2, soundOrigin) + this.Transform.Rotation;
             result.panning = 1 - Math.abs(angle) / 90;

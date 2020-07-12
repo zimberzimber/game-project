@@ -25,7 +25,7 @@ export class SoundComponent extends ComponentBase implements ITransformObserver 
     OnObservableNotified(args: ITransformEventArgs): void {
         if (!this.Enabled) return;
 
-        if (Audio.IsActive(this.currentSoundId)) {
+        if (Audio.IsActive(this.currentSoundId) && args.position) {
             const params = Camera.GetCameraRelativePanningAndVolume(this.Parent.worldRelativeTransform.Position, this.soundDefinition.falloffStartDistance, this.soundDefinition.falloffDistance);
 
             Audio.SetControllerValueForSound(this.currentSoundId, ControllerType.Pan, params.panning);

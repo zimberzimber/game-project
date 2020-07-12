@@ -8,29 +8,26 @@ export abstract class EntityBase implements ITransformObserver {
 
     readonly entityId: number;
     readonly transform: Transform = new Transform();
+    readonly worldRelativeTransform: Transform = new Transform();
 
     protected _parent: EntityBase | undefined;
     protected _children: EntityBase[] = [];
     protected _components: ComponentBase[] = [];
 
-    worldRelativeTransform: Transform;
-
     get Parent(): EntityBase | undefined { return this._parent; }
     get Children(): EntityBase[] { return this._children; }
 
-    constructor(parent: EntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
+    constructor(parent: EntityBase | void | null) {
         this._parent = parent || undefined;
         this.entityId = EntityBase.NextEntityId++;
 
-        this.transform.Position = position;
-        this.transform.Rotation = rotation;
-        this.transform.Scale = scale;
         this.transform.Subscribe(this);
         EntityBase.CalculateWorlRelativeTransform(this);
     }
 
     OnObservableNotified(args: ITransformEventArgs): void {
         EntityBase.CalculateWorlRelativeTransform(this);
+        this._children.forEach(c => c.OnObservableNotified(args));
     }
 
     Update(delta: number): void {
@@ -98,12 +95,12 @@ export abstract class EntityBase implements ITransformObserver {
         }
 
         this.transform.UnsubscribeAll();
+        this.worldRelativeTransform.UnsubscribeAll();
         this.RemoveAllComponents();
         this.RemoveAllChildEntities();
     }
 
     // Method for calculating an entities world relative transform, which is based on its parent chain
-    // Also responsible for doing the same for all children entities 
     private static CalculateWorlRelativeTransform(entity: EntityBase): void {
         let relative: Transform;
 
@@ -118,8 +115,8 @@ export abstract class EntityBase implements ITransformObserver {
             }
         }
 
-        entity.worldRelativeTransform = relative;
-        entity._children.forEach(c => EntityBase.CalculateWorlRelativeTransform(c));
+        // Changing the original transform instead of overriding it to retain observers and prevent memory leaks
+        entity.worldRelativeTransform.SetTransformParams(relative.Position, relative.Rotation, relative.Scale, relative.Depth);
     }
 }
 
@@ -129,17 +126,9 @@ export class UiEntityBase extends EntityBase {
 
     get Parent(): UiEntityBase | undefined { return this._parent; }
     get Children(): UiEntityBase[] { return this._children; }
-    
-    constructor(parent: UiEntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
-        super(parent, position, rotation, scale);
-    }
-    
-    AddChildEntity(child: UiEntityBase): void {
-        super.AddChildEntity(child);
-    }
 
-    RemoveChildEntity(child: UiEntityBase): void {
-        super.RemoveChildEntity(child);
+    constructor(parent: UiEntityBase | void | null) {
+        super(parent);
     }
 }
 
@@ -150,15 +139,7 @@ export class GameEntityBase extends EntityBase {
     get Parent(): GameEntityBase | undefined { return this._parent; }
     get Children(): GameEntityBase[] { return this._children; }
 
-    constructor(parent: GameEntityBase | void | null, position: Vec2 = [0, 0], rotation: number = 0, scale: Vec2 = [1, 1]) {
-        super(parent, position, rotation, scale);
-    }
-    
-    AddChildEntity(child: GameEntityBase): void {
-        super.AddChildEntity(child);
-    }
-
-    RemoveChildEntity(child: GameEntityBase): void {
-        super.RemoveChildEntity(child);
+    constructor(parent: GameEntityBase | void | null) {
+        super(parent);
     }
 }

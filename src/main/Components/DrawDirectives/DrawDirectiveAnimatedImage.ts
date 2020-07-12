@@ -23,11 +23,13 @@ export class DrawDirectiveAnimatedImage extends DrawDirectiveImageBase {
     get FrameId(): number { return this._currentFrame; }
     set Frame(frame: string | number) {
         const f = GetFrameFromMultiFrameStorage(this._spriteData, frame);
-        if (f > -1)
+        if (f > -1) {
             this._currentFrame = f;
+            this.UpdateWebglData();
+        }
     }
 
-    OnObservableNotified(args: ITransformEventArgs): void {
+    private UpdateWebglData() {
         const trans = this._parent.worldRelativeTransform;
         const ox = this.Size[0] / 2 * trans.Scale[0];
         const oy = this.Size[1] / 2 * trans.Scale[1];
@@ -52,5 +54,9 @@ export class DrawDirectiveAnimatedImage extends DrawDirectiveImageBase {
                 trans.Position[0] + ox, trans.Position[1] - oy, trans.Depth, sd.frames[this._currentFrame].origin[0] + sd.frames[this._currentFrame].size[0], sd.frames[this._currentFrame].origin[1] + sd.frames[this._currentFrame].size[1],
             ];
         }
+    }
+
+    OnObservableNotified(args: ITransformEventArgs): void {
+        this.UpdateWebglData();
     }
 }

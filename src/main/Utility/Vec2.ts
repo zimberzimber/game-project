@@ -3,6 +3,7 @@ import { ScalarUtil } from "./Scalar";
 
 export class Vec2Utils {
     static Translate = (v: Vec2, x: number, y: number): Vec2 => [v[0] + x, v[1] + y];
+
     static Sum = (v1: Vec2, v2: Vec2): Vec2 => [v1[0] + v2[0], v1[1] + v2[1]];
     static Sub = (v1: Vec2, v2: Vec2): Vec2 => [v1[0] - v2[0], v1[1] - v2[1]];
     static Mult = (v1: Vec2, v2: Vec2): Vec2 => [v1[0] * v2[0], v1[1] * v2[1]];
@@ -67,5 +68,7 @@ export class Vec2Utils {
         return Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
     }
 
-    static Equals = (p1: Vec2, p2: Vec2): boolean => (p1[0] == p2[0] && p1[1] == p2[1])
+    static Equals = (p1: Vec2, p2: Vec2): boolean => (p1[0] == p2[0] && p1[1] == p2[1]);
+
+    static Copy = (vec: Vec2): Vec2 => [vec[0], vec[1]];
 }

@@ -2,20 +2,17 @@ import { Game } from "../Workers/Game";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
 import { CheckCollision } from "../Workers/CollisionChecker";
-import { DrawDirectiveImageBase } from "../Components/DrawDirectives/DrawDirectiveImageBase";
 import { DrawDirectiveText, TextAlignmentHorizontal, TextAlignmentVertical } from "../Components/DrawDirectives/DrawDirectiveText";
 import { Camera } from "../Workers/CameraManager";
-import { Images } from "../Workers/ImageManager";
 import { Rendering } from "../Workers/RenderingPipeline";
-import { Light } from "../Components/Light/Light";
 import { Config, IConfigObserver, IConfigEventArgs } from "../Proxies/ConfigProxy";
 import { SoundType } from "../Models/SoundModels";
 import { Audio } from "../Workers/SoundPlayer";
 import { SoundDefinitions } from "../AssetDefinitions/SoundDefinitions";
 import { PlayerEntity } from "../Entities/Player";
 import { TestEntity } from "../Entities/Test";
-import { Test2Entity } from "../Entities/Test2";
-import { GameEntityBase, UiEntityBase } from "../Entities/EntityBase";
+import { UiEntityBase } from "../Entities/EntityBase";
+import { PlayerEntity2 } from "../Entities/PlayerEntities/PlayerRoot";
 
 
 export abstract class GameStateBase {
@@ -67,23 +64,13 @@ class GameStateGame extends GameStateBase implements IConfigObserver {
         this._debugDraw = Config.GetConfig('debugDraw', false);
         Config.Observable.Subscribe(this);
 
-        let p = new PlayerEntity();
+        let p = new PlayerEntity2();
         Game.AddEntity(p);
 
         let test = new TestEntity();
         test.transform.Position = [100, 100];
         test.transform.Scale = [5, 5];
         Game.AddEntity(test);
-
-        const n = 0;
-        for (let x = 0; x < n; x++) {
-            for (let y = 0; y < n; y++) {
-                let test2 = new Test2Entity();
-                test2.transform.Position = [(-n + x) * 7, (-n + y) * 7];
-                test2.transform.Scale = [0.25, 0.25];
-                Game.AddEntity(test2);
-            }
-        }
     }
 
     OnDeactivated(): void {
