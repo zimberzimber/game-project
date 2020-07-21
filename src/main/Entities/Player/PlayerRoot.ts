@@ -1,15 +1,16 @@
 import { GameEntityBase } from "../EntityBase";
-import { DrawDirectiveAnimatedImage } from "../../Components/DrawDirectives/DrawDirectiveAnimatedImage";
-import { Vec2 } from "../../Models/Vectors";
-import { PlayerMovementComponent } from "../../Components/PlayerMovementComponent";
+import { DrawDirectiveAnimatedImage } from "../../Components/Visual/DrawDirectiveAnimatedImage";
+import { PlayerMovementComponent } from "../../Components/Mechanics/PlayerMovementComponent";
 import { HitboxRectangle } from "../../Components/Hitboxes/HitboxRectangle";
 import { CollisionGroup, TriggerState } from "../../Models/CollisionModels";
 import { HitboxBase } from "../../Components/Hitboxes/HitboxBase";
-import { Light } from "../../Components/Light/Light";
+import { Light } from "../../Components/Visual/Light";
+import { ParticleComponent } from "../../Components/Visual/Particle";
 
 export class OriEntity extends GameEntityBase {
     private dd: DrawDirectiveAnimatedImage;
     private light: Light;
+    private particle: ParticleComponent;
 
     private frameDelta: number = 0.25;
     private frameTime: number = 0;
@@ -20,8 +21,12 @@ export class OriEntity extends GameEntityBase {
         this.dd = new DrawDirectiveAnimatedImage(this, "ori", [5, 15]);
         this.AddComponent(this.dd);
 
-        this.light = new Light(this, [0.85, 0.85, 1], 50, 0.25)
+        this.light = new Light(this, [0.85, 0.85, 1], 150, 0.25)
         this.AddComponent(this.light);
+
+        this.particle = new ParticleComponent(this, 'test');
+        this.AddComponent(this.particle);
+        this.particle.Start();
     }
 
     Update(delta: number) {
@@ -61,7 +66,7 @@ export class KuEntity extends GameEntityBase {
     }
 }
 
-export class PlayerEntity2 extends GameEntityBase {
+export class PlayerEntity extends GameEntityBase {
     private oriEntity: OriEntity;
     private kuEntity: KuEntity;
 

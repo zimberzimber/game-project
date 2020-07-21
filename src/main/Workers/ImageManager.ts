@@ -3,6 +3,7 @@ import { Log } from "./Logger";
 import { IDB } from "./IndexeddbManager";
 import { imageStore, gameSchema, IDBImageDataModel } from "../Models/IndexedDbSchemas";
 import { PromiseUtil } from "../Utility/Promises";
+import { Vec2 } from "../Models/Vectors";
 
 class ImageManager {
     private initialized: boolean = false;
@@ -34,13 +35,13 @@ class ImageManager {
         return this.nameIndex[name] !== undefined ? this.nameIndex[name] : -1;
     }
 
-    GetImageSize(id: number): [number, number] {
+    GetImageSize(id: number): Vec2 {
         if (this.images[id])
             return [this.images[id].width, this.images[id].height];
         return [0, 0];
     }
 
-    GetImageSizeByName(name: string): [number, number] {
+    GetImageSizeByName(name: string): Vec2 {
         return this.GetImageSize(this.GetImageIdFromName(name));
     }
 

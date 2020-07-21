@@ -8,4 +8,4 @@ The opposite is true for Chrome, thought the difference is smaller.
 
 Biggest performence impact (so far) comes from array processing for the graphic context
 
-UI elements should move with the camera
+Lighting: Since a point size cannot exceed 1024, light radius is hard limited to 512 radius, and will have the light circle have its edge cut off.

@@ -1,9 +1,9 @@
-import { ComponentBase } from "./ComponentBase";
-import { Vec2 } from "../Models/Vectors";
-import { Vec2Utils } from "../Utility/Vec2";
-import { Input } from "../Workers/InputHandler";
-import { EntityBase } from "../Entities/EntityBase";
-import { IKeyboardObserver, IKeyboardEvent, ButtonState } from "../Models/InputModels";
+import { ComponentBase } from "../ComponentBase";
+import { Vec2 } from "../../Models/Vectors";
+import { Vec2Utils } from "../../Utility/Vec2";
+import { Input } from "../../Workers/InputHandler";
+import { EntityBase } from "../../Entities/EntityBase";
+import { IKeyboardObserver, IKeyboardEvent, ButtonState } from "../../Models/InputModels";
 
 export class PlayerMovementComponent extends ComponentBase implements IKeyboardObserver {
     private _verticalDirection: number = 0;

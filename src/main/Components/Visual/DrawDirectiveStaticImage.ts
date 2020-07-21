@@ -17,9 +17,14 @@ export class DrawDirectiveStaticImage extends DrawDirectiveImageBase {
             0, 1, 2,
             0, 2, 3
         ];
+        this.UpdateWebglData();
     }
 
     OnObservableNotified(args: ITransformEventArgs): void {
+        this.UpdateWebglData();
+    }
+
+    private UpdateWebglData() {
         const trans = this._parent.worldRelativeTransform;
         const ox = this.Size[0] / 2 * trans.Scale[0];
         const oy = this.Size[1] / 2 * trans.Scale[1];

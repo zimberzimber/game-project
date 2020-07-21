@@ -68,7 +68,28 @@ export class Vec2Utils {
         return Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
     }
 
+    // https://programming.guide/random-point-within-circle.html
+    static RandomPointInCircle = (radius: number): Vec2 => {
+        const a = Math.random() * 2 * Math.PI;
+        const r = radius * Math.sqrt(Math.random());
+        return [r * Math.cos(a), r * Math.sin(a)];
+    }
+
+    static RandomPointInBox = (min: Vec2, max: Vec2): Vec2 => {
+        return [
+            (max[0] - min[0]) * Math.random() + min[0],
+            (max[1] - min[1]) * Math.random() + min[1],
+        ];
+    }
+
     static Equals = (p1: Vec2, p2: Vec2): boolean => (p1[0] == p2[0] && p1[1] == p2[1]);
+
+    static OneOrRange = (oor: Vec2 | [Vec2, Vec2]): Vec2 => {
+        // [0] of a number = undefined
+        if (oor[0][0] === undefined)
+            return Vec2Utils.Copy(oor as Vec2);
+        return Vec2Utils.RandomPointInBox(oor[0] as Vec2, oor[1] as Vec2);
+    }
 
     static Copy = (vec: Vec2): Vec2 => [vec[0], vec[1]];
 }

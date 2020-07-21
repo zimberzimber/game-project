@@ -2,8 +2,8 @@ import { GameEntityBase } from "./EntityBase";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
 import { HitboxRectangle } from "../Components/Hitboxes/HitboxRectangle";
-import { DrawDirectiveStaticImage } from "../Components/DrawDirectives/DrawDirectiveStaticImage";
-import { Light } from "../Components/Light/Light";
+import { DrawDirectiveStaticImage } from "../Components/Visual/DrawDirectiveStaticImage";
+import { Light } from "../Components/Visual/Light";
 import { Vec2 } from "../Models/Vectors";
 import { SoundComponent } from "../Components/Sound/SoundBase";
 

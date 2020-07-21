@@ -86,7 +86,7 @@ class SpriteManager {
         if (id > -1)
             return { imageId: id, frame: { origin: [0, 0], size: Images.GetImageSize(id) } };
 
-        OneTimeLog.Log(`nonexistentFullImage_${image}`, `Attempted to get non-existent image: ${image}`, LogLevel.Error);
+        OneTimeLog.Log(`nonexistentFullImage_${image}`, `Attempted to get non-existent image: ${image}`, LogLevel.Warn);
         return { imageId: 0, frame: { origin: [0, 0], size: [0, 0] } };
     }
 
@@ -94,7 +94,7 @@ class SpriteManager {
         if (this.sprites[name] && (this.sprites[name] as ISingleFrameSpriteStorage).frame)
             return this.sprites[name] as ISingleFrameSpriteStorage;
 
-        OneTimeLog.Log(`bad_static_sprite_${name}`, `Attempted to get a non-existent or non-static sprite: ${name}`, LogLevel.Error);
+        OneTimeLog.Log(`bad_static_sprite_${name}`, `Attempted to get a non-existent or non-static sprite: ${name}`, LogLevel.Warn);
         return null;
     }
 
@@ -102,7 +102,7 @@ class SpriteManager {
         if (this.sprites[name] && (this.sprites[name] as IMultiFrameSpriteStorage).frames)
             return this.sprites[name] as IMultiFrameSpriteStorage;
 
-        OneTimeLog.Log(`bad_animated_sprite_${name}`, `Attempted to get a non-existent or non-animated sprite: ${name}`, LogLevel.Error);
+        OneTimeLog.Log(`bad_animated_sprite_${name}`, `Attempted to get a non-existent or non-animated sprite: ${name}`, LogLevel.Warn);
         return null;
     }
 }

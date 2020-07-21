@@ -100,4 +100,33 @@ export class MiscUtil {
         image.src = ctx.canvas.toDataURL();
         return { image, names, frames, charWidths, maxCharHeight };
     }
+
+    static GenerateWebglTextureFromImage = (gl: WebGLRenderingContext, image: TexImageSource, wrap?: boolean): WebGLTexture => {
+        const texture: WebGLTexture = MiscUtil.GenerateWebglEmptyTexture(gl, [0, 0], wrap);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        return texture;
+    }
+
+    static GenerateWebglEmptyTexture = (gl: WebGLRenderingContext, size: Vec2, wrap?: boolean): WebGLTexture => {
+        const texture: WebGLTexture = gl.createTexture()!;
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        if (wrap) {
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        } else {
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        }
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size[0], size[1], 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        return texture;
+    }
 }

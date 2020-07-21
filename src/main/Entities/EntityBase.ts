@@ -1,6 +1,5 @@
 import { ComponentBase } from "../Components/ComponentBase";
 import { Transform, ITransformObserver, ITransformEventArgs } from "../Models/Transform";
-import { Vec2 } from "../Models/Vectors";
 import { Game } from "../Workers/Game";
 
 export abstract class EntityBase implements ITransformObserver {

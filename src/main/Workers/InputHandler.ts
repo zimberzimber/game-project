@@ -1,12 +1,12 @@
-import { IMouseObserver, IMouseEvent, IKeyboardObserver, IKeyboardEvent, MouseObserverFull, KeyboardObserverFull, ButtonState } from "../Models/InputModels";
+import { IMouseObserver, IMouseEvent, IKeyboardObserver, IKeyboardEvent, IMouseObserverFull, IKeyboardObserverFull, ButtonState } from "../Models/InputModels";
 import { Vec2 } from "../Models/Vectors";
 import { Observable } from "../Models/Observable";
 
 class InputHandler {
     readonly MouseObservable: Observable<IMouseObserver, IMouseEvent> = new Observable();
     readonly KeyboardObservable: Observable<IKeyboardObserver, IKeyboardEvent> = new Observable();
-    readonly MouseFullObservable: Observable<MouseObserverFull, MouseEvent> = new Observable();
-    readonly KeyboardFullObservable: Observable<KeyboardObserverFull, KeyboardEvent> = new Observable();
+    readonly MouseFullObservable: Observable<IMouseObserverFull, MouseEvent> = new Observable();
+    readonly KeyboardFullObservable: Observable<IKeyboardObserverFull, KeyboardEvent> = new Observable();
 
     private _mousePosition: Vec2 = [0, 0];
     get MousePosition(): Vec2 { return [this._mousePosition[0], this._mousePosition[1]]; }

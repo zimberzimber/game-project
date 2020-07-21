@@ -7,11 +7,11 @@ import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
 import { GameStateBase } from "../GameStates/GameStateBase";
 import { Rendering } from "./RenderingPipeline";
-import { DrawDirectiveImageBase } from "../Components/DrawDirectives/DrawDirectiveImageBase";
-import { DrawDirectiveText } from "../Components/DrawDirectives/DrawDirectiveText";
+import { DrawDirectiveImageBase } from "../Components/Visual/DrawDirectiveImageBase";
+import { DrawDirectiveText } from "../Components/Visual/DrawDirectiveText";
 import { Images } from "./ImageManager";
-import { Light } from "../Components/Light/Light";
-import { DrawDirectiveBase } from "../Components/DrawDirectives/DrawDirectiveBase";
+import { Light } from "../Components/Visual/Light";
+import { DrawDirectiveBase } from "../Components/Visual/DrawDirectiveBase";
 
 class GameManager implements IConfigObserver {
     private _entities: EntityBase[] = [];
@@ -171,7 +171,8 @@ class GameManager implements IConfigObserver {
                 let indexOffset = 0;
 
                 if (sceneData[dd.ImageId])
-                    indexOffset = sceneData[dd.ImageId].indexes[sceneData[dd.ImageId].indexes.length - 1] + 1;
+                    // || 0 in case of getting empty data first
+                    indexOffset = sceneData[dd.ImageId].indexes[sceneData[dd.ImageId].indexes.length - 1] + 1 || 0;
                 else
                     sceneData[dd.ImageId] = { attributes: [], indexes: [] };
 

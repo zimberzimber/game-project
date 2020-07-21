@@ -18,6 +18,7 @@ export class DrawDirectiveAnimatedImage extends DrawDirectiveImageBase {
             0, 1, 2,
             0, 2, 3
         ];
+        this.UpdateWebglData();
     }
 
     get FrameId(): number { return this._currentFrame; }

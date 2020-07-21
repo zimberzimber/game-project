@@ -1,5 +1,6 @@
 import { WebglRenderer } from "./BaseRenderer";
 import { IRendererConfig, IWebglActiveTextureInfo } from "./_RendererInterfaces";
+import { MiscUtil } from "../Utility/Misc";
 
 export class WebglPostRenderer extends WebglRenderer {
     private _frameBuffer: WebGLFramebuffer;
@@ -19,19 +20,13 @@ export class WebglPostRenderer extends WebglRenderer {
 
         this._renderBuffer = gl.createRenderbuffer()!;
         this._frameBuffer = gl.createFramebuffer()!;
-        this._frameTexture = gl.createTexture()!;
+        this._frameTexture = MiscUtil.GenerateWebglEmptyTexture(gl, [canvas.width, canvas.height]);
 
         gl.bindRenderbuffer(gl.RENDERBUFFER, this._renderBuffer);
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._frameBuffer);
         gl.bindTexture(gl.TEXTURE_2D, this._frameTexture);
 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this._frameTexture, 0);
-
         gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, canvas.width, canvas.height);
         gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this._renderBuffer);
 

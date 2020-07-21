@@ -2,7 +2,7 @@ import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition } from "../Mo
 import { MiscUtil } from "../Utility/Misc";
 
 export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition } = {
-    assetMissing: {
+    asset_missing: {
         sourceImageName: 'sprites',
         isPixelCoordinates: true,
         frame: {
@@ -206,6 +206,14 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
             size: [9, 22]
         }
     },
+    beam: {
+        sourceImageName: 'sprites',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [66, 24],
+            size: [5, 10]
+        }
+    }
 }
 
 export let FontDefinitions: { [key: string]: { font: string, size: number, outlineWidth: number } } = {

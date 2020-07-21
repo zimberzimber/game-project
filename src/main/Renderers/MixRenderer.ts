@@ -1,5 +1,6 @@
 import { WebglRenderer } from "./BaseRenderer";
 import { IRendererConfig, IWebglActiveTextureInfo } from "./_RendererInterfaces";
+import { MiscUtil } from "../Utility/Misc";
 
 interface IMixSubjectInfo extends IWebglActiveTextureInfo {
     frameBuffer: WebGLFramebuffer;
@@ -28,18 +29,13 @@ export class WebglMixRenderer extends WebglRenderer {
         gl.useProgram(this._program);
         for (let i = 0; i < 2; i++) {
             const frameBuffer = gl.createFramebuffer()!;
-            const texture = gl.createTexture()!;
+            const texture = MiscUtil.GenerateWebglEmptyTexture(gl, [canvas.width, canvas.height]);
             const renderBuffer = gl.createRenderbuffer()!;
 
             gl.bindRenderbuffer(gl.RENDERBUFFER, renderBuffer);
             gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
             gl.bindTexture(gl.TEXTURE_2D, texture);
 
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
             gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, canvas.width, canvas.height);

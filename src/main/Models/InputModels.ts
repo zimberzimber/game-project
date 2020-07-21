@@ -22,10 +22,10 @@ export interface IKeyboardObserver extends IObserver<IKeyboardEvent>{
     OnObservableNotified(args: IKeyboardEvent): void;
 }
 
-export class MouseObserverFull implements IObserver<MouseEvent>{
-    OnObservableNotified(args: MouseEvent): void { }
+export interface IMouseObserverFull extends IObserver<MouseEvent>{
+    OnObservableNotified(args: MouseEvent): void;
 }
 
-export class KeyboardObserverFull implements IObserver<KeyboardEvent>{
-    OnObservableNotified(args: KeyboardEvent): void { }
+export interface IKeyboardObserverFull extends IObserver<KeyboardEvent>{
+    OnObservableNotified(args: KeyboardEvent): void;
 }
