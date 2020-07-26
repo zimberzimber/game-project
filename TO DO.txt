@@ -1,14 +1,8 @@
-X Rewire components to listen to the parents world relative transform
-X Changed transform args to have all transform parameters as optional fields if they changed
-X Transform now has a method for changing multiple fields at once, notifying once and accordingly
-X Transform now copies data and passes on copies instead of operating directly with references
-X Added 3 basic clickable components - Rectangle, Polygon, and Circle
-X Added a resource component
-X Organized components better
-X Created 2 Webgl texture creating methods (from image, and empty)
-X Added tiled and scrollable image draw directives
-X Added Particles
-X Split game states into multiple files
-X Fixed Bug: Draw directives with empty Webgl data potentially mucking up drawing anything by messing up attribute indexes
-X Fixed Bug: Exception on deleting a clickable component
-- BUG: Pressing a key, creating a player input component, and then releasing the key results in wrong movement
+X Fixed Bug: Pressing a key, creating a player input component, and then releasing the key results in wrong movement
+X Fixed a dependency tree related issue with the game state dictionary by moving it to a separate file
+
+X Made components and entities clear all their fields on deletion/uninitialization to remove references to other places
+X Moved NextEntityId handling to Game
+X Fixed Game not indexing entities based on their ID, causing some entity deletion problems
+X Gave a toString method to base entity and component
+X Have the game state dictionary house the states a state can transition to

@@ -36,6 +36,10 @@ class InputHandler {
         window.addEventListener('keyup', this.OnKeyUp.bind(this));
     }
 
+    IsKeyDown(key: string): boolean {
+        return this._keysDown[key];
+    }
+
     private OnKeyDown(e: KeyboardEvent): void {
         if (this._keyMap[e.keyCode] && !this._keysDown[this._keyMap[e.keyCode]]) {
             this._keysDown[this._keyMap[e.keyCode]] = true;

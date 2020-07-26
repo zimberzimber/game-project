@@ -16,9 +16,10 @@ import { Rendering } from "./Workers/RenderingPipeline";
 import { Camera } from "./Workers/CameraManager";
 import { Vec2Utils } from "./Utility/Vec2";
 import { ScalarUtil } from "./Utility/Scalar";
-import { GameStateDictionary } from "./GameStates/GameStateBase";
 import { MiscUtil } from "./Utility/Misc";
 import { CDN } from "./Workers/CdnManager";
+import { StateManager } from "./Workers/GameStateManager";
+import { EntityBase } from "./Entities/EntityBase";
 
 let domPromise: any = PromiseUtil.CreateCompletionPromise();
 window.addEventListener('DOMContentLoaded', domPromise.resolve);
@@ -47,7 +48,7 @@ IDB.OpenDatabase(gameSchema)
             Input.MouseElement = canvas;
             Input.Keymap = Settings.GetSetting('controlsKeymap');
 
-            Game.GameState = GameStateDictionary.Game;
+            StateManager.Initialize('game');
             requestAnimationFrame(Game.Update.bind(Game))
         });
     });
@@ -68,7 +69,7 @@ let LoadImages = async (): Promise<void> => {
             names: result.names,
             frames: result.frames,
             isPixelCoordinates: true,
-            metadata: {charWidths: result.charWidths, maxCharHeight: result.maxCharHeight},
+            metadata: { charWidths: result.charWidths, maxCharHeight: result.maxCharHeight },
         }
     }
 
@@ -220,24 +221,21 @@ if (Config.GetConfig('debug', false) === true) {
         vec2u: Vec2Utils,
         scalaru: ScalarUtil,
         miscu: MiscUtil,
-        states: GameStateDictionary
+        statemanager: StateManager
     }
 
     //@ts-ignore
-    window.stop = () => Game.Paused = true;
-
-    //@ts-ignore
-    window.formatArray = (arr, jump) => {
+    window.formatArray = (arr: any[], jump: number) => {
         let str = '';
 
         for (let i = 0; i < arr.length; i++) {
             if (i % jump == 0 && i > 0)
                 str += '\n';
 
-            str += arr[i].toString();
-            str += '\t';
+            str += `${arr[i].toString()}\t`;
         }
 
+        console.log(`Array length: ${arr.length}, split into rows of ${jump}:`);
         console.log(str);
     }
 }

@@ -25,6 +25,10 @@ export abstract class ComponentBase {
     Update(delta: number): void { };
 
     Unitialize(): void {
-        delete this._parent;
+        for (const key in this) delete this[key];
+    }
+
+    toString(): string {
+        return this.constructor.name;
     }
 }

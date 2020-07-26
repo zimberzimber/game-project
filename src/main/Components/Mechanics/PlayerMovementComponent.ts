@@ -14,6 +14,11 @@ export class PlayerMovementComponent extends ComponentBase implements IKeyboardO
     constructor(parent: EntityBase) {
         super(parent);
         Input.KeyboardObservable.Subscribe(this);
+
+        if (Input.IsKeyDown('up')) this.OnKeyDown('up');
+        if (Input.IsKeyDown('down')) this.OnKeyDown('down');
+        if (Input.IsKeyDown('left')) this.OnKeyDown('left');
+        if (Input.IsKeyDown('right')) this.OnKeyDown('right');
     }
 
     Update(delta: number): void {

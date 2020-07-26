@@ -7,11 +7,9 @@ import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
 import { GameStateBase } from "../GameStates/GameStateBase";
 import { Rendering } from "./RenderingPipeline";
-import { DrawDirectiveImageBase } from "../Components/Visual/DrawDirectiveImageBase";
-import { DrawDirectiveText } from "../Components/Visual/DrawDirectiveText";
-import { Images } from "./ImageManager";
 import { Light } from "../Components/Visual/Light";
 import { DrawDirectiveBase } from "../Components/Visual/DrawDirectiveBase";
+import { StateManager } from "./GameStateManager";
 
 class GameManager implements IConfigObserver {
     private _entities: EntityBase[] = [];
@@ -32,13 +30,22 @@ class GameManager implements IConfigObserver {
     /** World relative mouse position */
     get MousePosition(): Vec2 { return this._mousePosition; }
 
-    private state: GameStateBase;
-    get GameState(): GameStateBase { return this.state; }
-    set GameState(state: GameStateBase) {
-        if (this.state)
-            this.state.OnDeactivated();
-        this.state = state;
-        this.state.OnActivated();
+    private _nextEntityId: number = 0;
+    get NextEntityId(): number {
+        const returned = this._nextEntityId;
+
+        if (this._nextEntityId < Number.MAX_SAFE_INTEGER) {
+            this._nextEntityId++;
+        } else {
+            for (let i = 0; i < Number.MAX_SAFE_INTEGER; i++) {
+                if (!this._entities[i]) {
+                    this._nextEntityId = i;
+                    break;
+                }
+            }
+        }
+
+        return returned;
     }
 
     constructor() {
@@ -55,7 +62,7 @@ class GameManager implements IConfigObserver {
 
     // Add an entity to the entity tree root
     AddEntity(entity: EntityBase): void {
-        this._entities.push(entity);
+        this._entities[entity.entityId] = entity;
     }
 
     // Remove an entity
@@ -144,7 +151,7 @@ class GameManager implements IConfigObserver {
         // Set world relative mouse position
         this._mousePosition = Vec2Utils.Sum(Vec2Utils.RotatePoint(Input.MousePosition, -Camera.Transform.RotationRadian), Camera.Transform.Position);
 
-        this.state.Update(this._updateDelta);
+        StateManager.StateUpdate(this._updateDelta);
 
         // Split entities into game and ui collections
         const allEntities = Game.GetAllEntities();
@@ -208,23 +215,6 @@ class GameManager implements IConfigObserver {
 
         Rendering.SetDrawData('ui', uiData)
 
-        // // Collect UI draw data
-        // const uiDrawData = {}
-        // uiDrawData[charsId] = { attributes: [], indexes: [] };
-        // tds.forEach((td: DrawDirectiveText) => {
-        //     uiDrawData[charsId].attributes.push(...td.WebGlData);
-        //     for (let i = 0; i < td.WebGlData.length / (5 * 4); i++) {
-        //         const s = chars * 4;
-        //         uiDrawData[charsId].indexes.push(
-        //             s, s + 1, s + 2,
-        //             s, s + 2, s + 3
-        //         );
-        //         chars++;
-        //     }
-        // });
-
-        // Rendering.SetDrawData('ui', uiDrawData)
-
         // Collect lighting data for scene (UI doesn't support lighting)
         const lights: number[] = [];
         Game.GetAllComponentsOfTypeFromEntityCollection(Light, gameEntities, true).forEach((l: Light) => {
@@ -232,7 +222,6 @@ class GameManager implements IConfigObserver {
                 lights.push(...l.WebglData);
         });
         Rendering.SetDrawData('lighting', lights)
-
 
         // Rendering.SetUniformData('post', 'u_offsetPower', [Math.abs(Math.sin(Date.now() * 0.001)) / 2]);
         Rendering.Render()

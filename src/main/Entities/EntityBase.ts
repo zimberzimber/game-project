@@ -3,7 +3,6 @@ import { Transform, ITransformObserver, ITransformEventArgs } from "../Models/Tr
 import { Game } from "../Workers/Game";
 
 export abstract class EntityBase implements ITransformObserver {
-    private static NextEntityId: number = 0;
 
     readonly entityId: number;
     readonly transform: Transform = new Transform();
@@ -18,7 +17,7 @@ export abstract class EntityBase implements ITransformObserver {
 
     constructor(parent: EntityBase | void | null) {
         this._parent = parent || undefined;
-        this.entityId = EntityBase.NextEntityId++;
+        this.entityId = Game.NextEntityId;
 
         this.transform.Subscribe(this);
         EntityBase.CalculateWorlRelativeTransform(this);
@@ -97,6 +96,8 @@ export abstract class EntityBase implements ITransformObserver {
         this.worldRelativeTransform.UnsubscribeAll();
         this.RemoveAllComponents();
         this.RemoveAllChildEntities();
+
+        for (const key in this) delete this[key];
     }
 
     // Method for calculating an entities world relative transform, which is based on its parent chain
@@ -117,6 +118,9 @@ export abstract class EntityBase implements ITransformObserver {
         // Changing the original transform instead of overriding it to retain observers and prevent memory leaks
         entity.worldRelativeTransform.SetTransformParams(relative.Position, relative.Rotation, relative.Scale, relative.Depth);
     }
+
+    toString = (): string => this.constructor.name;
+
 }
 
 export class UiEntityBase extends EntityBase {
