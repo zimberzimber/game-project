@@ -1,6 +1,6 @@
-import { GameStateBase } from "./GameStateBase";
+import { IGameState } from "./GameStateBase";
 
-export class GameStateIntro extends GameStateBase {
+export class GameStateIntro implements IGameState {
     OnActivated(): void {
         throw new Error("Method not implemented.");
     }

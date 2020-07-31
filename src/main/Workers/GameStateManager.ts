@@ -1,15 +1,21 @@
-import { GameStateBase } from "../GameStates/GameStateBase";
+import { IGameState } from "../GameStates/GameStateBase";
 import { GameStateGame } from "../GameStates/GameStateGame";
 import { GameStatePaused } from "../GameStates/GameStatePaused";
 import { Log } from "./Logger";
 import { Config } from "../Proxies/ConfigProxy";
+import { GameStateTitleScreen } from "../GameStates/GameStateTitleScreen";
 
 interface IStateContainer {
-    stateInstance: GameStateBase;
+    stateInstance: IGameState;
     nextStates: string[];
 }
 
+const initialState = 'title';
 const GameStateDictionary: { [key: string]: IStateContainer } = {
+    title: {
+        stateInstance: new GameStateTitleScreen(),
+        nextStates: ['game'],
+    },
     game: {
         stateInstance: new GameStateGame(),
         nextStates: ['paused']
@@ -31,7 +37,7 @@ class GameStateManager {
     private _currentState: string;
     get CurrentState(): string { return this._currentState };
 
-    Initialize(initialState: string): void {
+    Initialize(): void {
         if (this._currentState) {
             Log.Warn('GameStateManager already initialization.');
         } else if (GameStateDictionary[initialState]) {

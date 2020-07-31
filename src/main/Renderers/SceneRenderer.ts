@@ -41,9 +41,10 @@ export class WebglSceneRenderer extends WebglRenderer {
     ActivateProgram(): void {
         super.ActivateProgram();
         const gl = this._context;
-        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-        gl.enable(gl.BLEND);
-        gl.enable(gl.DEPTH_TEST);
+        // gl.enable(gl.BLEND);
+        // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        // gl.enable(gl.DEPTH_TEST);
+        // gl.depthFunc(gl.ALWAYS);
     }
 
     Render() {

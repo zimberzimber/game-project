@@ -8,7 +8,7 @@ class InputHandler {
     readonly MouseFullObservable: Observable<IMouseObserverFull, MouseEvent> = new Observable();
     readonly KeyboardFullObservable: Observable<IKeyboardObserverFull, KeyboardEvent> = new Observable();
 
-    private _mousePosition: Vec2 = [0, 0];
+    private _mousePosition: Vec2 = [Number.MIN_SAFE_INTEGER, Number.MIN_SAFE_INTEGER];
     get MousePosition(): Vec2 { return [this._mousePosition[0], this._mousePosition[1]]; }
 
     private _keysDown: { [key: string]: boolean } = {};

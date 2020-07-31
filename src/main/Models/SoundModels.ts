@@ -21,8 +21,8 @@ export interface IActiveSound extends ISoundBase {
 export interface ISoundDefinition extends ISoundBase {
     soundSourceName: string;
     volume: number;
-    falloffStartDistance: number;
-    falloffDistance: number;
+    falloffStartDistance?: number;
+    falloffDistance?: number;
 }
 
 export enum ControllerType {

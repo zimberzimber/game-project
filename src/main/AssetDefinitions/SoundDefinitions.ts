@@ -6,18 +6,14 @@ export const SoundDefinitions: { [key: string]: ISoundDefinition } = {
         volume: 0.5,
         playbackRate: 1,
         loop: true,
-        type: SoundType.Music,
-        falloffStartDistance: 100,
-        falloffDistance: 200
+        type: SoundType.Music
     },
     loop2: {
         soundSourceName: 'loop2',
         volume: 0.1,
         playbackRate: 1,
         loop: true,
-        type: SoundType.Music,
-        falloffStartDistance: 0,
-        falloffDistance: 0
+        type: SoundType.Music
     },
     ui: {
         soundSourceName: 'ui',
@@ -37,6 +33,22 @@ export const SoundDefinitions: { [key: string]: ISoundDefinition } = {
         falloffStartDistance: 200,
         falloffDistance: 600
     },
+    button_click: {
+        soundSourceName: 'sfx',
+        volume: 1,
+        playbackRate: 1,
+        loop: false,
+        type: SoundType.Default,
+        falloffStartDistance: 200,
+        falloffDistance: 600
+    },
+    button_hover: {
+        soundSourceName: 'ui_tick',
+        volume: 1,
+        playbackRate: 1,
+        loop: false,
+        type: SoundType.UI
+    }
 }
 
 export const ImpulseDefinitions: { [key: string]: string } = {

@@ -4,8 +4,7 @@ import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
 import { HitboxRectangle } from "../Components/Hitboxes/HitboxRectangle";
 import { DrawDirectiveStaticImage } from "../Components/Visual/DrawDirectiveStaticImage";
 import { Light } from "../Components/Visual/Light";
-import { Vec2 } from "../Models/Vectors";
-import { SoundComponent } from "../Components/Sound/SoundBase";
+import { SoundSingleInstanceComponent } from "../Components/Sound/SoundBase";
 
 export class TestEntity extends GameEntityBase {
     constructor(parent: GameEntityBase | void | null) {
@@ -17,7 +16,7 @@ export class TestEntity extends GameEntityBase {
         hitbox.CollisionGroup = CollisionGroup.Hazard;
         hitbox.CollideWithGroup = CollisionGroup.Player;
 
-        const sound = new SoundComponent(this, 'sfx');
+        const sound = new SoundSingleInstanceComponent(this, 'sfx');
         this.AddComponent(sound);
 
         hitbox.TriggerState = TriggerState.OnEnterTrigger;

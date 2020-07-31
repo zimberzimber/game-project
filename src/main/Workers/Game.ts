@@ -5,11 +5,11 @@ import { Input } from "./InputHandler";
 import { Camera, } from "./CameraManager";
 import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
-import { GameStateBase } from "../GameStates/GameStateBase";
 import { Rendering } from "./RenderingPipeline";
 import { Light } from "../Components/Visual/Light";
 import { DrawDirectiveBase } from "../Components/Visual/DrawDirectiveBase";
 import { StateManager } from "./GameStateManager";
+import { IsPointInPolygon } from "./CollisionChecker";
 
 class GameManager implements IConfigObserver {
     private _entities: EntityBase[] = [];
@@ -82,6 +82,42 @@ class GameManager implements IConfigObserver {
         if (e[0])
             return e[0];
         return null;
+    }
+
+    GetEntitiesInRadius(origin: Vec2, radius: number): GameEntityBase[] {
+        const entities: GameEntityBase[] = [];
+
+        this.GetAllEntities().forEach(e => {
+            if (e instanceof GameEntityBase && Vec2Utils.Distance(origin, e.worldRelativeTransform.Position) <= radius)
+                entities.push(e);
+        });
+
+        return entities;
+    }
+
+    GetEntitiesInPolygon(polygon: Vec2[]): GameEntityBase[] {
+        const entities: GameEntityBase[] = [];
+
+        this.GetAllEntities().forEach(e => {
+            if (e instanceof GameEntityBase && IsPointInPolygon(e.worldRelativeTransform.Position, polygon))
+                entities.push(e);
+        });
+
+        return entities;
+    }
+    
+    GetEntitiesInRectangle(bottomLeft: Vec2, topRight: Vec2): GameEntityBase[] {
+        const entities: GameEntityBase[] = [];
+
+        this.GetAllEntities().forEach(e => {
+            const pos = e.worldRelativeTransform.Position;
+            if (e instanceof GameEntityBase
+                && pos[0] >= bottomLeft[0] && pos[0] <= topRight[0]
+                && pos[1] >= bottomLeft[1] && pos[1] <= topRight[1])
+                entities.push(e);
+        });
+
+        return entities;
     }
 
     GetEntityTreeString(): string {

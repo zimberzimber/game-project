@@ -30,6 +30,7 @@ export abstract class EntityBase implements ITransformObserver {
 
     Update(delta: number): void {
         this._components.forEach(c => c.Update(delta));
+        this._children.forEach(c => c.Update(delta));
     }
 
     AddComponent(component: ComponentBase): void {

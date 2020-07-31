@@ -28,24 +28,6 @@ class CameraManager implements ITransformObserver {
         ];
     }
 
-    GetCameraRelativePanningAndVolume(soundOrigin: Vec2, falloffStartDistance: number, falloffDistance: number): { panning: number, volumeMultiplier: number } {
-        let result = { panning: 0, volumeMultiplier: 0 };
-
-        const d = Vec2Utils.Distance(this.Transform.Position, soundOrigin);
-        if (falloffDistance == 0 || d < falloffStartDistance)
-            result.volumeMultiplier = 1;
-        else if (d >= falloffStartDistance && d < falloffDistance)
-            result.volumeMultiplier = 1 - (d - falloffStartDistance) / (falloffDistance - falloffStartDistance);
-
-        if (d > 50) {
-            const p2 = Vec2Utils.MoveTowards(this.Transform.Position, soundOrigin, 50, false);
-            const angle = Vec2Utils.GetAngle(p2, soundOrigin) + this.Transform.Rotation;
-            result.panning = 1 - Math.abs(angle) / 90;
-        }
-
-        return result;
-    }
-
     IsInView(point: Vec2, radius: number): boolean {
         return IsPointInPolygon(Vec2Utils.MoveTowards(point, this.Transform.Position, radius, false), this.ViewPolyline);
     }

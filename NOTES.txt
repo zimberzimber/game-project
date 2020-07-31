@@ -4,8 +4,19 @@ Safari does not support storing blobs in IndexedDB
 Pushing spread arrays is faster than concatenating them.
 
 Arrow functions seem to be faster than traditional functions in Firefox.
-The opposite is true for Chrome, thought the difference is smaller.
+The opposite is true for Chrome, though the difference is smaller.
 
 Biggest performence impact (so far) comes from array processing for the graphic context
 
-Lighting: Since a point size cannot exceed 1024, light radius is hard limited to 512 radius, and will have the light circle have its edge cut off.
+Lighting: Since a WEBGL point size cannot exceed 1024, light radius is hard limited to 512 radius, and will have the light circle have its edge cut off.
+
+In TypeScript, a classes default field values are only applied after the parents constructor. Until then they are undefined.
+
+Entire system is prone to memory leaks in form of undisposed references to deleted objects
+Could be solved by passing identifiers instead of the entities themselves, and keeping a dictionary which passes methods on to the entities themselves.
+But I've decided to not do that as I'm not going to be creating anything else with this project.
+
+7:02am, 31st of July 2020:
+The exact moment I learned not to take things for granted, and discovered how painful implementing correct transparency rendering is.
+Have to take into account how blending is done, and depth, as it will not render anything behind an area which already had something rendered on to it.
+This means that if a semi-transparent area was rendered, everything that should be visible behind it will not exist. (woooo windows to the vooooid)

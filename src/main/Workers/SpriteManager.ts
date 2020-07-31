@@ -84,10 +84,10 @@ class SpriteManager {
     GetFullImageAsSprite(image: string): ISingleFrameSpriteStorage {
         const id = Images.GetImageIdFromName(image);
         if (id > -1)
-            return { imageId: id, frame: { origin: [0, 0], size: Images.GetImageSize(id) } };
+            return { imageId: id, frame: { origin: [0, 0], size: [1, 1] } };
 
         OneTimeLog.Log(`nonexistentFullImage_${image}`, `Attempted to get non-existent image: ${image}`, LogLevel.Warn);
-        return { imageId: 0, frame: { origin: [0, 0], size: [0, 0] } };
+        return { imageId: 0, frame: { origin: [0, 0], size: [1, 1] } };
     }
 
     GetStaticSpriteData(name: string): ISingleFrameSpriteStorage | null {

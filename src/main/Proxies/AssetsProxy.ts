@@ -11,25 +11,23 @@ class AssetsProxy {
             Log.Error("Asset proxy could not find field 'window.assets'")
     }
 
-    GetAndTerminateImages(): { [key: string]: string } {
-        const temp = this._original.images;
-        delete this._original.images;
-        return temp;
+    GetImages(): { [key: string]: string } {
+        return this._original.images;
     }
 
-    GetAndTerminateAudio(): { [key: string]: string } {
-        const temp = this._original.audio;
-        delete this._original.audio;
-        return temp;
+    GetAudio(): { [key: string]: string } {
+        return this._original.audio;
     }
 
-    FinalTermination(): void {
+    Dispose(): void {
         //@ts-ignore
         window.assets = undefined;
+        delete this._original.audio;
+        delete this._original.images;
         delete this._original;
-        this.GetAndTerminateImages = () => { return {} };
-        this.GetAndTerminateAudio = () => { return {} };
-        this.FinalTermination = () => { };
+        this.GetImages = () => { return {} };
+        this.GetAudio = () => { return {} };
+        this.Dispose = () => { };
     }
 }
 

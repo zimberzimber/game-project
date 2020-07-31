@@ -19,10 +19,49 @@ import { ScalarUtil } from "./Utility/Scalar";
 import { MiscUtil } from "./Utility/Misc";
 import { CDN } from "./Workers/CdnManager";
 import { StateManager } from "./Workers/GameStateManager";
-import { EntityBase } from "./Entities/EntityBase";
 
-let domPromise: any = PromiseUtil.CreateCompletionPromise();
-window.addEventListener('DOMContentLoaded', domPromise.resolve);
+let domCompletionPromise: any = PromiseUtil.CreateCompletionPromise();
+window.addEventListener('DOMContentLoaded', domCompletionPromise.resolve);
+window.addEventListener('DOMContentLoaded', () => loadingHandler.SetHtmlElement(document.getElementById('loading-element')));
+
+let loadingHandler: any = (() => {
+    let imageCount: number = Object.keys(Assets.GetImages()).length;
+    let imagesLoaded: number = 0;
+
+    let soundCount: number = Object.keys(Assets.GetAudio()).length;
+    let soundsLoaded: number = 0;
+
+    let htmlElement: HTMLElement | null = null;
+    let messages: string = '';
+
+    let UpdateLoadingMessage = () => {
+        if (htmlElement)
+            htmlElement.innerText = `Loading...\nImages: ${imagesLoaded}/${imageCount}\nAudio: ${soundsLoaded}/${soundCount}\n${messages}`;
+    };
+
+    return {
+        ImageLoaded: (): void => {
+            imagesLoaded++;
+            UpdateLoadingMessage();
+        },
+        SoundLoaded: (): void => {
+            soundsLoaded++
+            UpdateLoadingMessage();
+        },
+        SetHtmlElement: (element: HTMLElement | null): void => {
+            htmlElement = element;
+            UpdateLoadingMessage();
+        },
+        AppendMessage: (message: string): void => {
+            messages = `${messages}\n${message}`;
+            UpdateLoadingMessage();
+        },
+        Clear: (): void => {
+            messages = '';
+            if (htmlElement) htmlElement.innerText = '';
+        }
+    }
+})();
 
 IDB.OpenDatabase(gameSchema)
     .catch((e) => Log.Error(e))
@@ -30,10 +69,12 @@ IDB.OpenDatabase(gameSchema)
         const imagesPromise = LoadImages();
         const audioPromise = LoadSounds();
 
-        Promise.all([audioPromise, imagesPromise, domPromise.Promise]).then(() => {
-            window.removeEventListener('DOMContentLoaded', domPromise.resolve);
-            domPromise = undefined;
-            Assets.FinalTermination();
+        Promise.all([audioPromise, imagesPromise, domCompletionPromise.Promise]).then(() => {
+            window.removeEventListener('DOMContentLoaded', domCompletionPromise.resolve);
+            domCompletionPromise = undefined;
+            loadingHandler.Clear();
+            loadingHandler = undefined;
+            Assets.Dispose();
 
             const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
             canvas.width = 600;
@@ -48,15 +89,14 @@ IDB.OpenDatabase(gameSchema)
             Input.MouseElement = canvas;
             Input.Keymap = Settings.GetSetting('controlsKeymap');
 
-            StateManager.Initialize('game');
+            StateManager.Initialize();
             requestAnimationFrame(Game.Update.bind(Game))
         });
     });
 
 let LoadImages = async (): Promise<void> => {
     let promises: Promise<void>[] = [];
-    let nextId = 0;
-    const imageDefs = Assets.GetAndTerminateImages();
+    const imageDefs = Assets.GetImages();
     const images: { [key: string]: HTMLImageElement } = {};
 
     // Create font glyph images, inject them into sprite definitions and images object
@@ -90,7 +130,7 @@ let LoadImages = async (): Promise<void> => {
             if (exists) {
                 const result = await IDB.GetData(gameSchema.databaseName, imageStore.storeName, url);
                 if (result.error) {
-                    Log.Error(`Failed getting existing image from database: ${name}.`);
+                    loadingHandler.AppendMessage(`Failed pulling existing image from database: ${name}`);
                     Log.Error(result.error);
                     return;
                 }
@@ -101,7 +141,7 @@ let LoadImages = async (): Promise<void> => {
             else {
                 const result = await CDN.GetContentFromUrl(url);
                 if (result.error) {
-                    Log.Error(`Failed getting image '${name}' from ${url}`);
+                    loadingHandler.AppendMessage(`Failed fetching image from CDN: ${name}`);
                     Log.Error(result.error);
                     return;
                 }
@@ -124,10 +164,11 @@ let LoadImages = async (): Promise<void> => {
             image.onload = () => {
                 image.onload = null;
                 image.onerror = null;
+                loadingHandler.ImageLoaded();
                 completionPromise.resolve();
             };
             image.onerror = () => {
-                Log.Error(`Failed loading image ${name}. Make sure its data os correct.`);
+                Log.Error(`Failed loading image ${name} as HTML image element.`);
                 image.onload = null;
                 image.onerror = null;
                 completionPromise.resolve();
@@ -150,7 +191,7 @@ let LoadImages = async (): Promise<void> => {
 }
 
 let LoadSounds = async (): Promise<void> => {
-    const soundSourceDefinitions = Assets.GetAndTerminateAudio();
+    const soundSourceDefinitions = Assets.GetAudio();
     const promises: Promise<void>[] = [];
     const buffers: { [key: string]: ArrayBuffer } = {};
 
@@ -164,7 +205,7 @@ let LoadSounds = async (): Promise<void> => {
             if (exists) {
                 const result = await IDB.GetData('game', 'sounds', url);
                 if (result.error) {
-                    Log.Error(`Failed fetching existing sound resource from IDB: ${url}`);
+                    loadingHandler.AppendMessage(`Failed pulling existing sound from database: ${sourceName}`);
                     Log.Error(result.error);
                     return;
                 }
@@ -174,7 +215,7 @@ let LoadSounds = async (): Promise<void> => {
             } else {
                 const result = await CDN.GetContentFromUrl(url);
                 if (result.error) {
-                    Log.Error(`Failed fetching sound resource from url: ${url}`);
+                    loadingHandler.AppendMessage(`Failed fetching sound from CDN: ${sourceName}`);
                     Log.Error(result.error);
                     return;
                 }
@@ -184,6 +225,7 @@ let LoadSounds = async (): Promise<void> => {
                 }
             }
             buffers[sourceName] = arrayBuffer;
+            loadingHandler.SoundLoaded();
         };
 
         promises.push(method());
@@ -193,7 +235,6 @@ let LoadSounds = async (): Promise<void> => {
     await Promise.all(promises);
     Sounds.Initialize(buffers);
 }
-
 
 // Expose some methods globally for easy acess when in debug mode
 if (Config.GetConfig('debug', false) === true) {
@@ -238,4 +279,7 @@ if (Config.GetConfig('debug', false) === true) {
         console.log(`Array length: ${arr.length}, split into rows of ${jump}:`);
         console.log(str);
     }
+
+    //@ts-ignore
+    window.closeDbs = () => { for (let name in IDB.dbs) IDB.dbs[name].context.close(); }
 }

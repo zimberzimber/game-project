@@ -6,6 +6,7 @@ import { CollisionGroup, TriggerState } from "../../Models/CollisionModels";
 import { HitboxBase } from "../../Components/Hitboxes/HitboxBase";
 import { Light } from "../../Components/Visual/Light";
 import { ParticleComponent } from "../../Components/Visual/Particle";
+import { SoundEmitterComponent } from "../../Components/Sound/SoundEmitter";
 
 export class OriEntity extends GameEntityBase {
     private dd: DrawDirectiveAnimatedImage;
@@ -95,9 +96,16 @@ export class PlayerEntity extends GameEntityBase {
         this.AddChildEntity(this.kuEntity);
     }
 
+    k = new SoundEmitterComponent(this, 'sfx');
+    time = 0;
     Update(delta: number) {
         super.Update(delta);
 
+        this.time += delta;
+        if (this.time > 0.33) {
+            this.k.Emit();
+            this.time = 0;
+        }
         // this.transform.Rotate(1);
         // Camera.Transform.Rotate(1);
         // this.transform.Rotate(0.5);

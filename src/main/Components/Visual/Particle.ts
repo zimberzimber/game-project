@@ -48,8 +48,9 @@ export class ParticleComponent extends DrawDirectiveBase {
         this._particleController = new ParticleController(this._particleData, this._spriteData);
     }
 
-    // This doesn't need the transform observer because it updates each game frame regardless
+    // Both of these are redundant here, as its all handled through Update regardless.
     OnObservableNotified(args: ITransformEventArgs): void { }
+    protected UpdateWebglData(): void { }
 
     Update(delta: number) {
         super.Update(delta);

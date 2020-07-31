@@ -7,11 +7,12 @@ import { Rendering } from "../Workers/RenderingPipeline";
 import { Config, IConfigObserver, IConfigEventArgs } from "../Proxies/ConfigProxy";
 import { GameEntityBase } from "../Entities/EntityBase";
 import { PlayerEntity } from "../Entities/Player/PlayerRoot";
-import { ButtonWideEntity } from "../Entities/Ui/buttonWide";
 import { DrawDirectiveScrollableTiledImage } from "../Components/Visual/DrawDirectiveTiledImage";
-import { GameStateBase } from "./GameStateBase";
+import { IGameState } from "./GameStateBase";
+import { ButtonBasicEntity } from "../Entities/Ui/ButtonBasic";
+import { WindowBasicEntity } from "../Entities/Ui/WindowBasic";
 
-export class GameStateGame extends GameStateBase implements IConfigObserver {
+export class GameStateGame implements IGameState, IConfigObserver {
     private _debugDraw: boolean = Config.GetConfig('debugDraw', false);
 
     OnObservableNotified(args: IConfigEventArgs): void {
@@ -31,6 +32,9 @@ export class GameStateGame extends GameStateBase implements IConfigObserver {
         let p = new PlayerEntity();
         Game.AddEntity(p);
 
+        let w = new WindowBasicEntity(null, [100, 67], 10, 'e');
+        Game.AddEntity(w);
+
         // for (let i = 0; i < 3; i++) {
         //     for (let j = 0; j < 3; j++) {
         //         setTimeout(() => {
@@ -42,9 +46,12 @@ export class GameStateGame extends GameStateBase implements IConfigObserver {
         // }
         // let test = new TestEntity();
         // Game.AddEntity(test);
-        let button = new ButtonWideEntity();
+        let button = new ButtonBasicEntity(null, [30, 10], 'button_wide');
         Game.AddEntity(button);
 
+        button.OnClick = () => console.log('badabing');
+        button.OnUnclick = (isInside: boolean) => console.log(`Badaboom in: ${isInside}`);
+        button.HoverEvent = (hovered: boolean) => console.log(`Hovered: ${hovered}`);
 
         let temp = new GameEntityBase();
         temp.AddComponent(new DrawDirectiveScrollableTiledImage(temp, 'water', [50, 50], [64, 500], [0, 10]));

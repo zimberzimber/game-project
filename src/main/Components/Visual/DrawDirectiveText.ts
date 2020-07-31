@@ -1,14 +1,11 @@
 import { DrawDirectiveBase } from "./DrawDirectiveBase";
-import { ITransformEventArgs } from "../../Models/Transform";
 import { Sprites } from "../../Workers/SpriteManager";
 import { IMultiFrameSpriteStorage, GetFrameFromMultiFrameStorage } from "../../Models/SpriteModels";
 import { EntityBase } from "../../Entities/EntityBase";
 import { Vec2 } from "../../Models/Vectors";
 import { Vec2Utils } from "../../Utility/Vec2";
 import { Images } from "../../Workers/ImageManager";
-
-export enum TextAlignmentHorizontal { Left, Center, Right }
-export enum TextAlignmentVertical { Top, Center, Bottom }
+import { HorizontalAlignment, VerticalAlignment } from "../../Models/GenericInterfaces";
 
 export class DrawDirectiveText extends DrawDirectiveBase {
     protected readonly _spriteData: IMultiFrameSpriteStorage;
@@ -16,52 +13,29 @@ export class DrawDirectiveText extends DrawDirectiveBase {
     private static _fontImageId: number = -2;
     get ImageId(): number { return DrawDirectiveText._fontImageId; }
 
-    constructor(parent: EntityBase, size: number, text: string, horizontalAlignment: TextAlignmentHorizontal = TextAlignmentHorizontal.Left, verticalAlignment: TextAlignmentVertical = TextAlignmentVertical.Top) {
+    constructor(parent: EntityBase, size: number, text: string) {
         super(parent);
         this._spriteData = Sprites.GetAnimatedSpriteData('font_arial') || { imageId: 0, frames: [] };
-        this._size = size;
+        this._fontSize = size;
         this._text = text.toLowerCase();
-        this._horizontalAlignment = horizontalAlignment;
-        this._verticalAlignment = verticalAlignment;
-        this.CalculateDrawData();
+        this.UpdateWebglData();
 
         if (DrawDirectiveText._fontImageId == -2)
             DrawDirectiveText._fontImageId = Images.GetImageIdFromName('font_arial');
-
-        // TEMPORARY
-        this._boundingRadius = 10;
     }
 
     private _text: string = '';
     get Text(): string { return this._text };
     set Text(text: string) {
         this._text = text;
-        this.CalculateDrawData();
+        this.UpdateWebglData();
     };
 
-    private _size: number = 0;
-    get Size(): number { return this._size; }
-    set Size(size: number) {
-        this._size = size;
-        this.CalculateDrawData();
-    }
-
-    private _horizontalAlignment: TextAlignmentHorizontal = TextAlignmentHorizontal.Left;
-    get HorizontalAlignment(): TextAlignmentHorizontal { return this._horizontalAlignment; }
-    set HorizontalAlignment(alignment: TextAlignmentHorizontal) {
-        this._horizontalAlignment = alignment;
-        this.CalculateDrawData();
-    }
-
-    private _verticalAlignment: TextAlignmentVertical = TextAlignmentVertical.Top;
-    get VerticalAlignment(): TextAlignmentVertical { return this._verticalAlignment; }
-    set VerticalAlignment(alignment: TextAlignmentVertical) {
-        this._verticalAlignment = alignment;
-        this.CalculateDrawData();
-    }
-
-    OnObservableNotified(args: ITransformEventArgs): void {
-        this.CalculateDrawData();
+    private _fontSize: number = 0;
+    get FontSize(): number { return this._fontSize; }
+    set FontSize(size: number) {
+        this._fontSize = size;
+        this.UpdateWebglData();
     }
 
     private GetFrameForChar(char: string): number {
@@ -71,7 +45,7 @@ export class DrawDirectiveText extends DrawDirectiveBase {
         return f;
     }
 
-    private CalculateDrawData() {
+    protected UpdateWebglData() {
         const widths = this._spriteData.metadata.charWidths as number[];
         const maxCharHeight = this._spriteData.metadata.maxCharHeight as number;
 
@@ -93,24 +67,24 @@ export class DrawDirectiveText extends DrawDirectiveBase {
 
                 currentLine++;
                 lineOffsets[currentLine] = [0, (currentLine + 1) * -maxCharHeight];
-            } else if (this._horizontalAlignment != TextAlignmentHorizontal.Left) {
+            } else if (this._horizontalAlignment != HorizontalAlignment.Left) {
                 lineOffsets[currentLine][0] += widths[f];
             }
         }
         boundingHeight = lineOffsets[currentLine][1];
 
-        if (this._horizontalAlignment == TextAlignmentHorizontal.Center) {
+        if (this._horizontalAlignment == HorizontalAlignment.Middle) {
             lineOffsets.forEach(o => o[0] /= -2);
             boundingWidth /= 2;
         }
-        else if (this._horizontalAlignment == TextAlignmentHorizontal.Right)
+        else if (this._horizontalAlignment == HorizontalAlignment.Right)
             lineOffsets.forEach(o => o[0] *= -1);
 
-        if (this._verticalAlignment == TextAlignmentVertical.Center) {
+        if (this._verticalAlignment == VerticalAlignment.Middle) {
             const sum = lineOffsets.length * maxCharHeight / 2;
             lineOffsets.forEach(o => o[1] += sum);
             boundingHeight /= 2;
-        } else if (this._verticalAlignment == TextAlignmentVertical.Bottom) {
+        } else if (this._verticalAlignment == VerticalAlignment.Bottom) {
             let highest = lineOffsets[currentLine][1];
             lineOffsets.forEach(o => o[1] -= highest);
         }
@@ -141,10 +115,10 @@ export class DrawDirectiveText extends DrawDirectiveBase {
                 }
 
                 const frame = this._spriteData.frames[f];
-                this._webglData.attributes.push(p1[0], p1[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1]);
-                this._webglData.attributes.push(p2[0], p2[1], trans.Depth, frame.origin[0], frame.origin[1]);
-                this._webglData.attributes.push(p3[0], p3[1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1]);
-                this._webglData.attributes.push(p4[0], p4[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1]);
+                this._webglData.attributes.push(p1[0] + this._drawOffset[0], p1[1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1]);
+                this._webglData.attributes.push(p2[0] + this._drawOffset[0], p2[1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1]);
+                this._webglData.attributes.push(p3[0] + this._drawOffset[0], p3[1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1]);
+                this._webglData.attributes.push(p4[0] + this._drawOffset[0], p4[1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1]);
 
                 const o = (i - currentLine) * 4;
                 this._webglData.indexes.push(...[

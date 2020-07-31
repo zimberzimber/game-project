@@ -216,7 +216,7 @@ class SoundPlayer {
         this.activeSounds[soundId].sourceNode.loop = value;
     }
 
-    IsActive(soundId: number): boolean {
+    IsActive(soundId: number | string): boolean {
         return this.activeSounds[soundId] != undefined;
     }
 

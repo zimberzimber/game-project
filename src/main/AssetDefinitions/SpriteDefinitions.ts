@@ -1,5 +1,4 @@
 import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition } from "../Models/SpriteModels";
-import { MiscUtil } from "../Utility/Misc";
 
 export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition } = {
     asset_missing: {
@@ -45,21 +44,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
             {
                 origin: [20, 10],
                 size: [19, 10],
-            },
-        ]
-    },
-    button_wide: {
-        sourceImageName: 'sprites',
-        isPixelCoordinates: true,
-        names: ['normal', 'faded'],
-        frames: [
-            {
-                origin: [0, 20],
-                size: [33, 7],
-            },
-            {
-                origin: [0, 27],
-                size: [33, 7],
             },
         ]
     },
@@ -213,7 +197,258 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
             origin: [66, 24],
             size: [5, 10]
         }
-    }
+    },
+
+
+    window_simple_00: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [0, 0],
+            size: [3, 3]
+        }
+    },
+    window_simple_01: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [3, 0],
+            size: [1, 3]
+        }
+    },
+    window_simple_02: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [4, 0],
+            size: [3, 3]
+        }
+    },
+    window_simple_10: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [0, 3],
+            size: [3, 1]
+        }
+    },
+    window_simple_11: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [3, 3],
+            size: [1, 1]
+        }
+    },
+    window_simple_12: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [4, 3],
+            size: [3, 1]
+        }
+    },
+    window_simple_20: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [0, 4],
+            size: [3, 3]
+        }
+    },
+    window_simple_21: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [3, 4],
+            size: [1, 3]
+        }
+    },
+    window_simple_22: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [4, 4],
+            size: [3, 3]
+        }
+    },
+
+    button_cancel: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [7, 0],
+            size: [11, 11]
+        }
+    },
+    button_accept: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [18, 0],
+            size: [11, 11]
+        }
+    },
+
+    header_1_l: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [0, 11],
+            size: [5, 4]
+        }
+    },
+    header_1_fill: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [5, 11],
+            size: [1, 4]
+        }
+    },
+    header_1_r: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [6, 11],
+            size: [5, 4]
+        }
+    },
+
+    ui_health: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        names: ['empty', 'full'],
+        frames: [
+            {
+                origin: [11, 11],
+                size: [6, 6],
+            },
+            {
+                origin: [17, 11],
+                size: [6, 6],
+            },
+        ]
+    },
+    ui_energy: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        names: ['empty', 'full'],
+        frames: [
+            {
+                origin: [11, 17],
+                size: [6, 6],
+            },
+            {
+                origin: [17, 17],
+                size: [6, 6],
+            },
+        ]
+    },
+    ui_score: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [23, 11],
+            size: [6, 6]
+        }
+    },
+
+
+    scroll_h_border_l: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [29, 0],
+            size: [3, 5]
+        }
+    },
+    scroll_h_border_r: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [39, 0],
+            size: [3, 5]
+        }
+    },
+    scroll_h_line: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [32, 0],
+            size: [3, 5]
+        }
+    },
+    scroll_h_pin: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [35, 0],
+            size: [1, 5]
+        }
+    },
+    scroll_h_slider: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [36, 0],
+            size: [3, 5]
+        }
+    },
+
+
+    tick_box: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        names: ['unselected', 'selected'],
+        frames: [
+            {
+                origin: [29, 5],
+                size: [6, 6],
+            },
+            {
+                origin: [35, 5],
+                size: [6, 6],
+            },
+        ]
+    },
+
+    arrow_small_left: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [29, 11],
+            size: [3, 5]
+        }
+    },
+    arrow_small_right: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        frame: {
+            origin: [32, 11],
+            size: [3, 5]
+        }
+    },
+
+    button_wide: {
+        sourceImageName: 'uiElements',
+        isPixelCoordinates: true,
+        names: ['passive', 'hovered', 'pressed'],
+        frames: [
+            {
+                origin: [0, 23],
+                size: [33, 7],
+            },
+            {
+                origin: [0, 30],
+                size: [33, 7],
+            },
+            {
+                origin: [0, 37],
+                size: [33, 7],
+            },
+        ]
+    },
 }
 
 export let FontDefinitions: { [key: string]: { font: string, size: number, outlineWidth: number } } = {

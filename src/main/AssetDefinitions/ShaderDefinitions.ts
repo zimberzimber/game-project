@@ -26,7 +26,8 @@ void main() {
     vec4 color = texture2D(u_sampler, v_texCoord);
     if (color.a == 0.)
         discard;
-    gl_FragColor = color;
+    gl_FragColor = texture2D(u_sampler, vec2(v_texCoord.s, v_texCoord.t));
+    //gl_FragColor = color;
 }`,
 
     debug_vertex: `
