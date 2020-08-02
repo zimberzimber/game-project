@@ -1,5 +1,6 @@
 import { ISpriteFrame, IMultiFrameSpriteDefinition } from "../Models/SpriteModels";
 import { Vec2 } from "../Models/Vectors";
+import { IComparingMethod } from "../Models/GenericInterfaces";
 
 export class MiscUtil {
     // Taken from: https://stackoverflow.com/questions/9267899/arraybuffer-to-base64-encoded-string
@@ -128,5 +129,58 @@ export class MiscUtil {
 
         gl.bindTexture(gl.TEXTURE_2D, null);
         return texture;
+    }
+}
+
+class LinkedListNode<T> {
+    Next: LinkedListNode<T> | undefined;
+    Value: T;
+
+    constructor(value: T) {
+        this.Value = value;
+    }
+}
+
+export class SortedLinkedList<T> {
+    private _first: LinkedListNode<T> | undefined;
+    private _compare: IComparingMethod<T>;
+
+    constructor(comparingMethod: IComparingMethod<T>) {
+        this._compare = comparingMethod;
+    }
+
+    Add(value: T): void {
+        const newNode = new LinkedListNode(value);
+        if (!this._first) {
+            this._first = newNode;
+        } else if (this._compare(value, this._first.Value) == -1) {
+            newNode.Next = this._first;
+            this._first = newNode;
+        } else {
+            let node = this._first;
+            let next = this._first.Next;
+
+            while (next) {
+                const c = this._compare(value, next.Value)
+                if (c == -1) {
+                    node.Next = newNode;
+                    newNode.Next = next;
+                    return;
+                }
+                node = next;
+                next = next.Next;
+            }
+
+            node.Next = newNode;
+        }
+    }
+
+    [Symbol.iterator]() { return this.Values(); }
+    *Values() {
+        let current = this._first;
+        while (current) {
+            yield current.Value;
+            current = current.Next;
+        }
     }
 }
