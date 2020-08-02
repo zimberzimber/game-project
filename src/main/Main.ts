@@ -108,6 +108,7 @@ let LoadImages = async (): Promise<void> => {
             sourceImageName: name,
             names: result.names,
             frames: result.frames,
+            isTranslucent: false,
             isPixelCoordinates: true,
             metadata: { charWidths: result.charWidths, maxCharHeight: result.maxCharHeight },
         }

@@ -1,24 +1,12 @@
-X Turned the abstract class GameStateBase into the interface IGameState
-X Added loading screen for when the game loads content from the CDN, or post a message if it cannot
+
+        TO DO:
 - Change canvas size setting to be handled based on its actual size, instead of through Main.ts
 - Give particles the ability to use a random sprite from a collection
 - Give drawn sprites the ability to draw a portion of the sprite (like cutting it off)
-- Add a UI scale factor 
-X Made sound volume falloff optional
-X Made sound volume falloff and camera related panning not affect UI and Music sounds
-X Made a universal button entity
-X Fixed size changes not redrawing static and animated image components
+- Add a UI scale factor
 - Add controller support
 - Add a method which generates button or pane sprites and adds them to the sprite collection
-X Added drawing offset to draw directives
-X Added drawing alignment to draw directives
-X Modified tiled/scrolling draw directives to derive from image draw directives
-X Made image draw directive calculate the Webgl data, and made static and animated draw directives work with it
-X Added generic UI window entity
-X Split sound components into fire and forget, and a controlled single instance
-X Added three methods for obtaining entities in an area (circle, box, polygon)
-X Fixed entities not updating their child entities on update call
-X Added full image draw directive
+- Render opaque objects from front to back, and translucent objects from back to front
 - Revisit transparency rendering in Webgl
 -- Have opaque directives draw normally as they currently do
 -- Have translucent directives draw only after the opaque ones, from lowest to highest depth
@@ -26,3 +14,17 @@ X Added full image draw directive
 --  You can draw 'on top' of anything, and you can try drawing behind opaque pixels, but webgl won't actually draw it
 --  You can try drawing behind semi-transparent pixels, but webgl still won't draw it because that area already has something rendered into it, regardless of its transparency.
 --  So to make sure things render behind translucent renders, we must first draw whatever is behind it and only then the translucent bits.
+
+Collect all directives
+Opaque directives handling remains unchanged
+If the directive is translucent, add it to a separate collection, ordered by depth
+Draw opaque directives
+Draw translucent directives from lowest to highest depth
+
+Whether the directive is translucent or opaque is defined within the component as a property
+Add another attribute which determines the opacity of the entire draw directive, ranging from 0 (invisible) to 1 (draw it as is)
+This can apply to both opaque and translucent directives
+If an opaque directives opacity is below 1, it will be rendered as a translucent directive
+
+
+        Done:

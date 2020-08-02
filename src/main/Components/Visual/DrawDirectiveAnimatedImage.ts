@@ -8,8 +8,9 @@ import { Log } from "../../Workers/Logger";
 export class DrawDirectiveAnimatedImage extends DrawDirectiveImageBase {
     protected readonly _spriteData: IMultiFrameSpriteStorage;
     private _currentFrame: number = 0;
-    
+
     get ImageId(): number { return this._spriteData.imageId; }
+    get IsTranslucent(): boolean { return this._spriteData.isTranslucent; }
 
     constructor(parent: EntityBase, spriteName: string, size: Vec2 = [0, 0]) {
         super(parent, size);
@@ -18,7 +19,7 @@ export class DrawDirectiveAnimatedImage extends DrawDirectiveImageBase {
         if (spriteData)
             this._spriteData = spriteData;
         else {
-            this._spriteData = { imageId: 0, frames: [] };
+            this._spriteData = { imageId: 0, frames: [], isTranslucent: false };
             Log.Warn(`Could not retrieve animated sprite for DrawDirectiveAnimatedImage: ${spriteName}`);
         }
 

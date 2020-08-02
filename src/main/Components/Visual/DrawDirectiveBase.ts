@@ -42,6 +42,7 @@ export abstract class DrawDirectiveBase extends ComponentBase implements ITransf
         this.UpdateWebglData();
     }
 
+    abstract get IsTranslucent(): boolean;
     abstract get ImageId(): number;
 
     constructor(parent: EntityBase) {

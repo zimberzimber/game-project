@@ -12,10 +12,11 @@ export class DrawDirectiveText extends DrawDirectiveBase {
 
     private static _fontImageId: number = -2;
     get ImageId(): number { return DrawDirectiveText._fontImageId; }
+    get IsTranslucent(): boolean { return this._spriteData.isTranslucent; }
 
     constructor(parent: EntityBase, size: number, text: string) {
         super(parent);
-        this._spriteData = Sprites.GetAnimatedSpriteData('font_arial') || { imageId: 0, frames: [] };
+        this._spriteData = Sprites.GetAnimatedSpriteData('font_arial') || { imageId: 0, frames: [], isTranslucent: false };
         this._fontSize = size;
         this._text = text.toLowerCase();
         this.UpdateWebglData();

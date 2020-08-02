@@ -7,6 +7,7 @@ export interface ISpriteFrame {
 
 export interface ISpriteStorage {
     imageId: number;
+    isTranslucent: boolean;
     metadata?: any;
 }
 
@@ -46,6 +47,7 @@ export const GetFrameFromMultiFrameStorage = (frameStorage: IMultiFrameSpriteSto
 
 export interface ISpriteDefinition {
     sourceImageName: string;
+    isTranslucent?: boolean;
     isPixelCoordinates?: boolean;
     metadata?: any;
 }

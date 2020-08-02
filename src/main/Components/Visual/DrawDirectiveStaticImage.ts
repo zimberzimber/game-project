@@ -11,6 +11,9 @@ export class DrawDirectiveStaticImage extends DrawDirectiveImageBase {
     private _imageId: number = 0;
     get ImageId(): number { return this._imageId; }
 
+    private _translucent: boolean;
+    get IsTranslucent(): boolean { return this._translucent; }
+    
     constructor(parent: EntityBase, spriteName: string, size: Vec2 = [0, 0]) {
         super(parent, size);
 
@@ -18,6 +21,7 @@ export class DrawDirectiveStaticImage extends DrawDirectiveImageBase {
         if (spriteData) {
             this._imageId = spriteData.imageId;
             this.FrameData = spriteData.frame;
+            this._translucent = spriteData.isTranslucent || false;
         }
         else
             Log.Warn(`Could not retrieve static sprite for DrawDirectiveStaticImage: ${spriteName}`);

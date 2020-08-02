@@ -36,6 +36,7 @@ class SpriteManager {
                     const imageSize = Images.GetImageSize(imageId);
                     this.sprites[spriteName] = {
                         imageId: imageId,
+                        isTranslucent: def.isTranslucent || false,
                         frame: {
                             origin: Vec2Utils.Div(def.frame.origin, imageSize),
                             size: Vec2Utils.Div(def.frame.size, imageSize),
@@ -44,6 +45,7 @@ class SpriteManager {
                 } else {
                     this.sprites[spriteName] = {
                         imageId: imageId,
+                        isTranslucent: def.isTranslucent || false,
                         frame: def.frame
                     }
                 }
@@ -54,6 +56,7 @@ class SpriteManager {
 
                 const sprite: IMultiFrameSpriteStorage = {
                     imageId: imageId,
+                    isTranslucent: def.isTranslucent || false,
                     frames: [],
                     names: def.names || undefined, // Adding an underfined in case of the definition having an empty array
                     aliases: def.aliases || undefined, // Adding an underfined in case of the definition having an empty array
@@ -84,10 +87,10 @@ class SpriteManager {
     GetFullImageAsSprite(image: string): ISingleFrameSpriteStorage {
         const id = Images.GetImageIdFromName(image);
         if (id > -1)
-            return { imageId: id, frame: { origin: [0, 0], size: [1, 1] } };
+            return { imageId: id, frame: { origin: [0, 0], size: [1, 1] }, isTranslucent: true }; // Always render them as translucent to prevent further complexity.
 
         OneTimeLog.Log(`nonexistentFullImage_${image}`, `Attempted to get non-existent image: ${image}`, LogLevel.Warn);
-        return { imageId: 0, frame: { origin: [0, 0], size: [1, 1] } };
+        return { imageId: 0, frame: { origin: [0, 0], size: [1, 1] }, isTranslucent: false };
     }
 
     GetStaticSpriteData(name: string): ISingleFrameSpriteStorage | null {

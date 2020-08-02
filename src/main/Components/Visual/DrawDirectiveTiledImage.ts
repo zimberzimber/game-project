@@ -17,6 +17,9 @@ export class DrawDirectiveTiledImage extends DrawDirectiveImageBase {
         this.UpdateWebglData();
     }
 
+    private _translucent: boolean;
+    get IsTranslucent(): boolean { return this._translucent; }
+
     constructor(parent: EntityBase, imageName: string, tileSize: Vec2, size: Vec2) {
         super(parent);
         this._imageId = Images.GetImageIdFromName(imageName);
@@ -30,6 +33,7 @@ export class DrawDirectiveTiledImage extends DrawDirectiveImageBase {
         const spriteData = Sprites.GetFullImageAsSprite(imageName);
         if (spriteData) {
             this.FrameData = spriteData.frame;
+            this._translucent = spriteData.isTranslucent;
         } else {
             Log.Warn(`Could not retrieve image for DrawDirectiveTiledImage: ${imageName}`);
         }

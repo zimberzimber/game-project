@@ -24,6 +24,7 @@ export class ParticleComponent extends DrawDirectiveBase {
     private _particleController: ParticleController;
 
     get ImageId(): number { return this._spriteData.imageId; }
+    get IsTranslucent(): boolean { return this._spriteData.isTranslucent; }
 
     private OnEndedCallback: () => void;
     set OnEnded(callback: () => void) {
@@ -41,7 +42,7 @@ export class ParticleComponent extends DrawDirectiveBase {
 
         if (sd == null) {
             OneTimeLog.Log(`no_sprite_${this._particleData.spriteName}_for_particle_${particleName}`, `${particleName} particle uses sprite ${this._particleData.spriteName} which doesn't exist.`, LogLevel.Warn);
-            sd = { imageId: 0, frame: { origin: [0, 0], size: [0, 0] } };
+            sd = { imageId: 0, frame: { origin: [0, 0], size: [0, 0] }, isTranslucent: false };
         }
 
         this._spriteData = sd;
