@@ -41,18 +41,20 @@ export class DrawDirectiveTiledImage extends DrawDirectiveImageBase {
 
     protected UpdateWebglData(): void {
         super.UpdateWebglData();
-
+        // x y z p1 p2 o
+        // x y z p1 p2 o
+        // x y z p1 p2 o
         this._webglData.attributes[3] = this._size[0] / this._tileSize[0];
         this._webglData.attributes[4] = 0;
 
-        this._webglData.attributes[8] = 0;
         this._webglData.attributes[9] = 0;
+        this._webglData.attributes[10] = 0;
 
-        this._webglData.attributes[13] = 0;
-        this._webglData.attributes[14] = this._size[1] / this._tileSize[1];
+        this._webglData.attributes[15] = 0;
+        this._webglData.attributes[16] = this._size[1] / this._tileSize[1];
 
-        this._webglData.attributes[18] = this._size[0] / this._tileSize[0];
-        this._webglData.attributes[19] = this._size[1] / this._tileSize[1];
+        this._webglData.attributes[21] = this._size[0] / this._tileSize[0];
+        this._webglData.attributes[22] = this._size[1] / this._tileSize[1];
     }
 }
 
@@ -95,14 +97,14 @@ export class DrawDirectiveScrollableTiledImage extends DrawDirectiveTiledImage {
             this._webglData.attributes[3] -= relative[0];
             this._webglData.attributes[4] -= relative[1];
 
-            this._webglData.attributes[8] -= relative[0];
-            this._webglData.attributes[9] -= relative[1];
+            this._webglData.attributes[9] -= relative[0];
+            this._webglData.attributes[10] -= relative[1];
 
-            this._webglData.attributes[13] -= relative[0];
-            this._webglData.attributes[14] -= relative[1];
+            this._webglData.attributes[15] -= relative[0];
+            this._webglData.attributes[16] -= relative[1];
 
-            this._webglData.attributes[18] -= relative[0];
-            this._webglData.attributes[19] -= relative[1];
+            this._webglData.attributes[21] -= relative[0];
+            this._webglData.attributes[22] -= relative[1];
         }
     }
 }

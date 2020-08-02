@@ -104,36 +104,36 @@ class RenderingPipeline implements ITransformObserver {
         const gl = this._context;
 
         // Render the scene into the mix scene buffer
-        // this._renderers.mix.BindToSceneBuffer();
-        // gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
-        // this._renderers.scene.Render();
-
-        // // Render the lighting into the mix lighting buffer
-        // this._renderers.mix.BindToLightBuffer();
-        // gl.clearColor(0, 0, 0, 1);
-        // gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
-        // this._renderers.lighting.Render();
-
-        // // Render the scene and lighting together into the post buffer
-        // this._renderers.post.BindToBuffer();
-        // gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
-        // this._renderers.mix.Render();
-
-        // // Render post processing result on to the canvas
-        // this.UnbindBuffers();
+        this._renderers.mix.BindToSceneBuffer();
         gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
-        // this._renderers.post.Render();
-        // this.ResetClearColor();
+        this._renderers.scene.Render();
 
-        // // Render the UI on to the canvas
-        // gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        // Render the lighting into the mix lighting buffer
+        this._renderers.mix.BindToLightBuffer();
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        this._renderers.lighting.Render();
+
+        // Render the scene and lighting together into the post buffer
+        this._renderers.post.BindToBuffer();
+        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        this._renderers.mix.Render();
+
+        // Render post processing result on to the canvas
+        this.UnbindBuffers();
+        gl.clear(WebGLRenderingContext.COLOR_BUFFER_BIT | WebGLRenderingContext.DEPTH_BUFFER_BIT);
+        this._renderers.post.Render();
+        this.ResetClearColor();
+
+        // Render the UI on to the canvas
+        gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
         this._renderers.ui.Render();
 
-        // if (Config.GetConfig('debugDraw', false)) {
-        //     // Render debug data ontp the canvas
-        //     gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
-        //     this._renderers.debug.Render();
-        // }
+        if (Config.GetConfig('debugDraw', false)) {
+            // Render debug data ontp the canvas
+            gl.clear(WebGLRenderingContext.DEPTH_BUFFER_BIT);
+            this._renderers.debug.Render();
+        }
     }
 
     private CheckExists(rendererName: string): boolean {

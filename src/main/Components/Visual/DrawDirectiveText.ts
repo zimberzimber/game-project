@@ -116,10 +116,10 @@ export class DrawDirectiveText extends DrawDirectiveBase {
                 }
 
                 const frame = this._spriteData.frames[f];
-                this._webglData.attributes.push(p1[0] + this._drawOffset[0], p1[1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1]);
-                this._webglData.attributes.push(p2[0] + this._drawOffset[0], p2[1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1]);
-                this._webglData.attributes.push(p3[0] + this._drawOffset[0], p3[1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1]);
-                this._webglData.attributes.push(p4[0] + this._drawOffset[0], p4[1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1]);
+                this._webglData.attributes.push(p1[0] + this._drawOffset[0], p1[1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1], this._opacity);
+                this._webglData.attributes.push(p2[0] + this._drawOffset[0], p2[1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1], this._opacity);
+                this._webglData.attributes.push(p3[0] + this._drawOffset[0], p3[1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1], this._opacity);
+                this._webglData.attributes.push(p4[0] + this._drawOffset[0], p4[1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1], this._opacity);
 
                 const o = (i - currentLine) * 4;
                 this._webglData.indexes.push(...[

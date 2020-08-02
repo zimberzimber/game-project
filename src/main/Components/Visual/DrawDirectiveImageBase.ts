@@ -1,7 +1,7 @@
 import { DrawDirectiveBase } from "./DrawDirectiveBase";
 import { EntityBase } from "../../Entities/EntityBase";
 import { Vec2 } from "../../Models/Vectors";
-import { ISpriteStorage, ISpriteFrame } from "../../Models/SpriteModels";
+import { ISpriteFrame } from "../../Models/SpriteModels";
 import { Vec2Utils } from "../../Utility/Vec2";
 import { HorizontalAlignment, VerticalAlignment } from "../../Models/GenericInterfaces";
 
@@ -90,10 +90,10 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
         // Add the draw offset here, after the rotation so that the image is always rotated relative to itself.
         const f = this._frame;
         this._webglData.attributes = [
-            points[0][0] + this._drawOffset[0], points[0][1] + this._drawOffset[1], trans.Depth, f.origin[0] + f.size[0], f.origin[1],
-            points[1][0] + this._drawOffset[0], points[1][1] + this._drawOffset[1], trans.Depth, f.origin[0], f.origin[1],
-            points[2][0] + this._drawOffset[0], points[2][1] + this._drawOffset[1], trans.Depth, f.origin[0], f.origin[1] + f.size[1],
-            points[3][0] + this._drawOffset[0], points[3][1] + this._drawOffset[1], trans.Depth, f.origin[0] + f.size[0], f.origin[1] + f.size[1],
+            points[0][0] + this._drawOffset[0], points[0][1] + this._drawOffset[1], trans.Depth, f.origin[0] + f.size[0], f.origin[1], this._opacity,
+            points[1][0] + this._drawOffset[0], points[1][1] + this._drawOffset[1], trans.Depth, f.origin[0], f.origin[1], this._opacity,
+            points[2][0] + this._drawOffset[0], points[2][1] + this._drawOffset[1], trans.Depth, f.origin[0], f.origin[1] + f.size[1], this._opacity,
+            points[3][0] + this._drawOffset[0], points[3][1] + this._drawOffset[1], trans.Depth, f.origin[0] + f.size[0], f.origin[1] + f.size[1], this._opacity,
         ];
     }
 }

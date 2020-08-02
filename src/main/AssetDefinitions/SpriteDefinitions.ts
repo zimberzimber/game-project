@@ -433,6 +433,7 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     button_wide: {
         sourceImageName: 'uiElements',
         isPixelCoordinates: true,
+        isTranslucent: true,
         names: ['passive', 'hovered', 'pressed'],
         frames: [
             {

@@ -42,6 +42,13 @@ export abstract class DrawDirectiveBase extends ComponentBase implements ITransf
         this.UpdateWebglData();
     }
 
+    protected _opacity: number = 1;
+    get Opacity(): number { return this._opacity; }
+    set Opacity(opacity: number) {
+        this._opacity = opacity;
+        this.UpdateWebglData();
+    }
+
     abstract get IsTranslucent(): boolean;
     abstract get ImageId(): number;
 

@@ -4,15 +4,18 @@ precision mediump float;
 
 attribute vec3 a_position;
 attribute vec2 a_texCoord;
+attribute float a_opacity;
 
 uniform mat4 u_worldMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
 varying vec2 v_texCoord;
+varying float v_opacity;
 
 void main() {
     v_texCoord = a_texCoord;
+    v_opacity = a_opacity;
     gl_Position = u_projectionMatrix * u_viewMatrix * u_worldMatrix * vec4(a_position, 1.);
 }`,
 
@@ -20,14 +23,15 @@ void main() {
 precision mediump float;
 
 varying vec2 v_texCoord;
+varying float v_opacity;
 uniform sampler2D u_sampler;
 
 void main() {
     vec4 color = texture2D(u_sampler, v_texCoord);
-    if (color.a == 0.)
-        discard;
+    if (color.a == 0.) discard;
+
     gl_FragColor = texture2D(u_sampler, vec2(v_texCoord.s, v_texCoord.t));
-    //gl_FragColor = color;
+    gl_FragColor.a *= v_opacity;
 }`,
 
     debug_vertex: `
@@ -213,14 +217,17 @@ precision mediump float;
 
 attribute vec3 a_position;
 attribute vec2 a_texCoord;
+attribute float a_opacity;
 
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
 varying vec2 v_texCoord;
+varying float v_opacity;
 
 void main() {
     v_texCoord = a_texCoord;
+    v_opacity = a_opacity;
     gl_Position = u_projectionMatrix * u_viewMatrix * vec4(a_position, 1.);
 }`,
 };

@@ -10,6 +10,8 @@ import { Light } from "../Components/Visual/Light";
 import { DrawDirectiveBase } from "../Components/Visual/DrawDirectiveBase";
 import { StateManager } from "./GameStateManager";
 import { IsPointInPolygon } from "./CollisionChecker";
+import { ISceneDrawData } from "../Renderers/SceneRenderer";
+import { SortedLinkedList } from "../Utility/Misc";
 
 class GameManager implements IConfigObserver {
     private _entities: EntityBase[] = [];
@@ -105,7 +107,7 @@ class GameManager implements IConfigObserver {
 
         return entities;
     }
-    
+
     GetEntitiesInRectangle(bottomLeft: Vec2, topRight: Vec2): GameEntityBase[] {
         const entities: GameEntityBase[] = [];
 
@@ -203,53 +205,11 @@ class GameManager implements IConfigObserver {
 
 
         // Collect scene draw data
-        const sceneDDs = Game.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveBase, gameEntities, true);
-        const sceneData = {}
+        const sceneDDs = Game.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveBase, gameEntities, true) as DrawDirectiveBase[];
+        CollectSceneRendererData('scene', sceneDDs);
 
-        sceneDDs.forEach((dd: DrawDirectiveBase) => {
-            // Skip directives outside of view
-            const dTrans = dd.Parent.worldRelativeTransform
-
-            if (Camera.IsInView(dTrans.Position, dd.BoundingRadius)) {
-                let indexOffset = 0;
-
-                if (sceneData[dd.ImageId])
-                    // || 0 in case of getting empty data first
-                    indexOffset = sceneData[dd.ImageId].indexes[sceneData[dd.ImageId].indexes.length - 1] + 1 || 0;
-                else
-                    sceneData[dd.ImageId] = { attributes: [], indexes: [] };
-
-                sceneData[dd.ImageId].attributes.push(...dd.WebGlData.attributes);
-                for (const ind of dd.WebGlData.indexes)
-                    sceneData[dd.ImageId].indexes.push(ind + indexOffset);
-            }
-        });
-
-        Rendering.SetDrawData('scene', sceneData)
-
-        const uiDDs = Game.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveBase, uiEntities, true);
-        const uiData = {}
-
-        // Collect UI draw data
-        uiDDs.forEach((dd: DrawDirectiveBase) => {
-            // Skip directives outside of view
-            const dTrans = dd.Parent.worldRelativeTransform
-
-            if (Camera.IsInView(dTrans.Position, dd.BoundingRadius)) {
-                let indexOffset = 0;
-
-                if (uiData[dd.ImageId])
-                    indexOffset = uiData[dd.ImageId].indexes[uiData[dd.ImageId].indexes.length - 1] + 1;
-                else
-                    uiData[dd.ImageId] = { attributes: [], indexes: [] };
-
-                uiData[dd.ImageId].attributes.push(...dd.WebGlData.attributes);
-                for (const ind of dd.WebGlData.indexes)
-                    uiData[dd.ImageId].indexes.push(ind + indexOffset);
-            }
-        });
-
-        Rendering.SetDrawData('ui', uiData)
+        const uiDDs = Game.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveBase, uiEntities, true) as DrawDirectiveBase[];
+        CollectSceneRendererData('ui', uiDDs);
 
         // Collect lighting data for scene (UI doesn't support lighting)
         const lights: number[] = [];
@@ -278,6 +238,67 @@ class GameManager implements IConfigObserver {
             }
         }
     }
+}
+
+const CollectSceneRendererData = (rendererName: string, collection: DrawDirectiveBase[]) => {
+    const data: ISceneDrawData = { opaque: {}, translucent: [] };
+    const depthList = new SortedLinkedList<DrawDirectiveBase>((dd1: DrawDirectiveBase, dd2: DrawDirectiveBase) => {
+        if (dd1.Parent.worldRelativeTransform.Depth < dd2.Parent.worldRelativeTransform.Depth) return -1;
+        if (dd1.Parent.worldRelativeTransform.Depth > dd2.Parent.worldRelativeTransform.Depth) return 1;
+        return 0;
+    });
+
+    // Part 1 of dealing with negative depth
+    let lowestDepth = Number.MAX_SAFE_INTEGER;
+
+    // Collect draw data
+    collection.forEach((dd: DrawDirectiveBase) => {
+        // Skip directives outside of view
+        const dTrans = dd.Parent.worldRelativeTransform
+
+        if (dd.Opacity > 0 && Camera.IsInView(dTrans.Position, dd.BoundingRadius)) {
+            let indexOffset = 0;
+
+            if (dd.IsTranslucent || dd.Opacity < 1) {
+                depthList.Add(dd);
+                if (dd.Parent.worldRelativeTransform.Depth < lowestDepth)
+                    lowestDepth = dd.Parent.worldRelativeTransform.Depth;
+            } else {
+                if (data.opaque[dd.ImageId])
+                    indexOffset = data.opaque[dd.ImageId].indexes[data.opaque[dd.ImageId].indexes.length - 1] + 1;
+                else
+                    data.opaque[dd.ImageId] = { attributes: [], indexes: [] };
+
+                data.opaque[dd.ImageId].attributes.push(...dd.WebGlData.attributes);
+                for (const ind of dd.WebGlData.indexes)
+                    data.opaque[dd.ImageId].indexes.push(ind + indexOffset);
+            }
+        }
+    });
+
+    for (const dd of depthList) {
+        let indexOffset = 0;
+
+        // Part 2 of dealing with negative depth
+        const d = dd.Parent.worldRelativeTransform.Depth - lowestDepth;
+        if (!data.translucent[d])
+            data.translucent[d] = [];
+
+        // I don't even care anymore :D
+        if (data.translucent[d][dd.ImageId])
+            indexOffset = data.translucent[d][dd.ImageId].indexes[data.translucent[d][dd.ImageId].indexes.length - 1];
+        else
+            data.translucent[d][dd.ImageId] = { attributes: [], indexes: [] }
+
+        data.translucent[d][dd.ImageId].attributes.push(...dd.WebGlData.attributes);
+        for (const ind of dd.WebGlData.indexes)
+            data.translucent[d][dd.ImageId].indexes.push(ind + indexOffset);
+    }
+
+    // Part 3 of dealing with negative depth
+    data.translucent = data.translucent.filter(i => i);
+
+    Rendering.SetDrawData(rendererName, data)
 }
 
 export const Game: GameManager = new GameManager();

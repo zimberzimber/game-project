@@ -10,15 +10,22 @@ export const RenderConfigs: { [key: string]: IRendererConfig } = {
                 size: 3,
                 type: WebGLRenderingContext.FLOAT,
                 normalized: false,
-                stride: 5 * Float32Array.BYTES_PER_ELEMENT,
+                stride: 6 * Float32Array.BYTES_PER_ELEMENT,
                 offset: 0,
             },
             a_texCoord: {
                 size: 2,
                 type: WebGLRenderingContext.FLOAT,
                 normalized: false,
-                stride: 5 * Float32Array.BYTES_PER_ELEMENT,
+                stride: 6 * Float32Array.BYTES_PER_ELEMENT,
                 offset: 3 * Float32Array.BYTES_PER_ELEMENT,
+            },
+            a_opacity: {
+                size: 1,
+                type: WebGLRenderingContext.FLOAT,
+                normalized: false,
+                stride: 6 * Float32Array.BYTES_PER_ELEMENT,
+                offset: 5 * Float32Array.BYTES_PER_ELEMENT,
             }
         },
         uniforms: {
@@ -134,15 +141,22 @@ export const RenderConfigs: { [key: string]: IRendererConfig } = {
                 size: 3,
                 type: WebGLRenderingContext.FLOAT,
                 normalized: false,
-                stride: 5 * Float32Array.BYTES_PER_ELEMENT,
+                stride: 6 * Float32Array.BYTES_PER_ELEMENT,
                 offset: 0,
             },
             a_texCoord: {
                 size: 2,
                 type: WebGLRenderingContext.FLOAT,
                 normalized: false,
-                stride: 5 * Float32Array.BYTES_PER_ELEMENT,
+                stride: 6 * Float32Array.BYTES_PER_ELEMENT,
                 offset: 3 * Float32Array.BYTES_PER_ELEMENT,
+            },
+            a_opacity: {
+                size: 1,
+                type: WebGLRenderingContext.FLOAT,
+                normalized: false,
+                stride: 6 * Float32Array.BYTES_PER_ELEMENT,
+                offset: 5 * Float32Array.BYTES_PER_ELEMENT,
             }
         },
         uniforms: {

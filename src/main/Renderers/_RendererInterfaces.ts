@@ -26,10 +26,6 @@ export interface IRendererUniformDefinitions {
     [key: string]: string;
 }
 
-export interface ISceneRendererDrawData {
-    [key: number]: IAttributesIndexesTyped;
-}
-
 export interface IAttributesIndexes {
     attributes: number[],
     indexes: number[],
@@ -38,6 +34,11 @@ export interface IAttributesIndexes {
 export interface IAttributesIndexesTyped {
     attributes: Float32Array,
     indexes: Uint16Array,
+}
+
+export interface IAttributesIndexesByImageId {
+    /** ImageID: { attributes, indexes } */
+    [key: number]: IAttributesIndexes;
 }
 
 export interface IRendererConfig {
