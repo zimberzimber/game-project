@@ -12,6 +12,7 @@ export interface IParticleDefinition {
 
     frameDuration?: number;
     loopFrames?: boolean;
+    randomFrame?: boolean;
 
     spawnRadius?: number;
     spawnBox?: [Vec2, Vec2];
@@ -20,6 +21,7 @@ export interface IParticleDefinition {
     emissionForce?: number | [number, number];
     relativePositioning?: boolean;
     initialRotation?: number | [number, number];
+    opacity?: number | [number, number];
 
     // Ongoing
     emissionRate: number;
@@ -30,6 +32,9 @@ export interface IParticleDefinition {
     forceResistence?: number;
     gravity?: Vec2;
     sizeGrowth?: number;
+    fadeOutStartTime?: number;
+    fadeInTime?: number;
+    faceForceDirection?: boolean;
 }
 
 export interface IParticleInstance {
@@ -47,31 +52,39 @@ export interface IParticleInstance {
     // Position manipulator
     position: Vec2;
     force: Vec2;
+
+    // Opacity
+    initialOpacity: number;
+    actualOpacity: number;
 }
 
 export class ParticleController {
     private _chain: IParticleManipulator[] = [];
     private _def: IParticleDefinition;
+    private _randomFrame: boolean;
+    private _frameCount: number;
 
     constructor(definition: IParticleDefinition, spriteData: ISingleFrameSpriteStorage | IMultiFrameSpriteStorage) {
         this._def = definition;
 
-        if (definition.frameDuration && definition.frameDuration > 0) {
-            let frameCount = 1;
-            if ((spriteData as IMultiFrameSpriteStorage).frames)
-                frameCount = (spriteData as IMultiFrameSpriteStorage).frames.length;
+        if ((spriteData as IMultiFrameSpriteStorage).frames)
+            this._frameCount = (spriteData as IMultiFrameSpriteStorage).frames.length;
 
-            if (frameCount > 1)
-                this._chain.push(new ParticleManipulatorFrames(frameCount, definition.frameDuration, definition.loopFrames || true));
-        }
+        if (this._frameCount > 1 && definition.frameDuration !== undefined)
+            this._chain.push(new ParticleManipulatorFrames(this._frameCount, definition.frameDuration, definition.loopFrames || true));
 
-        this._chain.push(new ParticleManipulatorPositionRotation(definition.rotationSpeed || 0));
+        this._randomFrame = definition.randomFrame || false;
+
+        this._chain.push(new ParticleManipulatorPositionRotation(definition.rotationSpeed || 0, definition.faceForceDirection || false));
 
         if (definition.forceResistence || (definition.gravity && (definition.gravity[0] || definition.gravity[1])))
             this._chain.push(new ParticleManipulatorForceChange(definition.forceResistence || 0, definition.gravity || [0, 0]))
 
         if (definition.sizeGrowth)
             this._chain.push(new ParticleManipulatorSizeGrowth(definition.sizeGrowth));
+
+        if (definition.fadeInTime !== undefined || definition.fadeOutStartTime !== undefined)
+            this._chain.push(new ParticleManipulatorOpacity(definition.fadeInTime || 0, definition.fadeOutStartTime || 0));
     }
 
     Manipulate(instance: IParticleInstance, delta: number): void {
@@ -92,7 +105,18 @@ export class ParticleController {
 
             position: [0, 0],
             force: [ScalarUtil.OneOrRange(this._def.emissionForce || 0), 0],
+            initialOpacity: 1,
+            actualOpacity: 0,
         };
+
+        if (this._randomFrame && this._frameCount > 1)
+            inst.frame = ScalarUtil.RandomIntRange(0, this._frameCount);
+
+        if (this._def.opacity !== undefined)
+            inst.initialOpacity = ScalarUtil.OneOrRange(this._def.opacity);
+
+        if (this._def.fadeInTime === undefined)
+            inst.actualOpacity = inst.initialOpacity;
 
         if (this._def.spawnRadius)
             inst.position = Vec2Utils.RandomPointInCircle(this._def.spawnRadius);
@@ -118,6 +142,7 @@ class ParticleManipulatorFrames implements IParticleManipulator {
     constructor(frameCount: number, frameTime: number, loop: boolean) {
         this._frameCount = frameCount;
         this._frameTime = frameTime;
+        this._loop = loop;
     }
 
     Manipulate(instance: IParticleInstance, delta: number): void {
@@ -133,15 +158,21 @@ class ParticleManipulatorFrames implements IParticleManipulator {
 
 class ParticleManipulatorPositionRotation implements IParticleManipulator {
     private _rotationSpeed: number;
+    private _faceForceDirection: boolean;
 
-    constructor(rotationSpeed: number) {
+    constructor(rotationSpeed: number, faceForceDirection: boolean) {
+        this._faceForceDirection = faceForceDirection;
         this._rotationSpeed = rotationSpeed;
     }
 
     Manipulate(instance: IParticleInstance, delta: number): void {
         instance.position[0] += instance.force[0] * delta;
         instance.position[1] += instance.force[1] * delta;
-        instance.rotation += this._rotationSpeed * delta;
+
+        if (!this._faceForceDirection)
+            instance.rotation += this._rotationSpeed * delta;
+        else if (instance.force[0] || instance.force[1])
+            instance.rotation = Vec2Utils.GetAngle([0, 0], instance.force);
     }
 }
 
@@ -156,9 +187,9 @@ class ParticleManipulatorForceChange implements IParticleManipulator {
 
     Manipulate(instance: IParticleInstance, delta: number): void {
         // Not using Vec2Utils because this will be used a lot, and should be as fast as possible.
-        const forceResist = 1 - this._forceResistence * delta;
-        instance.force[0] = instance.force[0] * forceResist + this._gravity[0] * forceResist;
-        instance.force[1] = instance.force[1] * forceResist + this._gravity[1] * forceResist;
+        const forceResist = this._forceResistence * delta;
+        instance.force[0] = instance.force[0] - instance.force[0] * forceResist + this._gravity[0] * forceResist;
+        instance.force[1] = instance.force[1] - instance.force[1] * forceResist + this._gravity[1] * forceResist;
     }
 }
 
@@ -171,5 +202,26 @@ class ParticleManipulatorSizeGrowth implements IParticleManipulator {
 
     Manipulate(instance: IParticleInstance, delta: number): void {
         instance.sizeMultiplier = Math.max(instance.sizeMultiplier + this._growth * delta, 0);
+    }
+}
+
+class ParticleManipulatorOpacity implements IParticleManipulator {
+    private _fadeInTime: number;
+    private _fadeOutStartTime: number;
+
+    constructor(fadeInTime: number, fadeOutStartTime: number) {
+        this._fadeInTime = fadeInTime;
+        this._fadeOutStartTime = fadeOutStartTime;
+    }
+
+    Manipulate(instance: IParticleInstance, delta: number): void {
+        let mult = 1;
+
+        if (instance.lifeTime > this._fadeOutStartTime)
+            mult = (instance.lifeSpan - instance.lifeTime) / (instance.lifeSpan - this._fadeOutStartTime);
+        else if (instance.lifeTime < this._fadeInTime)
+            mult = instance.lifeTime / this._fadeInTime;
+
+        instance.actualOpacity = instance.initialOpacity * mult;
     }
 }

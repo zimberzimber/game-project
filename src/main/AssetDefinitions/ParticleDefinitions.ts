@@ -5,6 +5,7 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
         spriteName: 'asset_missing',
         size: [5, 5],
         sizeMultiplier: [0.5, 2],
+        initialRotation: [0, 360],
 
         emissionRate: 33,
         maxParticles: 999,
@@ -12,13 +13,18 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
 
         spawnBox: [[-2.5, 15], [2.5, 15]],
 
+        opacity: 0.75,
+        // fadeInTime: 2,
+        fadeOutStartTime: 4.5,
+
         // Movement
-        emissionAngle: [105, 75],
-        emissionForce: [300, 500],
-        forceResistence: 0,
-        gravity: [0, -10],
+        emissionAngle: [0, 360],
+        emissionForce: 300,
+        forceResistence: 3,
+        gravity: [0, 0],
         rotationSpeed: 20,
         relativePositioning: false,
-        sizeGrowth: -1,
+        faceForceDirection: true,
+        sizeGrowth: 1,
     }
 }

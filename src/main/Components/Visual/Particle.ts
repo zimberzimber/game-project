@@ -10,6 +10,7 @@ import { Vec2Utils } from "../../Utility/Vec2";
 import { ScalarUtil } from "../../Utility/Scalar";
 import { IParticleDefinition, IParticleInstance, ParticleController } from "../../Models/ParticleModels";
 import { particleDefinitions } from "../../AssetDefinitions/ParticleDefinitions";
+import { Camera } from "../../Workers/CameraManager";
 
 export class ParticleComponent extends DrawDirectiveBase {
     private _lastEmission: number = 0;
@@ -57,6 +58,8 @@ export class ParticleComponent extends DrawDirectiveBase {
         super.Update(delta);
         const now = Date.now();
         let stopEmitting = false;
+
+        this._boundingRadius = 0;
 
         if (this._isEmitting && this._particleInstances.length < this._particleData.maxParticles) {
             if (this._particleData.emissionTime && now - this._startedEmitting >= this._particleData.emissionTime * 1000) {
@@ -132,6 +135,11 @@ export class ParticleComponent extends DrawDirectiveBase {
 
         const widthHalf = inst.size[0] * inst.sizeMultiplier / 2;
         const heightHalf = inst.size[1] * inst.sizeMultiplier / 2;
+        const instanceBoundingRadius = ScalarUtil.DiagonalLength(widthHalf, heightHalf);
+
+        // Don't process the instance if its not in view
+        if (!Camera.IsInView(origin, instanceBoundingRadius)) return;
+
         let coords: Vec2[] = [
             [origin[0] + widthHalf, inst.position[1] + heightHalf],
             [origin[0] - widthHalf, inst.position[1] + heightHalf],
@@ -139,18 +147,19 @@ export class ParticleComponent extends DrawDirectiveBase {
             [origin[0] + widthHalf, inst.position[1] - heightHalf],
         ];
 
-        // Using Vec2 utils here because its a bit more complex
+        // Using Vec2 utils here because the operation is a bit more complex
         if (inst.rotation) {
             const rad = ScalarUtil.ToRadian(inst.rotation);
             for (let i = 0; i < coords.length; i++)
                 coords[i] = Vec2Utils.RotatePointAroundCenter(coords[i], rad, origin);
         }
 
+        const op = inst.actualOpacity * this._opacity;
         this._webglData.attributes.push(
-            coords[0][0], coords[0][1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1],
-            coords[1][0], coords[1][1], trans.Depth, frame.origin[0], frame.origin[1],
-            coords[2][0], coords[2][1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1],
-            coords[3][0], coords[3][1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1],
+            coords[0][0] + this._drawOffset[0], coords[0][1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1], op,
+            coords[1][0] + this._drawOffset[0], coords[1][1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1], op,
+            coords[2][0] + this._drawOffset[0], coords[2][1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1], op,
+            coords[3][0] + this._drawOffset[0], coords[3][1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1], op,
         );
 
         const index = this._webglData.indexes.length > 0 ? this._webglData.indexes[this._webglData.indexes.length - 1] + 1 : 0
@@ -158,6 +167,10 @@ export class ParticleComponent extends DrawDirectiveBase {
             index, index + 1, index + 2,
             index, index + 2, index + 3
         );
+
+        const boundingRadius = Vec2Utils.Distance(origin, this.Parent.transform.Position) + instanceBoundingRadius;
+        if (this._boundingRadius < boundingRadius)
+            this._boundingRadius = boundingRadius;
     }
 
     Start(): void {

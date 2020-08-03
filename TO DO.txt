@@ -1,30 +1,13 @@
 
         TO DO:
 - Change canvas size setting to be handled based on its actual size, instead of through Main.ts
-- Give particles the ability to use a random sprite from a collection
 - Give drawn sprites the ability to draw a portion of the sprite (like cutting it off)
 - Add a UI scale factor
 - Add controller support
 - Add a method which generates button or pane sprites and adds them to the sprite collection
-- Render opaque objects from front to back, and translucent objects from back to front
-- Revisit transparency rendering in Webgl
--- Have opaque directives draw normally as they currently do
--- Have translucent directives draw only after the opaque ones, from lowest to highest depth
--- Reason:
---  You can draw 'on top' of anything, and you can try drawing behind opaque pixels, but webgl won't actually draw it
---  You can try drawing behind semi-transparent pixels, but webgl still won't draw it because that area already has something rendered into it, regardless of its transparency.
---  So to make sure things render behind translucent renders, we must first draw whatever is behind it and only then the translucent bits.
-
-Collect all directives
-Opaque directives handling remains unchanged
-If the directive is translucent, add it to a separate collection, ordered by depth
-Draw opaque directives
-Draw translucent directives from lowest to highest depth
-
-Whether the directive is translucent or opaque is defined within the component as a property
-Add another attribute which determines the opacity of the entire draw directive, ranging from 0 (invisible) to 1 (draw it as is)
-This can apply to both opaque and translucent directives
-If an opaque directives opacity is below 1, it will be rendered as a translucent directive
-
 
         Done:
+X Added particle opacity controls
+X Added bounding radius calculation to particles, and made particle instances draw only when they're in view
+X Corrected particle force resistence, and the option to have them face in the direction they're pushed
+X Added the option to have particles start off a random frame (whether the sprite itself is animated or not)

@@ -8,6 +8,7 @@ export class ScalarUtil {
     static ToAngle = (radian: number): number => radian * _rta;
 
     static RandomRange = (min: number, max: number): number => (max - min) * Math.random() + min;
+    static RandomIntRange = (min: number, max: number): number => Math.floor(ScalarUtil.RandomRange(min, max));
     static Clamp = (min: number, value: number, max: number): number => Math.min(max, Math.max(value, min));
     static Round = (value: number): number => Math.floor(value + 0.5);
 
@@ -21,4 +22,6 @@ export class ScalarUtil {
         const l = Math.log(num) / Math.log(2);
         return l == Math.floor(l);
     }
+
+    static DiagonalLength = (width: number, height: number): number => Math.sqrt(width * width + height * height);
 }
