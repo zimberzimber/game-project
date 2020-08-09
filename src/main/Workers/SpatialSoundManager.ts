@@ -6,6 +6,7 @@ import { LogLevel } from "./Logger";
 import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
 import { OneTimeLog } from "./OneTimeLogger";
+import { ScalarUtil } from "../Utility/Scalar";
 
 
 class SpatialSoundManager implements ITransformObserver {
@@ -42,7 +43,6 @@ class SpatialSoundManager implements ITransformObserver {
         }
     }
 
-
     private UpdateSoundParams(id: number): void {
         const origin = this._soundData[id].origin;
         const fd = this._soundData[id].definition.falloffDistance || 0;
@@ -57,15 +57,15 @@ class SpatialSoundManager implements ITransformObserver {
         Audio.SetControllerValueForSound(id, ControllerType.Volume, volumeMultiplier * this._soundData[id].definition.volume);
 
         let panning = 0;
-        if (d > 50) {
-            const p2 = Vec2Utils.MoveTowards(Camera.Transform.Position, origin, 50, false);
-            const angle = Vec2Utils.GetAngle(p2, origin) + Camera.Transform.Rotation;
-            panning = 1 - Math.abs(angle) / 90;
-        }
+        let panOrigin = origin;
+        if (Camera.Transform.Rotation)
+            panOrigin = Vec2Utils.RotatePointAroundCenter(origin, Camera.Transform.RotationRadian, Camera.Transform.Position);
+
+        const e = panOrigin[0] - Camera.Transform.Position[0]
+        panning = ScalarUtil.Clamp(-1, e / 200, 1);
+
         Audio.SetControllerValueForSound(id, ControllerType.Pan, panning);
-
     }
-
 
     private UpdateAllSoundsParams() {
         let deleted = false;

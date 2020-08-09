@@ -13,9 +13,9 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
 
         spawnBox: [[-2.5, 15], [2.5, 15]],
 
-        opacity: 0.75,
-        // fadeInTime: 2,
-        fadeOutStartTime: 4.5,
+        opacity: 1,
+        fadeInTime: 2,
+        // fadeOutStartTime: 4.5,
 
         // Movement
         emissionAngle: [0, 360],

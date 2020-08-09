@@ -60,13 +60,9 @@ export abstract class WebglRenderer {
             //@ts-ignore Weird case where typescript refused to aknowledge the spread operator
             // gl.clearColor(...this._clearColor);
             // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            gl.enable(gl.DEPTH_TEST);
             gl.enable(gl.CULL_FACE);
             gl.frontFace(gl.CCW);
             gl.cullFace(gl.BACK);
-
-            gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-            gl.enable(gl.BLEND);
         }
 
         //@ts-ignore Can't be null

@@ -29,6 +29,6 @@ export class WebglLightingRenderer extends WebglRenderer {
         const gl = this._context;
 
         gl.bufferData(gl.ARRAY_BUFFER, this._drawData, gl.DYNAMIC_DRAW);
-        gl.drawArrays(gl.POINTS, 0, this._drawData.length / this._attributeCount);
+        gl.drawArrays(gl.TRIANGLES, 0, this._drawData.length / this._attributeCount);
     }
 }

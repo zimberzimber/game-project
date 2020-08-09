@@ -1,13 +1,13 @@
 
         TO DO:
-- Change canvas size setting to be handled based on its actual size, instead of through Main.ts
-- Give drawn sprites the ability to draw a portion of the sprite (like cutting it off)
+- Give drawn sprites the ability to draw a portion of the sprite (cutting it off, like a progress bar)
 - Add a UI scale factor
 - Add controller support
 - Add a method which generates button or pane sprites and adds them to the sprite collection
 
         Done:
-X Added particle opacity controls
-X Added bounding radius calculation to particles, and made particle instances draw only when they're in view
-X Corrected particle force resistence, and the option to have them face in the direction they're pushed
-X Added the option to have particles start off a random frame (whether the sprite itself is animated or not)
+X Changed light renderering to use triangles instead of points to prevent it from relying on maximum point size
+X Canvas size is now based on its actual size, and locked to a 4:3 aspect ratio (handled through Main.ts)
+X Have spatial sound be applied based on a tag, instead of type (so that they can be played through UI (for example) without being spatial)
+X Corrected spatial sound panning
+X Added directional light

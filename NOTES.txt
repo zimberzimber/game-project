@@ -8,7 +8,10 @@ The opposite is true for Chrome, though the difference is smaller.
 
 Biggest performence impact (so far) comes from array processing for the graphic context
 
-Lighting: Since a WEBGL point size cannot exceed 1024, light radius is hard limited to 512 radius, and will have the light circle have its edge cut off.
+Lighting: Rendered point size cannot exceed certain values (based on GPU? Mine is 1024), which cuts off the light circle past half that limits value.
+So I've rewritten the rendered to take in 3 points for a triangle.
+Using a triangle because despite having to go through ~30% more pixels, I will only have to pass 3 points without indexing.
+This trade off is preferable as processing large arrays has a higher performence impact. (And I'm using a smaller view so its not that big of a difference on the GPUs end)
 
 In TypeScript, a classes default field values are only applied after the parents constructor. Until then they are undefined.
 

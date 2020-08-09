@@ -4,13 +4,14 @@ import { PlayerMovementComponent } from "../../Components/Mechanics/PlayerMoveme
 import { HitboxRectangle } from "../../Components/Hitboxes/HitboxRectangle";
 import { CollisionGroup, TriggerState } from "../../Models/CollisionModels";
 import { HitboxBase } from "../../Components/Hitboxes/HitboxBase";
-import { Light } from "../../Components/Visual/Light";
+import { LightComponent } from "../../Components/Visual/Light";
 import { ParticleComponent } from "../../Components/Visual/Particle";
 import { SoundEmitterComponent } from "../../Components/Sound/SoundEmitter";
+import { SoundSingleInstanceComponent } from "../../Components/Sound/SoundSingleInstance";
 
 export class OriEntity extends GameEntityBase {
     private dd: DrawDirectiveAnimatedImage;
-    private light: Light;
+    private light: LightComponent;
     private particle: ParticleComponent;
 
     private frameDelta: number = 0.25;
@@ -22,7 +23,7 @@ export class OriEntity extends GameEntityBase {
         this.dd = new DrawDirectiveAnimatedImage(this, "ori", [5, 15]);
         this.AddComponent(this.dd);
 
-        this.light = new Light(this, [0.85, 0.85, 1], 150, 0.25)
+        this.light = new LightComponent(this, [0.85, 0.85, 1], 150, 0.25)
         this.AddComponent(this.light);
 
         this.particle = new ParticleComponent(this, 'test');
@@ -94,18 +95,16 @@ export class PlayerEntity extends GameEntityBase {
 
         this.kuEntity = new KuEntity(this);
         this.AddChildEntity(this.kuEntity);
+        this.AddComponent(this.l);
+        this.l.Play();
     }
 
-    k = new SoundEmitterComponent(this, 'sfx');
+    l = new SoundSingleInstanceComponent(this, 'loop', true);
+
     time = 0;
     Update(delta: number) {
         super.Update(delta);
 
-        this.time += delta;
-        if (this.time > 0.33) {
-            this.k.Emit();
-            this.time = 0;
-        }
         // this.transform.Rotate(1);
         // Camera.Transform.Rotate(1);
         // this.transform.Rotate(0.5);

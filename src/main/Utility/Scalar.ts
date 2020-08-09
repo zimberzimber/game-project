@@ -11,6 +11,7 @@ export class ScalarUtil {
     static RandomIntRange = (min: number, max: number): number => Math.floor(ScalarUtil.RandomRange(min, max));
     static Clamp = (min: number, value: number, max: number): number => Math.min(max, Math.max(value, min));
     static Round = (value: number): number => Math.floor(value + 0.5);
+    static Avarage = (val1: number, val2: number): number => (val1 + val2) / 2;
 
     static OneOrRange = (oor: number | [number, number]): number => {
         if (oor[0] === undefined)

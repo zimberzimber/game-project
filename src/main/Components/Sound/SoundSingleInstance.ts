@@ -1,6 +1,6 @@
 import { ComponentBase } from "../ComponentBase";
 import { EntityBase } from "../../Entities/EntityBase";
-import { ISoundDefinition, SoundType } from "../../Models/SoundModels";
+import { ISoundDefinition } from "../../Models/SoundModels";
 import { Audio } from "../../Workers/SoundPlayer";
 import { ITransformObserver, ITransformEventArgs } from "../../Models/Transform";
 import { SoundDefinitions } from "../../AssetDefinitions/SoundDefinitions";
@@ -10,22 +10,22 @@ import { SpatialSoundManagement } from "../../Workers/SpatialSoundManager";
 export class SoundSingleInstanceComponent extends ComponentBase implements ITransformObserver {
     private _soundDefinition: ISoundDefinition;
     private _currentSoundId: number = -1;
+    private _isSpatial: boolean;
 
-    constructor(parent: EntityBase, soundName: string) {
+    constructor(parent: EntityBase, soundName: string, spatial: boolean) {
         super(parent);
 
         if (SoundDefinitions[soundName]) {
             this._soundDefinition = SoundDefinitions[soundName];
 
-            // Only default type is spatial
-            if (this._soundDefinition.type == SoundType.Default)
+            this._isSpatial = spatial;
+            if (spatial)
                 this.Parent.worldRelativeTransform.Subscribe(this);
         } else
             Log.Error(`Entity ID ${this.Parent.entityId} initialized a sound component with an undefined sound: ${soundName}`);
     }
 
     OnObservableNotified(args: ITransformEventArgs): void {
-        // No need to check whether the sound is of type Default since the compotent doesn't subscribe to parents transform otherwise
         if (this.Enabled && args.position && Audio.IsActive(this._currentSoundId))
             SpatialSoundManagement.UpdateOrigin(this._currentSoundId, this.Parent.worldRelativeTransform.Position);
     }
@@ -37,8 +37,7 @@ export class SoundSingleInstanceComponent extends ComponentBase implements ITran
             Audio.RestartSound(this._currentSoundId);
         else {
             this._currentSoundId = Audio.PlaySound(this._soundDefinition);
-            // Only default sounds are spatial
-            if (this._soundDefinition.type == SoundType.Default)
+            if (this._isSpatial)
                 SpatialSoundManagement.AddSound(this._currentSoundId, this.Parent.worldRelativeTransform.Position, this._soundDefinition);
         }
     }

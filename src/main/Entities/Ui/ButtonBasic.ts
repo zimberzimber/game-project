@@ -2,7 +2,7 @@ import { UiEntityBase } from "../EntityBase"
 import { DrawDirectiveAnimatedImage } from "../../Components/Visual/DrawDirectiveAnimatedImage";
 import { ClickboxComponent } from "../../Components/Interactable/Clickable";
 import { Vec2 } from "../../Models/Vectors";
-import { SoundSingleInstanceComponent } from "../../Components/Sound/SoundBase";
+import { SoundSingleInstanceComponent } from "../../Components/Sound/SoundSingleInstance";
 
 export class ButtonBasicEntity extends UiEntityBase {
     private dd: DrawDirectiveAnimatedImage;
@@ -45,8 +45,8 @@ export class ButtonBasicEntity extends UiEntityBase {
     constructor(parent: UiEntityBase | void | null, size: Vec2, spriteName: string) {
         super(parent);
 
-        this.soundHover = new SoundSingleInstanceComponent(this, 'button_hover');
-        this.soundClick = new SoundSingleInstanceComponent(this, 'button_click');
+        this.soundHover = new SoundSingleInstanceComponent(this, 'button_hover', false);
+        this.soundClick = new SoundSingleInstanceComponent(this, 'button_click', false);
         this.clickable = new ClickboxComponent(this, size);
         this.dd = new DrawDirectiveAnimatedImage(this, spriteName, size);
         this.dd.Frame = 'passive';

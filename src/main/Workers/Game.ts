@@ -6,7 +6,7 @@ import { Camera, } from "./CameraManager";
 import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
 import { Rendering } from "./RenderingPipeline";
-import { Light } from "../Components/Visual/Light";
+import { LightComponent } from "../Components/Visual/Light";
 import { DrawDirectiveBase } from "../Components/Visual/DrawDirectiveBase";
 import { StateManager } from "./GameStateManager";
 import { IsPointInPolygon } from "./CollisionChecker";
@@ -213,8 +213,8 @@ class GameManager implements IConfigObserver {
 
         // Collect lighting data for scene (UI doesn't support lighting)
         const lights: number[] = [];
-        Game.GetAllComponentsOfTypeFromEntityCollection(Light, gameEntities, true).forEach((l: Light) => {
-            if (Camera.IsInView(l.Parent.worldRelativeTransform.Position, l.Radius))
+        Game.GetAllComponentsOfTypeFromEntityCollection(LightComponent, gameEntities, true).forEach((l: LightComponent) => {
+            if (Camera.IsInView(l.Parent.worldRelativeTransform.Position, l.BoundingRadius))
                 lights.push(...l.WebglData);
         });
         Rendering.SetDrawData('lighting', lights)

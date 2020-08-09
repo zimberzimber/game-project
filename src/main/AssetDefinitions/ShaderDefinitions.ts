@@ -156,45 +156,93 @@ void main() {
 precision mediump float;
 
 attribute vec2 a_position;
+attribute vec2 a_origin;
 attribute vec3 a_color;
 attribute float a_radius;
 attribute float a_hardness;
+attribute float a_direction;
+attribute float a_angle;
 
 uniform mat4 u_worldMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
-varying vec2 v_position;
+varying vec2 v_origin;
 varying vec3 v_color;
 varying float v_radius;
 varying float v_hardness;
+varying float v_direction;
+varying float v_angle;
 
 void main() {
     v_color = a_color;
     v_radius = a_radius;
     v_hardness = a_hardness;
-    
+    v_direction = a_direction;
+    v_angle = a_angle;
+
     gl_Position = u_projectionMatrix * u_viewMatrix * u_worldMatrix * vec4(a_position, 1., 1.);
-    gl_PointSize = a_radius * 2.;
 
     vec2 half_resolution = vec2(
         (1. - u_projectionMatrix[0][3]) / u_projectionMatrix[0][0],
         (1. - u_projectionMatrix[1][3]) / u_projectionMatrix[1][1]);
-    v_position = (u_worldMatrix * vec4(a_position, 1., 1.)).xy + half_resolution;
-}
-`,
+    
+    v_origin += (u_worldMatrix * vec4(a_origin, 1., 1.)).xy + half_resolution;
+}`,
 
+// Modulo has some funky behaviour in GLSL, so I had to use its broken down version
+// Taken from: https://www.shadertoy.com/view/3ssXWB
     lighting_fragment: `
 precision mediump float;
+#define PI 3.1415926538
 
-varying vec2 v_position;
+varying vec2 v_origin;
 varying vec3 v_color;
 varying float v_radius;
 varying float v_hardness;
+varying float v_direction;
+varying float v_angle;
+
+float Mod(float subject, float factor) {
+    return subject - floor(subject / factor) * factor;
+}
+
+bool IsInFrustum(float radian) {
+    float angle = radian * 180. / PI;
+    float min = v_direction - v_angle / 2.;
+    float max = v_direction + v_angle / 2.;
+
+    //if (angle >= min && angle <= max)
+    //    return true;
+
+    if (max >= 360.) {
+        min -= 360.;
+        max -= 360.;
+    }
+    else if (max >= 180.) {
+        angle = Mod(angle, 360.);
+    }
+    else if (min <= -360.) {
+        min += 360.;
+        max += 360.;
+    }
+    else if (min <= -180.) {
+        angle = Mod(angle, -360.);
+    }
+
+    if (angle >= min && angle <= max)
+        return true;
+
+    return false;
+}
 
 void main() {
-    float dist = distance(gl_FragCoord.xy, v_position);
+    float dist = distance(gl_FragCoord.xy, v_origin);
     if (dist > v_radius)
+        discard;
+
+    float radian = atan(gl_FragCoord.y - v_origin.y, gl_FragCoord.x - v_origin.x);
+    if (v_angle < 360. && !IsInFrustum(radian))
         discard;
 
     float alpha = 1.;
@@ -202,9 +250,7 @@ void main() {
 
     if (dist > min_distance)
     {
-        float angle = atan(gl_FragCoord.y - v_position.y, gl_FragCoord.x - v_position.x);
-        vec2 p2 = vec2(v_position.x + cos(angle) * min_distance, v_position.y + sin(angle) * min_distance);
-
+        vec2 p2 = vec2(v_origin.x + cos(radian) * min_distance, v_origin.y + sin(radian) * min_distance);
         float dist2 = distance(gl_FragCoord.xy, p2);
         alpha = smoothstep(1., 0., dist2 / (v_radius - min_distance));
     }

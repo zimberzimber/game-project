@@ -77,12 +77,14 @@ IDB.OpenDatabase(gameSchema)
             Assets.Dispose();
 
             const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
-            canvas.width = 600;
-            canvas.height = 500;
+            const aspectRatio = 4 / 3;
+
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.width / aspectRatio;
 
             Rendering.Init(canvas);
 
-            Camera.Transform.Scale = [canvas.width, canvas.height];
+            Camera.Transform.Scale = [600, 600 / aspectRatio];
             Camera.Transform.Position = [0, 0];
             Camera.Transform.Rotation = 0;
 
