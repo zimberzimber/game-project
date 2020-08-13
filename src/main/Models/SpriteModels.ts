@@ -48,7 +48,6 @@ export const GetFrameFromMultiFrameStorage = (frameStorage: IMultiFrameSpriteSto
 export interface ISpriteDefinition {
     sourceImageName: string;
     isTranslucent?: boolean;
-    isPixelCoordinates?: boolean;
     metadata?: any;
 }
 

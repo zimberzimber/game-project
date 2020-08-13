@@ -32,22 +32,10 @@ class SpriteManager {
 
             if ((spriteDefinitions[spriteName] as ISingleFrameSpriteDefinition).frame) {
                 const def = spriteDefinitions[spriteName] as ISingleFrameSpriteDefinition;
-                if (def.isPixelCoordinates) {
-                    const imageSize = Images.GetImageSize(imageId);
-                    this.sprites[spriteName] = {
-                        imageId: imageId,
-                        isTranslucent: def.isTranslucent || false,
-                        frame: {
-                            origin: Vec2Utils.Div(def.frame.origin, imageSize),
-                            size: Vec2Utils.Div(def.frame.size, imageSize),
-                        }
-                    }
-                } else {
-                    this.sprites[spriteName] = {
-                        imageId: imageId,
-                        isTranslucent: def.isTranslucent || false,
-                        frame: def.frame
-                    }
+                this.sprites[spriteName] = {
+                    imageId: imageId,
+                    isTranslucent: def.isTranslucent || false,
+                    frame: def.frame
                 }
                 this.sprites[spriteName].metadata = def.metadata;
 
@@ -63,18 +51,7 @@ class SpriteManager {
                     metadata: def.metadata
                 }
 
-                if (def.isPixelCoordinates) {
-                    const imageSize = Images.GetImageSize(imageId);
-                    for (const f of def.frames) {
-                        sprite.frames.push({
-                            origin: Vec2Utils.Div(f.origin, imageSize),
-                            size: Vec2Utils.Div(f.size, imageSize),
-                        })
-                    }
-                } else {
-                    sprite.frames = def.frames;
-                }
-
+                sprite.frames = def.frames;
                 this.sprites[spriteName] = sprite;
 
             } else { // Also covers empty frames array
@@ -87,7 +64,7 @@ class SpriteManager {
     GetFullImageAsSprite(image: string): ISingleFrameSpriteStorage {
         const id = Images.GetImageIdFromName(image);
         if (id > -1)
-            return { imageId: id, frame: { origin: [0, 0], size: [1, 1] }, isTranslucent: true }; // Always render them as translucent to prevent further complexity.
+            return { imageId: id, frame: { origin: [0, 0], size: Images.GetImageSize(id) }, isTranslucent: true }; // Always render them as translucent to prevent further complexity.
 
         OneTimeLog.Log(`nonexistentFullImage_${image}`, `Attempted to get non-existent image: ${image}`, LogLevel.Warn);
         return { imageId: 0, frame: { origin: [0, 0], size: [1, 1] }, isTranslucent: false };

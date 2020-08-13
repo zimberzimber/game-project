@@ -8,6 +8,7 @@ import { LightComponent } from "../../Components/Visual/Light";
 import { ParticleComponent } from "../../Components/Visual/Particle";
 import { SoundEmitterComponent } from "../../Components/Sound/SoundEmitter";
 import { SoundSingleInstanceComponent } from "../../Components/Sound/SoundSingleInstance";
+import { DirectionalLightComponent } from "../../Components/Visual/LightDirectional";
 
 export class OriEntity extends GameEntityBase {
     private dd: DrawDirectiveAnimatedImage;
@@ -23,7 +24,7 @@ export class OriEntity extends GameEntityBase {
         this.dd = new DrawDirectiveAnimatedImage(this, "ori", [5, 15]);
         this.AddComponent(this.dd);
 
-        this.light = new LightComponent(this, [0.85, 0.85, 1], 150, 0.25)
+        this.light = new DirectionalLightComponent(this, [0.85, 0.85, 1], 150, 0.25, 45, 90)
         this.AddComponent(this.light);
 
         this.particle = new ParticleComponent(this, 'test');

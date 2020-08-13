@@ -7,6 +7,7 @@ export class DirectionalLightComponent extends LightComponent {
     private _direction = 0;
     get Direction(): number { return this._direction; }
     set Direction(direction: number) {
+        // Not applying % 360 because its applied in webgl data calculation with the addition of the transforms rotation
         this._direction = direction;
         this.CaulculateWebglData();
     }

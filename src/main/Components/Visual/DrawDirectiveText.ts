@@ -12,7 +12,7 @@ export class DrawDirectiveText extends DrawDirectiveBase {
 
     private static _fontImageId: number = -2;
     get ImageId(): number { return DrawDirectiveText._fontImageId; }
-    get IsTranslucent(): boolean { return this._spriteData.isTranslucent; }
+    get IsTranslucent(): boolean { return false; }
 
     constructor(parent: EntityBase, size: number, text: string) {
         super(parent);
@@ -47,10 +47,8 @@ export class DrawDirectiveText extends DrawDirectiveBase {
     }
 
     protected UpdateWebglData() {
-        const widths = this._spriteData.metadata.charWidths as number[];
-        const maxCharHeight = this._spriteData.metadata.maxCharHeight as number;
-
         const trans = this._parent.worldRelativeTransform;
+        const maxCharHeight = this._spriteData.metadata.maxCharHeight as number * trans.Scale[0];
         this._webglData = { attributes: [], indexes: [] };
 
         let boundingWidth = 0;
@@ -69,7 +67,7 @@ export class DrawDirectiveText extends DrawDirectiveBase {
                 currentLine++;
                 lineOffsets[currentLine] = [0, (currentLine + 1) * -maxCharHeight];
             } else if (this._horizontalAlignment != HorizontalAlignment.Left) {
-                lineOffsets[currentLine][0] += widths[f];
+                lineOffsets[currentLine][0] += this._spriteData.frames[f].size[0] * trans.Scale[0];
             }
         }
         boundingHeight = lineOffsets[currentLine][1];
@@ -102,11 +100,13 @@ export class DrawDirectiveText extends DrawDirectiveBase {
                 offset = lineOffsets[currentLine];
             } else {
                 let f = this.GetFrameForChar(c);
+                const frame = this._spriteData.frames[f];
+                const charWidth = frame.size[0] * trans.Scale[0];
 
-                let p1: Vec2 = [trans.Position[0] + offset[0] + widths[f], trans.Position[1] + offset[1] + maxCharHeight];
-                let p2: Vec2 = [trans.Position[0] + offset[0], trans.Position[1] + offset[1] + maxCharHeight];
-                let p3: Vec2 = [trans.Position[0] + offset[0], trans.Position[1] + offset[1]];
-                let p4: Vec2 = [trans.Position[0] + offset[0] + widths[f], trans.Position[1] + offset[1]];
+                let p1: Vec2 = [trans.Position[0] + offset[0] * trans.Scale[0] + charWidth, trans.Position[1] + offset[1] * trans.Scale[1] + maxCharHeight];
+                let p2: Vec2 = [trans.Position[0] + offset[0] * trans.Scale[0],             trans.Position[1] + offset[1] * trans.Scale[1] + maxCharHeight];
+                let p3: Vec2 = [trans.Position[0] + offset[0] * trans.Scale[0],             trans.Position[1] + offset[1] * trans.Scale[1]];
+                let p4: Vec2 = [trans.Position[0] + offset[0] * trans.Scale[0] + charWidth, trans.Position[1] + offset[1] * trans.Scale[1]];
 
                 if (trans.RotationRadian != 0) {
                     p1 = Vec2Utils.RotatePointAroundCenter(p1, trans.RotationRadian, trans.Position);
@@ -115,18 +115,17 @@ export class DrawDirectiveText extends DrawDirectiveBase {
                     p4 = Vec2Utils.RotatePointAroundCenter(p4, trans.RotationRadian, trans.Position);
                 }
 
-                const frame = this._spriteData.frames[f];
-                this._webglData.attributes.push(p1[0] + this._drawOffset[0], p1[1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1], this._opacity);
-                this._webglData.attributes.push(p2[0] + this._drawOffset[0], p2[1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1], this._opacity);
-                this._webglData.attributes.push(p3[0] + this._drawOffset[0], p3[1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1], this._opacity);
-                this._webglData.attributes.push(p4[0] + this._drawOffset[0], p4[1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1], this._opacity);
+                this._webglData.attributes.push(p1[0] + this._drawOffset[0] * trans.Scale[0], p1[1] + this._drawOffset[1] * trans.Scale[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1], this._opacity);
+                this._webglData.attributes.push(p2[0] + this._drawOffset[0] * trans.Scale[0], p2[1] + this._drawOffset[1] * trans.Scale[1], trans.Depth, frame.origin[0], frame.origin[1], this._opacity);
+                this._webglData.attributes.push(p3[0] + this._drawOffset[0] * trans.Scale[0], p3[1] + this._drawOffset[1] * trans.Scale[1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1], this._opacity);
+                this._webglData.attributes.push(p4[0] + this._drawOffset[0] * trans.Scale[0], p4[1] + this._drawOffset[1] * trans.Scale[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1], this._opacity);
 
                 const o = (i - currentLine) * 4;
                 this._webglData.indexes.push(...[
                     o, o + 1, o + 2,
                     o, o + 2, o + 3]);
 
-                offset[0] += widths[f];
+                offset[0] += charWidth;
             }
         }
     }

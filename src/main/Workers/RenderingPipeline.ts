@@ -38,16 +38,15 @@ class RenderingPipeline implements ITransformObserver {
     private _renderers: IRenderersContainer;
 
     Init(canvas: HTMLCanvasElement): void {
-        let gl = canvas.getContext('webgl');
-
+        let gl = canvas.getContext('webgl2');
         if (!gl) {
-            Log.Warn('Browser does not support WebGL, moving to experimental.');
-            //@ts-ignore TypeScript doesn't recognize 'experimental-webgl'
-            gl = canvas.getContext('experimental-webgl');
+            Log.Warn('Browser does not support WebGL2, trying experimental.');
+            //@ts-ignore Not recognized by TS
+            gl = canvas.getContext('experimental-webgl2');
         }
 
         if (!gl) {
-            Log.Error('Browser does not support any form of WebGL. Aborting Rendering Pipeline initialization.');
+            Log.Error('Browser does not support any form of WebGL2.');
             return;
         }
 

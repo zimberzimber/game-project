@@ -6,9 +6,9 @@ import { Vec2Utils } from "../../Utility/Vec2";
 import { HorizontalAlignment, VerticalAlignment } from "../../Models/GenericInterfaces";
 
 export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
-    private _frame: ISpriteFrame = { origin: [0, 0], size: [0, 0] };
+    protected _frameData: ISpriteFrame = { origin: [0, 0], size: [0, 0] };
     set FrameData(frame: ISpriteFrame) {
-        this._frame = frame;
+        this._frameData = frame;
         this.UpdateWebglData();
     }
 
@@ -88,7 +88,7 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
                 points[i] = Vec2Utils.RotatePointAroundCenter(points[i], trans.RotationRadian, origin)
 
         // Add the draw offset here, after the rotation so that the image is always rotated relative to itself.
-        const f = this._frame;
+        const f = this._frameData;
         this._webglData.attributes = [
             points[0][0] + this._drawOffset[0], points[0][1] + this._drawOffset[1], trans.Depth, f.origin[0] + f.size[0], f.origin[1], this._opacity,
             points[1][0] + this._drawOffset[0], points[1][1] + this._drawOffset[1], trans.Depth, f.origin[0], f.origin[1], this._opacity,

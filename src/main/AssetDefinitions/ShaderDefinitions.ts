@@ -1,17 +1,17 @@
 export const ShaderSources = {
-    scene_vertex: `
+    scene_vertex: `#version 300 es
 precision mediump float;
 
-attribute vec3 a_position;
-attribute vec2 a_texCoord;
-attribute float a_opacity;
+in vec3 a_position;
+in vec2 a_texCoord;
+in float a_opacity;
 
 uniform mat4 u_worldMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
-varying vec2 v_texCoord;
-varying float v_opacity;
+out vec2 v_texCoord;
+out float v_opacity;
 
 void main() {
     v_texCoord = a_texCoord;
@@ -19,57 +19,64 @@ void main() {
     gl_Position = u_projectionMatrix * u_viewMatrix * u_worldMatrix * vec4(a_position, 1.);
 }`,
 
-    scene_fragment: `
+    scene_fragment: `#version 300 es
 precision mediump float;
 
-varying vec2 v_texCoord;
-varying float v_opacity;
 uniform sampler2D u_sampler;
 
+in vec2 v_texCoord;
+in float v_opacity;
+
+out vec4 outColor;
+
 void main() {
-    vec4 color = texture2D(u_sampler, v_texCoord);
+    vec2 coord = v_texCoord / vec2(textureSize(u_sampler, 0));
+
+    vec4 color = texture(u_sampler, coord);
     if (color.a == 0.) discard;
 
-    gl_FragColor = texture2D(u_sampler, vec2(v_texCoord.s, v_texCoord.t));
-    gl_FragColor.a *= v_opacity;
+    outColor = texture(u_sampler, coord);
+    outColor.a *= v_opacity;
 }`,
 
-    debug_vertex: `
+    debug_vertex: `#version 300 es
 precision mediump float;
 
-attribute vec2 a_position;
-attribute float a_colorIndex;
+in vec2 a_position;
+in float a_colorIndex;
 
 uniform mat4 u_worldMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
-varying float v_colorIndex;
+out float v_colorIndex;
 
 void main() {
     v_colorIndex = a_colorIndex;
     gl_Position = u_projectionMatrix * u_viewMatrix * u_worldMatrix * vec4(a_position, 1., 1.);
 }`,
 
-    debug_fragment: `
+    debug_fragment: `#version 300 es
 precision mediump float;
 
-varying float v_colorIndex;
+in float v_colorIndex;
+
+out vec4 fragColor;
 
 void main() {
     if (v_colorIndex == 1.)
-        { gl_FragColor = vec4(1., 0., 0., 1.); }
+        { fragColor = vec4(1., 0., 0., 1.); }
     else
-        { gl_FragColor = vec4(1., 1., 0., 1.); }
+        { fragColor = vec4(1., 1., 0., 1.); }
 }`,
 
 
-    post_vertex: `
+    post_vertex: `#version 300 es
 precision mediump float;
 
-attribute vec4 a_position;
+in vec4 a_position;
 
-varying vec2 v_texCoord;
+out vec2 v_texCoord;
 
 void main() {
     float xTex = 0.;
@@ -84,46 +91,29 @@ void main() {
     gl_Position = a_position;
 }`,
 
-    post_fragment: `
+    post_fragment: `#version 300 es
 precision mediump float;
 
-varying vec2 v_texCoord;
 uniform sampler2D u_sampler;
 uniform float u_offsetPower;
 
-float Distance(vec2 origin, vec2 point) { return abs(sqrt(pow(point.x - origin.x, 2.) + pow(point.y - origin.y, 2.))); }
-float Distance(float x1, float y1, float x2,float  y2) { return abs(sqrt(pow(x2 - x1, 2.) + pow(y2 - y1, 2.))); }
+in vec2 v_texCoord;
 
-float Flashlight()
-{
-    vec2 n_coord = vec2(gl_FragCoord.x, gl_FragCoord.y);
-    
-    const float radius = 200.;
-    float d = Distance(vec2(300, 250), n_coord);
-    if(d <= radius)
-    {
-        float d_norm = d * 1. / radius;
-        return smoothstep(1., 0., d_norm);
-    }
-    
-    return 0.;
-}
+out vec4 fragColor;
 
 void main() {
-    vec4 color = texture2D(u_sampler, v_texCoord);
-    color.r = texture2D(u_sampler, v_texCoord + vec2(u_offsetPower, 0.)).r;
-    color.b = texture2D(u_sampler, v_texCoord - vec2(u_offsetPower, 0.)).b;
-    // color *= Flashlight();
-    // color.a = 1.;
-    gl_FragColor = color;
+    vec4 color = texture(u_sampler, v_texCoord);
+    color.r = texture(u_sampler, v_texCoord + vec2(u_offsetPower, 0.)).r;
+    color.b = texture(u_sampler, v_texCoord - vec2(u_offsetPower, 0.)).b;
+    fragColor = color;
 }`,
 
-    mix_vertex: `
+    mix_vertex: `#version 300 es
 precision mediump float;
 
-attribute vec4 a_position;
+in vec4 a_position;
 
-varying vec2 v_texCoord;
+out vec2 v_texCoord;
 
 void main() {
 float xTex = 0.;
@@ -138,41 +128,43 @@ v_texCoord = vec2(xTex, yTex);
 gl_Position = a_position;
 }`,
 
-    mix_fragment: `
+    mix_fragment: `#version 300 es
 precision mediump float;
-
-varying vec2 v_texCoord;
 
 uniform sampler2D u_sampler_0;
 uniform sampler2D u_sampler_1;
 
+in vec2 v_texCoord;
+
+out vec4 fragColor;
+
 void main() {
-    gl_FragColor = texture2D(u_sampler_0, v_texCoord) * texture2D(u_sampler_1, v_texCoord);
+    fragColor = texture(u_sampler_0, v_texCoord) * texture(u_sampler_1, v_texCoord);
 }`,
 
     // Resolution extraction from projection matrix:
     // https://stackoverflow.com/a/12926655
-    lighting_vertex: `
+    lighting_vertex: `#version 300 es
 precision mediump float;
 
-attribute vec2 a_position;
-attribute vec2 a_origin;
-attribute vec3 a_color;
-attribute float a_radius;
-attribute float a_hardness;
-attribute float a_direction;
-attribute float a_angle;
+in vec2 a_position;
+in vec2 a_origin;
+in vec3 a_color;
+in float a_radius;
+in float a_hardness;
+in float a_direction;
+in float a_angle;
 
 uniform mat4 u_worldMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
-varying vec2 v_origin;
-varying vec3 v_color;
-varying float v_radius;
-varying float v_hardness;
-varying float v_direction;
-varying float v_angle;
+out vec2 v_origin;
+out vec3 v_color;
+out float v_radius;
+out float v_hardness;
+out float v_direction;
+out float v_angle;
 
 void main() {
     v_color = a_color;
@@ -190,44 +182,37 @@ void main() {
     v_origin += (u_worldMatrix * vec4(a_origin, 1., 1.)).xy + half_resolution;
 }`,
 
-// Modulo has some funky behaviour in GLSL, so I had to use its broken down version
-// Taken from: https://www.shadertoy.com/view/3ssXWB
-    lighting_fragment: `
+    lighting_fragment: `#version 300 es
 precision mediump float;
 #define PI 3.1415926538
 
-varying vec2 v_origin;
-varying vec3 v_color;
-varying float v_radius;
-varying float v_hardness;
-varying float v_direction;
-varying float v_angle;
+in vec2 v_origin;
+in vec3 v_color;
+in float v_radius;
+in float v_hardness;
+in float v_direction;
+in float v_angle;
 
-float Mod(float subject, float factor) {
-    return subject - floor(subject / factor) * factor;
-}
+out vec4 fragColor;
 
 bool IsInFrustum(float radian) {
     float angle = radian * 180. / PI;
     float min = v_direction - v_angle / 2.;
     float max = v_direction + v_angle / 2.;
 
-    //if (angle >= min && angle <= max)
-    //    return true;
-
     if (max >= 360.) {
         min -= 360.;
         max -= 360.;
     }
     else if (max >= 180.) {
-        angle = Mod(angle, 360.);
+        angle = mod(angle, 360.);
     }
     else if (min <= -360.) {
         min += 360.;
         max += 360.;
     }
     else if (min <= -180.) {
-        angle = Mod(angle, -360.);
+        angle = mod(angle, -360.);
     }
 
     if (angle >= min && angle <= max)
@@ -255,21 +240,21 @@ void main() {
         alpha = smoothstep(1., 0., dist2 / (v_radius - min_distance));
     }
 
-    gl_FragColor = vec4(v_color, alpha);
+    fragColor = vec4(v_color, alpha);
 }`,
 
-    ui_vertex: `
+    ui_vertex: `#version 300 es
 precision mediump float;
-
-attribute vec3 a_position;
-attribute vec2 a_texCoord;
-attribute float a_opacity;
 
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
-varying vec2 v_texCoord;
-varying float v_opacity;
+in vec3 a_position;
+in vec2 a_texCoord;
+in float a_opacity;
+
+out vec2 v_texCoord;
+out float v_opacity;
 
 void main() {
     v_texCoord = a_texCoord;

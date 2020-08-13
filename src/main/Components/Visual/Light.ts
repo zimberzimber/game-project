@@ -2,6 +2,7 @@ import { ComponentBase } from "../ComponentBase";
 import { EntityBase } from "../../Entities/EntityBase";
 import { Vec3 } from "../../Models/Vectors";
 import { ITransformObserver, ITransformEventArgs } from "../../Models/Transform";
+import { ScalarUtil } from "../../Utility/Scalar";
 
 // Multiplying radius by 1.85 gives a good enough distance to the desired points in the triangle
 const triMult = 1.85;
@@ -10,7 +11,11 @@ export class LightComponent extends ComponentBase implements ITransformObserver 
     protected _color: Vec3;
     get Color(): Vec3 { return this._color; }
     set Color(color: Vec3) {
-        this._color = color;
+        this._color = [
+            ScalarUtil.Clamp(0, color[0], 1),
+            ScalarUtil.Clamp(0, color[1], 1),
+            ScalarUtil.Clamp(0, color[2], 1),
+        ];
         this.CaulculateWebglData();
     }
 
@@ -24,7 +29,7 @@ export class LightComponent extends ComponentBase implements ITransformObserver 
     protected _hardness: number;
     get Hardness(): number { return this._hardness; }
     set Hardness(hardness: number) {
-        this._hardness = hardness;
+        this._hardness = ScalarUtil.Clamp(0, hardness, 1);
         this.CaulculateWebglData();
     }
 
@@ -36,11 +41,10 @@ export class LightComponent extends ComponentBase implements ITransformObserver 
 
     constructor(parent: EntityBase, color: Vec3, radius: number, hardness: number) {
         super(parent);
-        this._color = color;
         this._radius = radius;
-        this._hardness = hardness;
         this.Parent.worldRelativeTransform.Subscribe(this);
-        this.CaulculateWebglData();
+        this.Color = color; // Also calculates webgl data
+        this.Hardness = hardness; // Also calculates webgl data
     }
 
     OnObservableNotified(args: ITransformEventArgs): void {
@@ -49,7 +53,6 @@ export class LightComponent extends ComponentBase implements ITransformObserver 
     }
 
     protected CaulculateWebglData(): void {
-        // x y ox oy r g b rad hard dir ang
         const trans = this.Parent.worldRelativeTransform;
         const scaledRadius = (trans.Scale[0] + trans.Scale[1]) / 2 * this._radius;
         this._boundingRadius = scaledRadius;

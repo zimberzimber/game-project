@@ -6,8 +6,9 @@
 - Add a method which generates button or pane sprites and adds them to the sprite collection
 
         Done:
-X Changed light renderering to use triangles instead of points to prevent it from relying on maximum point size
-X Canvas size is now based on its actual size, and locked to a 4:3 aspect ratio (handled through Main.ts)
-X Have spatial sound be applied based on a tag, instead of type (so that they can be played through UI (for example) without being spatial)
-X Corrected spatial sound panning
-X Added directional light
+X Sprite frame definitions are now always pixel based, shader determines their 0-1 coordinates while rendering
+X Forced light color and hardness to clamp between 0 and 1
+X Removed old SpriteManager from code
+X Text now scales with transform scale
+X Convert all shaders to 300 es format
+X Replaced the custom modulo method in light shader with the built-in mod function (didn't know it was there lmao)

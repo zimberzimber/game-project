@@ -3,7 +3,6 @@ import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition } from "../Mo
 export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition } = {
     asset_missing: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [83, 0],
             size: [4, 4]
@@ -11,7 +10,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     health_bar: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         names: ['root', 'full', 'empty'],
         frames: [
             {
@@ -30,7 +28,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     energy_bar: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         names: ['root', 'full', 'empty'],
         frames: [
             {
@@ -49,7 +46,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     ori: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         names: ['0', '1', '2'],
         aliases: {
             3: '1',
@@ -71,7 +67,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     ku: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         names: ['0', '1', '2', '3'],
         aliases: {
             4: '2',
@@ -98,7 +93,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     skill_frame: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [33, 0],
             size: [10, 10]
@@ -106,7 +100,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     skill_bow: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [43, 0],
             size: [8, 8]
@@ -114,7 +107,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     skill_sword: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [51, 0],
             size: [8, 8]
@@ -122,7 +114,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     ui_pause: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [59, 0],
             size: [5, 5]
@@ -130,7 +121,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     pickup_health: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [33, 10],
             size: [4, 4]
@@ -138,7 +128,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     pickup_energy: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [33, 14],
             size: [4, 4]
@@ -146,7 +135,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     pickup_xp: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [33, 18],
             size: [4, 4]
@@ -154,7 +142,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     enemy: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         names: ['0', '1', '2'],
         aliases: {
             3: '1'
@@ -176,7 +163,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     spikes: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [37, 10],
             size: [17, 9]
@@ -184,7 +170,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     spike_big: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [57, 12],
             size: [9, 22]
@@ -192,7 +177,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     beam: {
         sourceImageName: 'sprites',
-        isPixelCoordinates: true,
         frame: {
             origin: [66, 24],
             size: [5, 10]
@@ -202,7 +186,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
 
     window_simple_00: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [0, 0],
             size: [3, 3]
@@ -210,7 +193,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     window_simple_01: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [3, 0],
             size: [1, 3]
@@ -218,7 +200,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     window_simple_02: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [4, 0],
             size: [3, 3]
@@ -226,7 +207,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     window_simple_10: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [0, 3],
             size: [3, 1]
@@ -234,7 +214,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     window_simple_11: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [3, 3],
             size: [1, 1]
@@ -242,7 +221,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     window_simple_12: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [4, 3],
             size: [3, 1]
@@ -250,7 +228,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     window_simple_20: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [0, 4],
             size: [3, 3]
@@ -258,7 +235,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     window_simple_21: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [3, 4],
             size: [1, 3]
@@ -266,7 +242,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     window_simple_22: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [4, 4],
             size: [3, 3]
@@ -275,7 +250,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
 
     button_cancel: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [7, 0],
             size: [11, 11]
@@ -283,7 +257,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     button_accept: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [18, 0],
             size: [11, 11]
@@ -292,7 +265,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
 
     header_1_l: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [0, 11],
             size: [5, 4]
@@ -300,7 +272,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     header_1_fill: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [5, 11],
             size: [1, 4]
@@ -308,7 +279,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     header_1_r: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [6, 11],
             size: [5, 4]
@@ -317,7 +287,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
 
     ui_health: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         names: ['empty', 'full'],
         frames: [
             {
@@ -332,7 +301,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     ui_energy: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         names: ['empty', 'full'],
         frames: [
             {
@@ -347,7 +315,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     ui_score: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [23, 11],
             size: [6, 6]
@@ -357,7 +324,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
 
     scroll_h_border_l: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [29, 0],
             size: [3, 5]
@@ -365,7 +331,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     scroll_h_border_r: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [39, 0],
             size: [3, 5]
@@ -373,7 +338,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     scroll_h_line: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [32, 0],
             size: [3, 5]
@@ -381,7 +345,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     scroll_h_pin: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [35, 0],
             size: [1, 5]
@@ -389,7 +352,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     scroll_h_slider: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [36, 0],
             size: [3, 5]
@@ -399,7 +361,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
 
     tick_box: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         names: ['unselected', 'selected'],
         frames: [
             {
@@ -415,7 +376,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
 
     arrow_small_left: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [29, 11],
             size: [3, 5]
@@ -423,7 +383,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     arrow_small_right: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         frame: {
             origin: [32, 11],
             size: [3, 5]
@@ -432,7 +391,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
 
     button_wide: {
         sourceImageName: 'uiElements',
-        isPixelCoordinates: true,
         isTranslucent: true,
         names: ['passive', 'hovered', 'pressed'],
         frames: [

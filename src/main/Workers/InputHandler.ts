@@ -3,10 +3,10 @@ import { Vec2 } from "../Models/Vectors";
 import { Observable } from "../Models/Observable";
 
 class InputHandler {
-    readonly MouseObservable: Observable<IMouseObserver, IMouseEvent> = new Observable();
-    readonly KeyboardObservable: Observable<IKeyboardObserver, IKeyboardEvent> = new Observable();
-    readonly MouseFullObservable: Observable<IMouseObserverFull, MouseEvent> = new Observable();
-    readonly KeyboardFullObservable: Observable<IKeyboardObserverFull, KeyboardEvent> = new Observable();
+    readonly MouseObservable: Observable<IMouseObserver, IMouseEvent> = new Observable<IMouseObserver, IMouseEvent>();
+    readonly KeyboardObservable: Observable<IKeyboardObserver, IKeyboardEvent> = new Observable<IKeyboardObserver, IKeyboardEvent>();
+    readonly MouseFullObservable: Observable<IMouseObserverFull, MouseEvent> = new Observable<IMouseObserverFull, MouseEvent>();
+    readonly KeyboardFullObservable: Observable<IKeyboardObserverFull, KeyboardEvent> = new Observable<IKeyboardObserverFull, KeyboardEvent>();
 
     private _mousePosition: Vec2 = [Number.MIN_SAFE_INTEGER, Number.MIN_SAFE_INTEGER];
     get MousePosition(): Vec2 { return [this._mousePosition[0], this._mousePosition[1]]; }
