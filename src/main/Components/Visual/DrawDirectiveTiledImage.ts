@@ -22,8 +22,14 @@ export class DrawDirectiveTiledImage extends DrawDirectiveImageBase {
     private _translucent: boolean;
     get IsTranslucent(): boolean { return this._translucent; }
 
+    set Cutoff(cutoff: null) {
+        delete this._cutOff;
+        Log.Warn('Tiled images dont support cutoff.')
+    }
+
     constructor(parent: EntityBase, imageName: string, tileSize: Vec2, size: Vec2) {
         super(parent);
+        delete this._cutOff;
         this._imageId = Images.GetImageIdFromName(imageName);
         this._tileSize = tileSize;
         this._size = size;

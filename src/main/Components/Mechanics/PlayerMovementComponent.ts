@@ -4,6 +4,7 @@ import { Vec2Utils } from "../../Utility/Vec2";
 import { Input } from "../../Workers/InputHandler";
 import { EntityBase } from "../../Entities/EntityBase";
 import { IKeyboardObserver, IKeyboardEvent, ButtonState } from "../../Models/InputModels";
+import { ControlKey } from "../../Models/ControlKeys";
 
 export class PlayerMovementComponent extends ComponentBase implements IKeyboardObserver {
     private _verticalDirection: number = 0;
@@ -15,10 +16,10 @@ export class PlayerMovementComponent extends ComponentBase implements IKeyboardO
         super(parent);
         Input.KeyboardObservable.Subscribe(this);
 
-        if (Input.IsKeyDown('up')) this.OnKeyDown('up');
-        if (Input.IsKeyDown('down')) this.OnKeyDown('down');
-        if (Input.IsKeyDown('left')) this.OnKeyDown('left');
-        if (Input.IsKeyDown('right')) this.OnKeyDown('right');
+        if (Input.IsKeyDown(ControlKey.up)) this.OnKeyDown(ControlKey.up);
+        if (Input.IsKeyDown(ControlKey.down)) this.OnKeyDown(ControlKey.down);
+        if (Input.IsKeyDown(ControlKey.left)) this.OnKeyDown(ControlKey.left);
+        if (Input.IsKeyDown(ControlKey.right)) this.OnKeyDown(ControlKey.right);
     }
 
     Update(delta: number): void {
@@ -27,28 +28,28 @@ export class PlayerMovementComponent extends ComponentBase implements IKeyboardO
 
     OnObservableNotified(args: IKeyboardEvent): void {
         if (args.state == ButtonState.Down)
-            this.OnKeyDown(args.keyName)
+            this.OnKeyDown(args.key)
         else
-            this.OnKeyUp(args.keyName)
+            this.OnKeyUp(args.key)
     }
 
-    private OnKeyDown(key: string): void {
+    private OnKeyDown(key: ControlKey): void {
         switch (key) {
-            case 'up': this._verticalDirection++; break;
-            case 'down': this._verticalDirection--; break;
-            case 'right': this._horizontalDirection++; break;
-            case 'left': this._horizontalDirection--; break;
+            case ControlKey.up: this._verticalDirection++; break;
+            case ControlKey.down: this._verticalDirection--; break;
+            case ControlKey.right: this._horizontalDirection++; break;
+            case ControlKey.left: this._horizontalDirection--; break;
             default: return;
         }
         this.RecalculateMovement();
     }
 
-    private OnKeyUp(key: string): void {
+    private OnKeyUp(key: ControlKey): void {
         switch (key) {
-            case 'up': this._verticalDirection--; break;
-            case 'down': this._verticalDirection++; break;
-            case 'right': this._horizontalDirection--; break;
-            case 'left': this._horizontalDirection++; break;
+            case ControlKey.up: this._verticalDirection--; break;
+            case ControlKey.down: this._verticalDirection++; break;
+            case ControlKey.right: this._horizontalDirection--; break;
+            case ControlKey.left: this._horizontalDirection++; break;
             default: return;
         }
         this.RecalculateMovement();

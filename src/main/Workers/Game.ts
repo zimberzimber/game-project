@@ -1,7 +1,7 @@
 import { EntityBase, GameEntityBase, UiEntityBase } from "../Entities/EntityBase";
 import { ComponentBase } from "../Components/ComponentBase";
 import { Config, IConfigObserver, IConfigEventArgs } from "../Proxies/ConfigProxy";
-import { Input } from "./InputHandler";
+import { Input, GamepadHandler } from "./InputHandler";
 import { Camera, } from "./CameraManager";
 import { Vec2 } from "../Models/Vectors";
 import { Vec2Utils } from "../Utility/Vec2";
@@ -180,11 +180,12 @@ class GameManager implements IConfigObserver {
     }
 
     Update(): void {
-        requestAnimationFrame(this.Update.bind(this));
-
         const newFrameTime = new Date().getTime();
         this._updateDelta = Math.min((newFrameTime - this._oldUpdateTime) / 1000, this._minimumUpdateDelta);
         this._oldUpdateTime = newFrameTime;
+
+        // Update gamepad state
+        GamepadHandler.Update();
 
         // Set world relative mouse position
         this._mousePosition = Vec2Utils.Sum(Vec2Utils.RotatePoint(Input.MousePosition, -Camera.Transform.RotationRadian), Camera.Transform.Position);
@@ -237,6 +238,8 @@ class GameManager implements IConfigObserver {
                     element.innerHTML = fps.toString();
             }
         }
+        
+        requestAnimationFrame(this.Update.bind(this));
     }
 }
 

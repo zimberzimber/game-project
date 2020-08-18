@@ -1,5 +1,6 @@
 import { IObserver } from "./Observable";
 import { Vec2 } from "./Vectors";
+import { ControlKey } from "./ControlKeys";
 
 export enum ButtonState { Down, Up }
 
@@ -11,7 +12,7 @@ export interface IMouseEvent {
 
 export interface IKeyboardEvent {
     state: ButtonState;
-    keyName: string;
+    key: ControlKey;
 }
 
 export interface IMouseObserver extends IObserver<IMouseEvent>{

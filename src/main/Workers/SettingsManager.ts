@@ -1,4 +1,5 @@
 import { IUserSettings } from "../Models/IUserSettings";
+import { ControlKey } from "../Models/ControlKeys";
 
 class UserSettings {
     private _storageKey: string = 'userSettings';
@@ -42,13 +43,15 @@ class UserSettings {
             sfxVolume: 1,
             musicVolume: 1,
             controlsKeymap: {
-                87: 'up',
-                68: 'right',
-                83: 'down',
-                65: 'left',
-                80: 'pause',
-                69: 'interact',
-                27: 'cancel'
+                [ControlKey.up]: 87,
+                [ControlKey.down]: 83,
+                [ControlKey.left]: 65,
+                [ControlKey.right]: 68,
+                [ControlKey.pause]: 80,
+                [ControlKey.action1]: 69,
+                [ControlKey.action2]: 27,
+                [ControlKey.action3]: 82,
+                [ControlKey.action4]: 81,
             }
         }
     }

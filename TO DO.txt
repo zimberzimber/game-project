@@ -1,14 +1,12 @@
 
         TO DO:
-- Give drawn sprites the ability to draw a portion of the sprite (cutting it off, like a progress bar)
 - Add a UI scale factor
-- Add controller support
 - Add a method which generates button or pane sprites and adds them to the sprite collection
 
         Done:
-X Sprite frame definitions are now always pixel based, shader determines their 0-1 coordinates while rendering
-X Forced light color and hardness to clamp between 0 and 1
-X Removed old SpriteManager from code
-X Text now scales with transform scale
-X Convert all shaders to 300 es format
-X Replaced the custom modulo method in light shader with the built-in mod function (didn't know it was there lmao)
+X Sprites can now display part of the image (cutoff). (Like a progress bar)
+X Moved animation loop request to the end of the update function in Game
+X Added a proper keymap class
+X Keys are now passed as enums
+X Added key and mouse click simulation to input controls
+X Added controller supports

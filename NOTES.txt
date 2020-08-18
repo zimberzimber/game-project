@@ -23,3 +23,7 @@ But I've decided to not do that as I'm not going to be creating anything else wi
 The exact moment I learned not to take things for granted, and discovered how painful implementing correct transparency rendering is.
 Have to take into account how blending is done, and depth, as it will not render anything behind an area which already had something rendered on to it.
 This means that if a semi-transparent area was rendered, everything that should be visible behind it will not exist. (woooo windows to the vooooid)
+
+Xbox gamepad axes are [left X, left Y, right X, right Y]
+
+Disconnecting a game pad doesn't reset button/axis values, not does it change the timestamp
