@@ -8,7 +8,7 @@ import { Sprites } from "./Workers/SpriteManager";
 import { Images } from "./Workers/ImageManager";
 import { Audio } from "./Workers/SoundPlayer";
 import { Input } from "./Workers/InputHandler";
-import { SpriteDefinitions, ClearSpriteDefinitions, FontDefinitions, ClearFontDefinitions } from "./AssetDefinitions/SpriteDefinitions";
+import { SpriteDefinitions, DisposeSpriteDefinitions, FontDefinitions } from "./AssetDefinitions/SpriteDefinitions";
 import { Assets } from "./Proxies/AssetsProxy";
 import { Settings } from "./Workers/SettingsManager";
 import { PromiseUtil } from "./Utility/Promises";
@@ -188,8 +188,7 @@ let LoadImages = async (): Promise<void> => {
 
     Images.Initialize(images);
     Sprites.Initialize(SpriteDefinitions);
-    ClearSpriteDefinitions();
-    ClearFontDefinitions();
+    DisposeSpriteDefinitions();
 }
 
 let LoadSounds = async (): Promise<void> => {

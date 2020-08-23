@@ -1,7 +1,7 @@
 
         TO DO:
-- Add a UI scale factor
-- Add a method which generates button or pane sprites and adds them to the sprite collection
+- Add a UI scale factor (No need, can just change the UI entities transform scale accordingly)
+- Add Ribbon particles
 
         Done:
 X Sprites can now display part of the image (cutoff). (Like a progress bar)
@@ -10,3 +10,4 @@ X Added a proper keymap class
 X Keys are now passed as enums
 X Added key and mouse click simulation to input controls
 X Added controller supports
+X Added a method which generates button or pane sprites and adds them to the sprite collection

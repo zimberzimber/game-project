@@ -10,19 +10,6 @@ export class MiscUtil {
     static CopyArrayBuffer = (buffer: ArrayBuffer): ArrayBuffer =>
         buffer.slice(0);
 
-    static GenerateTiles = (rows: number, columns: number, width: number, height: number, imageSize: Vec2, offset: Vec2 = [0, 0]): ISpriteFrame[] => {
-        const tiles: ISpriteFrame[] = [];
-
-        for (let y = 0; y < columns; y++)
-            for (let x = 0; x < rows; x++)
-                tiles.push({
-                    origin: [width / imageSize[0] * x + offset[0], height / imageSize[1] * y + offset[1]],
-                    size: [width / imageSize[0], height / imageSize[1]]
-                });
-
-        return tiles;
-    }
-
     static GenerateASCIITextImage = (fontName: string, fontSize: number, outlineWidth: number, maxWidth: number = 500): {
         image: HTMLImageElement, frames: ISpriteFrame[], names: string[], charWidths: number[], maxCharHeight: number
     } => {
@@ -130,6 +117,8 @@ export class MiscUtil {
         gl.bindTexture(gl.TEXTURE_2D, null);
         return texture;
     }
+
+    static DeleteObjectContents = (obj: Object): void => { for (let i in obj) delete obj[i]; }
 }
 
 class LinkedListNode<T> {

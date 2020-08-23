@@ -1,4 +1,70 @@
-import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition } from "../Models/SpriteModels";
+import { ISingleFrameSpriteDefinition, IMultiFrameSpriteDefinition, ISpriteFrame } from "../Models/SpriteModels";
+import { Vec2 } from "../Models/Vectors";
+import { Vec2Utils } from "../Utility/Vec2";
+
+let Util = {
+    GenerateTiles: (rows: number, columns: number, width: number, height: number, offset: Vec2 = [0, 0]): ISpriteFrame[] => {
+        const tiles: ISpriteFrame[] = [];
+
+        for (let y = 0; y < columns; y++)
+            for (let x = 0; x < rows; x++)
+                tiles.push({
+                    origin: [width * x + offset[0], height * y + offset[1]],
+                    size: [width, height]
+                });
+
+        return tiles;
+    },
+
+    AddWindowBox: (name: string, sourceImageName, origin: Vec2, sizes: IVec2Grid3x3): { [key: string]: ISingleFrameSpriteDefinition } => {
+        const defs: { [key: string]: ISingleFrameSpriteDefinition } = {};
+        const offset: Vec2 = [0, 0];
+
+        for (let r = 0; r < sizes.length; r++) {
+            for (let c = 0; c < sizes[r].length; c++) {
+                defs[`${name}_${r}${c}`] = {
+                    sourceImageName,
+                    frame: {
+                        origin: [
+                            origin[0] + offset[0],
+                            origin[1] + offset[1]
+                        ],
+                        size: [
+                            sizes[r][c][0],
+                            sizes[r][c][1]
+                        ]
+                    }
+                };
+                offset[0] += sizes[r][c][0];
+            }
+            offset[0] = 0;
+            offset[1] += sizes[r][0][1];
+        }
+
+        return defs;
+    },
+
+    AddButton: (sourceImageName: string, origin: Vec2, size: Vec2): IMultiFrameSpriteDefinition => {
+        return {
+            sourceImageName,
+            names: ['passive', 'hovered', 'pressed'],
+            frames: [
+                {
+                    origin: Vec2Utils.Copy(origin),
+                    size: Vec2Utils.Copy(size),
+                },
+                {
+                    origin: [origin[0], origin[1] + size[1]],
+                    size: Vec2Utils.Copy(size),
+                },
+                {
+                    origin: [origin[0], origin[1] + size[1] + size[1]],
+                    size: Vec2Utils.Copy(size),
+                },
+            ]
+        };
+    }
+}
 
 export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition } = {
     asset_missing: {
@@ -183,71 +249,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
         }
     },
 
-
-    window_simple_00: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [0, 0],
-            size: [3, 3]
-        }
-    },
-    window_simple_01: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [3, 0],
-            size: [1, 3]
-        }
-    },
-    window_simple_02: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [4, 0],
-            size: [3, 3]
-        }
-    },
-    window_simple_10: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [0, 3],
-            size: [3, 1]
-        }
-    },
-    window_simple_11: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [3, 3],
-            size: [1, 1]
-        }
-    },
-    window_simple_12: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [4, 3],
-            size: [3, 1]
-        }
-    },
-    window_simple_20: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [0, 4],
-            size: [3, 3]
-        }
-    },
-    window_simple_21: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [3, 4],
-            size: [1, 3]
-        }
-    },
-    window_simple_22: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [4, 4],
-            size: [3, 3]
-        }
-    },
-
     button_cancel: {
         sourceImageName: 'uiElements',
         frame: {
@@ -389,30 +390,27 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
         }
     },
 
-    button_wide: {
-        sourceImageName: 'uiElements',
-        isTranslucent: true,
-        names: ['passive', 'hovered', 'pressed'],
-        frames: [
-            {
-                origin: [0, 23],
-                size: [33, 7],
-            },
-            {
-                origin: [0, 30],
-                size: [33, 7],
-            },
-            {
-                origin: [0, 37],
-                size: [33, 7],
-            },
-        ]
-    },
+    ...Util.AddWindowBox('window_simple', 'uiElements', [0, 0], [
+        [[3, 3], [1, 3], [3, 3]],
+        [[3, 1], [1, 1], [3, 1]],
+        [[3, 3], [1, 3], [3, 3]]]),
+
+    button_wide: Util.AddButton('uiElements', [0, 23], [33, 7])
 }
 
 export let FontDefinitions: { [key: string]: { font: string, size: number, outlineWidth: number } } = {
     font_arial: { font: 'Arial', size: 20, outlineWidth: 2.5 }
 }
 
-export const ClearSpriteDefinitions = () => SpriteDefinitions = {};
-export const ClearFontDefinitions = () => FontDefinitions = {};
+interface IVec2Grid3x3 extends Array<[Vec2, Vec2, Vec2]> {
+    0: [Vec2, Vec2, Vec2];
+    1: [Vec2, Vec2, Vec2];
+    2: [Vec2, Vec2, Vec2];
+}
+
+export const DisposeSpriteDefinitions = (): void => {
+    SpriteDefinitions = {};
+    FontDefinitions = {};
+    //@ts-ignore shhhhhhhh I know
+    Util = {};
+}

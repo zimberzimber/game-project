@@ -1,3 +1,5 @@
+import { Vec2 } from "./Vectors";
+
 export interface IDataOrErrorContainer {
     error: Error | undefined;
     data: any | undefined;
