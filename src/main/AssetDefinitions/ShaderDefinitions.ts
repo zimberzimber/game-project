@@ -43,31 +43,28 @@ void main() {
 precision mediump float;
 
 in vec2 a_position;
-in float a_colorIndex;
+in vec3 a_color;
 
 uniform mat4 u_worldMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_projectionMatrix;
 
-out float v_colorIndex;
+out vec3 v_color;
 
 void main() {
-    v_colorIndex = a_colorIndex;
+    v_color = a_color;
     gl_Position = u_projectionMatrix * u_viewMatrix * u_worldMatrix * vec4(a_position, 1., 1.);
 }`,
 
     debug_fragment: `#version 300 es
 precision mediump float;
 
-in float v_colorIndex;
+in vec3 v_color;
 
 out vec4 fragColor;
 
 void main() {
-    if (v_colorIndex == 1.)
-        { fragColor = vec4(1., 0., 0., 1.); }
-    else
-        { fragColor = vec4(1., 1., 0., 1.); }
+    fragColor = vec4(v_color, 1.);
 }`,
 
 
@@ -95,17 +92,15 @@ void main() {
 precision mediump float;
 
 uniform sampler2D u_sampler;
-uniform float u_offsetPower;
+uniform float u_brightness;
 
 in vec2 v_texCoord;
 
 out vec4 fragColor;
 
 void main() {
-    vec4 color = texture(u_sampler, v_texCoord);
-    color.r = texture(u_sampler, v_texCoord + vec2(u_offsetPower, 0.)).r;
-    color.b = texture(u_sampler, v_texCoord - vec2(u_offsetPower, 0.)).b;
-    fragColor = color;
+    fragColor = texture(u_sampler, v_texCoord);
+    fragColor.rgb *= u_brightness;
 }`,
 
     mix_vertex: `#version 300 es
@@ -261,4 +256,26 @@ void main() {
     v_opacity = a_opacity;
     gl_Position = u_projectionMatrix * u_viewMatrix * vec4(a_position, 1.);
 }`,
+
+    ui_fragment: `#version 300 es
+    precision mediump float;
+    
+    uniform sampler2D u_sampler;
+    uniform float u_brightness;
+    
+    in vec2 v_texCoord;
+    in float v_opacity;
+    
+    out vec4 outColor;
+    
+    void main() {
+        vec2 coord = v_texCoord / vec2(textureSize(u_sampler, 0));
+    
+        vec4 color = texture(u_sampler, coord);
+        if (color.a == 0.) discard;
+    
+        outColor = texture(u_sampler, coord);
+        outColor.a *= v_opacity * u_brightness;
+        outColor.rgb *= u_brightness;
+    }`,
 };

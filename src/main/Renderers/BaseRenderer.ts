@@ -11,12 +11,12 @@ export abstract class WebglRenderer {
     protected _indexBuffer: WebGLBuffer;
 
     constructor(canvas: HTMLCanvasElement, config: IRendererConfig) {
-        let gl = canvas.getContext('webgl2');
+        let gl = canvas.getContext('webgl2', { alpha: false });
 
         if (!gl) {
             Log.Warn('Browser does not support WebGL2, trying experimental.');
             //@ts-ignore Not recognized by TS
-            gl = canvas.getContext('experimental-webgl2');
+            gl = canvas.getContext('experimental-webgl2', { alpha: false });
         }
 
         if (!gl) {

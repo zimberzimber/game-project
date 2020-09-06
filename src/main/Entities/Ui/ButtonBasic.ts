@@ -3,6 +3,7 @@ import { DrawDirectiveAnimatedImage } from "../../Components/Visual/DrawDirectiv
 import { ClickboxComponent } from "../../Components/Interactable/Clickable";
 import { Vec2 } from "../../Models/Vectors";
 import { SoundSingleInstanceComponent } from "../../Components/Sound/SoundSingleInstance";
+import { VerticalAlignment, HorizontalAlignment } from "../../Models/GenericInterfaces";
 
 export class ButtonBasicEntity extends UiEntityBase {
     private dd: DrawDirectiveAnimatedImage;
@@ -45,20 +46,24 @@ export class ButtonBasicEntity extends UiEntityBase {
     constructor(parent: UiEntityBase | void | null, size: Vec2, spriteName: string) {
         super(parent);
 
-        this.soundHover = new SoundSingleInstanceComponent(this, 'button_hover', false);
-        this.soundClick = new SoundSingleInstanceComponent(this, 'button_click', false);
-        this.clickable = new ClickboxComponent(this, size);
+        this.soundHover = new SoundSingleInstanceComponent(this, 'ui_button_hover', false);
+        this.soundClick = new SoundSingleInstanceComponent(this, 'ui_button_click', false);
+
         this.dd = new DrawDirectiveAnimatedImage(this, spriteName, size);
         this.dd.Frame = 'passive';
+        this.dd.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
 
+        this.clickable = new ClickboxComponent(this, size);
+        this.clickable.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
+        
         this.AddComponent(this.dd);
         this.AddComponent(this.clickable);
         this.AddComponent(this.soundHover);
         this.AddComponent(this.soundClick);
 
         // Adding this so that the hover and click animations play even when they don't have any functionality
-        this.OnClick = () => {};
-        this.OnUnclick = () => {};
-        this.HoverEvent = () => {};
+        this.OnClick = () => { };
+        this.OnUnclick = () => { };
+        this.HoverEvent = () => { };
     }
 }

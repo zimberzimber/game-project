@@ -38,11 +38,11 @@ class RenderingPipeline implements ITransformObserver {
     private _renderers: IRenderersContainer;
 
     Init(canvas: HTMLCanvasElement): void {
-        let gl = canvas.getContext('webgl2');
+        let gl = canvas.getContext('webgl2', { alpha: false });
         if (!gl) {
             Log.Warn('Browser does not support WebGL2, trying experimental.');
             //@ts-ignore Not recognized by TS
-            gl = canvas.getContext('experimental-webgl2');
+            gl = canvas.getContext('experimental-webgl2', {alpha:false});
         }
 
         if (!gl) {
@@ -68,7 +68,7 @@ class RenderingPipeline implements ITransformObserver {
         this.SetUniformData(['scene', 'debug', 'lighting', 'ui'], 'u_viewMatrix', [false, viewMatrix]);
         this.SetUniformData(['scene', 'debug', 'lighting', 'ui'], 'u_projectionMatrix', [false, empty]);
         this.SetUniformData(['scene', 'debug', 'lighting'], 'u_worldMatrix', [false, empty]);
-        this.SetUniformData('post', 'u_offsetPower', [0]);
+        this.SetUniformData(['ui', 'post'], 'u_brightness', [1]);
 
         this.ResetClearColor();
     }
@@ -92,7 +92,7 @@ class RenderingPipeline implements ITransformObserver {
     }
 
     private ResetClearColor() {
-        this._context.clearColor(0.2, 0.2, 0.2, 1);
+        this._context.clearColor(0, 0, 0, 1);
     }
 
     Render(): void {

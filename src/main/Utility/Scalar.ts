@@ -13,9 +13,14 @@ export class ScalarUtil {
     static Round = (value: number): number => Math.floor(value + 0.5);
     static Avarage = (val1: number, val2: number): number => (val1 + val2) / 2;
 
+    static ClampToIncrement = (value: number, increment: number): number => {
+        const min = value - value % increment
+        const max = min + increment;
+        return Math.abs(value - min) < Math.abs(max - value) ? min : max;
+    }
+
     static OneOrRange = (oor: number | [number, number]): number => {
-        if (oor[0] === undefined)
-            return oor as number;
+        if (oor[0] === undefined) return oor as number;
         return ScalarUtil.RandomRange(oor[0], oor[1]);
     }
 

@@ -19,6 +19,7 @@ import { ScalarUtil } from "./Utility/Scalar";
 import { MiscUtil } from "./Utility/Misc";
 import { CDN } from "./Workers/CdnManager";
 import { StateManager } from "./Workers/GameStateManager";
+import { UserSetting } from "./Models/IUserSettings";
 
 let domCompletionPromise: any = PromiseUtil.CreateCompletionPromise();
 window.addEventListener('DOMContentLoaded', domCompletionPromise.resolve);
@@ -89,7 +90,7 @@ IDB.OpenDatabase(gameSchema)
             Camera.Transform.Rotation = 0;
 
             Input.MouseElement = canvas;
-            Input.Keymap = Settings.GetSetting('controlsKeymap');
+            Input.Keymap = Settings.GetSetting(UserSetting.ControlsKeymap);
 
             StateManager.Initialize();
             requestAnimationFrame(Game.Update.bind(Game))
@@ -111,7 +112,7 @@ let LoadImages = async (): Promise<void> => {
             names: result.names,
             frames: result.frames,
             isTranslucent: false,
-            metadata: { charWidths: result.charWidths, maxCharHeight: result.maxCharHeight },
+            metadata: { charWidths: result.charWidths, maxCharHeight: result.maxCharHeight, originalFontSize: config.size },
         }
     }
 

@@ -43,14 +43,14 @@ export const RenderConfigs: { [key: string]: IRendererConfig } = {
                 size: 2,
                 type: WebGLRenderingContext.FLOAT,
                 normalized: false,
-                stride: 3 * Float32Array.BYTES_PER_ELEMENT,
+                stride: 5 * Float32Array.BYTES_PER_ELEMENT,
                 offset: 0,
             },
-            a_colorIndex: {
-                size: 1,
+            a_color: {
+                size: 3,
                 type: WebGLRenderingContext.FLOAT,
                 normalized: false,
-                stride: 3 * Float32Array.BYTES_PER_ELEMENT,
+                stride: 5 * Float32Array.BYTES_PER_ELEMENT,
                 offset: 2 * Float32Array.BYTES_PER_ELEMENT,
             },
         },
@@ -74,7 +74,7 @@ export const RenderConfigs: { [key: string]: IRendererConfig } = {
             }
         },
         uniforms: {
-            u_offsetPower: '1f'
+            u_brightness: '1f',
         }
     },
 
@@ -156,7 +156,7 @@ export const RenderConfigs: { [key: string]: IRendererConfig } = {
 
     ui: {
         vertexSource: ShaderSources.ui_vertex,
-        fragmentSource: ShaderSources.scene_fragment,
+        fragmentSource: ShaderSources.ui_fragment,
         attributes: {
             a_position: {
                 size: 3,
@@ -183,6 +183,7 @@ export const RenderConfigs: { [key: string]: IRendererConfig } = {
         uniforms: {
             u_projectionMatrix: 'Matrix4fv',
             u_viewMatrix: 'Matrix4fv',
+            u_brightness: '1f',
         }
     }
 }

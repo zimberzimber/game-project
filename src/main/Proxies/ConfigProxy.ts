@@ -40,4 +40,5 @@ class ConfigProxy {
     }
 }
 
+/** Used to keep track of config set by the developer. Unlike Settings which is for things decided by the user. */
 export const Config = new ConfigProxy();

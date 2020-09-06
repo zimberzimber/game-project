@@ -1,6 +1,7 @@
 import { HitboxBase } from "./HitboxBase";
-import { TriggerState, HitboxType, DebugDrawColor } from "../../Models/CollisionModels";
+import { TriggerState, HitboxType } from "../../Models/CollisionModels";
 import { EntityBase } from "../../Entities/EntityBase";
+import { DebugDrawColors } from "../../Models/GenericInterfaces";
 
 export class HitboxRectangle extends HitboxBase {
     readonly HitboxType: HitboxType = HitboxType.Rectangular;
@@ -37,12 +38,12 @@ export class HitboxRectangle extends HitboxBase {
         const width = this._width * absTransform.Scale[0] / 2;
         const height = this._height * absTransform.Scale[1] / 2;
 
-        const colorIndex = this.TriggerState == TriggerState.NotTrigger ? DebugDrawColor.Default : DebugDrawColor.Red
+        const color = this.TriggerState == TriggerState.NotTrigger ? DebugDrawColors.Hitbox : DebugDrawColors.HitboxTrigger;
         return [
-            absTransform.Position[0] + width, absTransform.Position[1] + height, colorIndex,
-            absTransform.Position[0] - width, absTransform.Position[1] + height, colorIndex,
-            absTransform.Position[0] - width, absTransform.Position[1] - height, colorIndex,
-            absTransform.Position[0] + width, absTransform.Position[1] - height, colorIndex,
+            absTransform.Position[0] + width, absTransform.Position[1] + height, ...color,
+            absTransform.Position[0] - width, absTransform.Position[1] + height, ...color,
+            absTransform.Position[0] - width, absTransform.Position[1] - height, ...color,
+            absTransform.Position[0] + width, absTransform.Position[1] - height, ...color,
         ];
     };
 }

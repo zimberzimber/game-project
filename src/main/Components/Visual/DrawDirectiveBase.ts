@@ -5,7 +5,6 @@ import { IAttributesIndexes } from "../../Renderers/_RendererInterfaces";
 import { Vec2 } from "../../Models/Vectors";
 import { Vec2Utils } from "../../Utility/Vec2";
 import { HorizontalAlignment, VerticalAlignment, IAlignmentContainer } from "../../Models/GenericInterfaces";
-import { ISpriteFrame } from "../../Models/SpriteModels";
 
 export abstract class DrawDirectiveBase extends ComponentBase implements ITransformObserver {
     protected _webglData: IAttributesIndexes = { attributes: [], indexes: [] };
@@ -21,14 +20,14 @@ export abstract class DrawDirectiveBase extends ComponentBase implements ITransf
         this.UpdateWebglData();
     }
 
-    protected _horizontalAlignment: HorizontalAlignment = HorizontalAlignment.Middle;
+    protected _horizontalAlignment: HorizontalAlignment = HorizontalAlignment.Left;
     get HorizontalAlignment(): HorizontalAlignment { return this._horizontalAlignment; }
     set HorizontalAlignment(alignment: HorizontalAlignment) {
         this._horizontalAlignment = alignment;
         this.UpdateWebglData();
     }
 
-    protected _verticalAlignment: VerticalAlignment = VerticalAlignment.Middle;
+    protected _verticalAlignment: VerticalAlignment = VerticalAlignment.Bottom;
     get VerticalAlignment(): VerticalAlignment { return this._verticalAlignment; }
     set VerticalAlignment(alignment: VerticalAlignment) {
         this._verticalAlignment = alignment;
@@ -46,6 +45,13 @@ export abstract class DrawDirectiveBase extends ComponentBase implements ITransf
     get Opacity(): number { return this._opacity; }
     set Opacity(opacity: number) {
         this._opacity = opacity;
+        this.UpdateWebglData();
+    }
+
+    protected _depthOffset: number = 0;
+    get DepthOffset(): number { return this._depthOffset; }
+    set DepthOffset(depth: number) {
+        this._depthOffset = depth;
         this.UpdateWebglData();
     }
 

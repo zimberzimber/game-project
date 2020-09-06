@@ -3,6 +3,8 @@ import { SoundType, IActiveSound, ISoundDefinition, ControllerType, ISoundplayer
 import { OneTimeLog } from './OneTimeLogger';
 import { Sounds } from './SoundManager';
 import { ScalarUtil } from "../Utility/Scalar";
+import { ISettingsObserver, UserSetting, IUserSettings, ISettingsEventArgs } from "../Models/IUserSettings";
+import { Settings } from "./SettingsManager";
 
 class SoundPlayer {
     private nextSoundId: number = 0;
@@ -20,6 +22,8 @@ class SoundPlayer {
     private convolverConnected: boolean = false;
     private tagGainNodes: { [key: number]: GainNode; } = {};
 
+    private settingsObserver: ISettingsObserver;
+
     constructor() {
         //@ts-ignore TypeScript does not recognize Webkit
         this.context = new (window.AudioContext || window.webkitAudioContext)();
@@ -28,7 +32,7 @@ class SoundPlayer {
         this.masterPanNode = this.context.createStereoPanner();
         this.masterConvolver = this.context.createConvolver();
 
-        this.masterGainNode.gain.value = 1;
+        this.masterGainNode.gain.value = Settings.GetSetting(UserSetting.MasterVolume);
         this.masterPanNode.pan.value = 0;
 
         this.masterPanNode.connect(this.masterGainNode).connect(this.context.destination);
@@ -40,6 +44,33 @@ class SoundPlayer {
                 this.tagGainNodes[tag].connect(this.nodeConnectionPoint);
                 this.tagGainNodes[tag].gain.value = 1;
             }
+
+        // No sir, don't like this either
+        this.tagGainNodes[SoundType.Music].gain.value = Settings.GetSetting(UserSetting.MusicVolume);
+        this.tagGainNodes[SoundType.Default].gain.value = Settings.GetSetting(UserSetting.SfxVolume);
+        this.tagGainNodes[SoundType.UI].gain.value = Settings.GetSetting(UserSetting.SfxVolume);
+
+        this.settingsObserver = {
+            OnObservableNotified: ((args: ISettingsEventArgs) => {
+                // Ditto
+                switch (args.setting) {
+                    case UserSetting.MasterVolume:
+                        this.masterGainNode.gain.value = args.newValue;
+                        break;
+                    case UserSetting.MusicVolume:
+                        this.tagGainNodes[SoundType.Music].gain.value = args.newValue;
+                        break;
+                    case UserSetting.SfxVolume:
+                        this.tagGainNodes[SoundType.Default].gain.value = args.newValue;
+                        this.tagGainNodes[SoundType.UI].gain.value = args.newValue;
+                        break;
+                }
+            })
+        }
+        Settings.Observable.Subscribe(this.settingsObserver);
+
+        // Some browsers (i.e Chrome) pause the audio context if it started before the page was interacted with/focused on
+        window.addEventListener('focus', () => this.context.resume());
     }
 
     SetConvolverImpulse(soundName: string): void {
@@ -123,14 +154,14 @@ class SoundPlayer {
             OneTimeLog.Log(`soundPlayer_failedLoading_${a.sourceName}`, `Failed retrieving sound named '${a.sourceName}' from sound manager.`, LogLevel.Error);
             return;
         }
-        
+
         const newSource = this.context.createBufferSource();
         this.context.decodeAudioData(buffer, (audioBuffer) => {
             newSource.buffer = audioBuffer;
             newSource.start(0);
             newSource.onended = a.sourceNode.onended;
             newSource.connect(a.panNode);
-    
+
             a.sourceNode.onended = null;
             a.sourceNode.stop();
             a.sourceNode.disconnect();

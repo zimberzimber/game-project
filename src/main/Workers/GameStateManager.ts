@@ -4,6 +4,7 @@ import { GameStatePaused } from "../GameStates/GameStatePaused";
 import { Log } from "./Logger";
 import { Config } from "../Proxies/ConfigProxy";
 import { GameStateTitleScreen } from "../GameStates/GameStateTitleScreen";
+import { GameStateIntro } from "../GameStates/GameStateIntro";
 
 interface IStateContainer {
     stateInstance: IGameState;
@@ -12,6 +13,10 @@ interface IStateContainer {
 
 const initialState = 'title';
 const GameStateDictionary: { [key: string]: IStateContainer } = {
+    intro: {
+        stateInstance: new GameStateIntro(),
+        nextStates: ['title'],
+    },
     title: {
         stateInstance: new GameStateTitleScreen(),
         nextStates: ['game'],
@@ -47,13 +52,13 @@ class GameStateManager {
             Log.Error(`Game state '${initialState}' doesn't exist. GameStateManager initialization failed.`);
     }
 
-    ChangeState(stateName: string): void {
+    ChangeState(stateName: string, args?: any): void {
         if (!GameStateDictionary[stateName]) {
             Log.Warn(`Game state '${stateName}' doesn't exist.`);
         } else if (this.CanTransitionTo(stateName)) {
             GameStateDictionary[this._currentState].stateInstance.OnDeactivated();
             this._currentState = stateName;
-            GameStateDictionary[this._currentState].stateInstance.OnActivated();
+            GameStateDictionary[this._currentState].stateInstance.OnActivated(args);
         } else
             Log.Warn(`Game state '${this._currentState}' cannot transition to '${stateName}'`)
     }

@@ -5,11 +5,6 @@ import { Vec2Utils } from "../../Utility/Vec2";
 import { VerticalAlignment, HorizontalAlignment } from "../../Models/GenericInterfaces";
 
 export class WindowBasicEntity extends UiEntityBase {
-    // private dd: DrawDirectiveAnimatedImage;
-    // private clickable: ClickboxComponent;
-    // private soundHover: SoundComponent;
-    // private soundClick: SoundComponent;
-
     private _dds: DrawDirectiveStaticImage[][] = [];
 
     private _size: Vec2;
@@ -35,7 +30,7 @@ export class WindowBasicEntity extends UiEntityBase {
         for (let x = 0; x < 3; x++) {
             this._dds[x] = [];
             for (let y = 0; y < 3; y++) {
-                const c = new DrawDirectiveStaticImage(this, `window_simple_${y}${x}`);
+                const c = new DrawDirectiveStaticImage(this, `${spriteName}_${y}${x}`);
                 c.Alignment = { vertical: VerticalAlignment.Bottom, horizontal: HorizontalAlignment.Left };
                 this._dds[x][y] = c;
                 this.AddComponent(c);

@@ -33,6 +33,13 @@ export class LightComponent extends ComponentBase implements ITransformObserver 
         this.CaulculateWebglData();
     }
 
+    protected _lightMultiplier: number = 1;
+    get LightMultiplier(): number { return this._lightMultiplier; }
+    set LightMultiplier(multiplier: number) {
+        this._lightMultiplier = ScalarUtil.Clamp(0, multiplier, 1);
+        this.CaulculateWebglData();
+    }
+
     protected _webglData: number[] = [];
     get WebglData(): number[] { return this.Enabled ? this._webglData : []; }
 
@@ -56,10 +63,15 @@ export class LightComponent extends ComponentBase implements ITransformObserver 
         const trans = this.Parent.worldRelativeTransform;
         const scaledRadius = (trans.Scale[0] + trans.Scale[1]) / 2 * this._radius;
         this._boundingRadius = scaledRadius;
+
+        const r = this._color[0] * this._lightMultiplier;
+        const g = this._color[1] * this._lightMultiplier;
+        const b = this._color[2] * this._lightMultiplier;
+
         this._webglData = [
-            trans.Position[0], trans.Position[1] + scaledRadius * triMult, ...trans.Position, ...this._color, scaledRadius, this._hardness, 0, 360,
-            trans.Position[0] - scaledRadius * triMult, trans.Position[1] - scaledRadius, ...trans.Position, ...this._color, scaledRadius, this._hardness, 0, 360,
-            trans.Position[0] + scaledRadius * triMult, trans.Position[1] - scaledRadius, ...trans.Position, ...this._color, scaledRadius, this._hardness, 0, 360,
+            trans.Position[0], trans.Position[1] + scaledRadius * triMult, ...trans.Position, r, g, b, scaledRadius, this._hardness, 0, 360,
+            trans.Position[0] - scaledRadius * triMult, trans.Position[1] - scaledRadius, ...trans.Position, r, g, b, scaledRadius, this._hardness, 0, 360,
+            trans.Position[0] + scaledRadius * triMult, trans.Position[1] - scaledRadius, ...trans.Position, r, g, b, scaledRadius, this._hardness, 0, 360,
         ];
     }
 

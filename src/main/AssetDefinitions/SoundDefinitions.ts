@@ -1,31 +1,17 @@
 import { ISoundDefinition, SoundType } from "../Models/SoundModels";
 
 export const SoundDefinitions: { [key: string]: ISoundDefinition } = {
-    loop: {
-        soundSourceName: 'loop',
-        volume: 0.5,
+    silence: {
+        soundSourceName: 'silence',
+        volume: 0,
         playbackRate: 1,
         loop: true,
         type: SoundType.Music
     },
-    loop2: {
-        soundSourceName: 'loop2',
-        volume: 0.1,
-        playbackRate: 1,
-        loop: true,
-        type: SoundType.Music
-    },
-    ui: {
-        soundSourceName: 'ui',
-        volume: 1,
-        playbackRate: 1,
-        loop: false,
-        type: SoundType.UI,
-        falloffStartDistance: 0,
-        falloffDistance: 0
-    },
-    sfx: {
-        soundSourceName: 'sfx',
+
+    // SFX
+    item_key: {
+        soundSourceName: 'item_key',
         volume: 1,
         playbackRate: 1,
         loop: false,
@@ -33,21 +19,43 @@ export const SoundDefinitions: { [key: string]: ISoundDefinition } = {
         falloffStartDistance: 200,
         falloffDistance: 600
     },
-    button_click: {
-        soundSourceName: 'sfx',
+    ui_accept: {
+        soundSourceName: 'ui_accept',
         volume: 1,
         playbackRate: 1,
         loop: false,
-        type: SoundType.Default,
-        falloffStartDistance: 200,
-        falloffDistance: 600
+        type: SoundType.UI
     },
-    button_hover: {
+    
+    ui_button_click: {
+        soundSourceName: 'item_key',
+        volume: 1,
+        playbackRate: 1,
+        loop: false,
+        type: SoundType.UI
+    },
+    ui_button_hover: {
         soundSourceName: 'ui_tick',
         volume: 1,
         playbackRate: 1,
         loop: false,
         type: SoundType.UI
+    },
+
+    // Music
+    music_game: {
+        soundSourceName: 'music_game',
+        volume: 1,
+        playbackRate: 1,
+        loop: true,
+        type: SoundType.Music
+    },
+    music_main: {
+        soundSourceName: 'music_main',
+        volume: 1,
+        playbackRate: 1,
+        loop: true,
+        type: SoundType.Music
     }
 }
 

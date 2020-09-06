@@ -1,8 +1,9 @@
 import { ComponentBase } from "../ComponentBase";
 import { CheckCollision } from "../../Workers/CollisionChecker";
 import { HitboxType, TriggerState, CollisionGroup, CollisionDelegate } from "../../Models/CollisionModels";
+import { IDebugDrawable } from "../../Models/GenericInterfaces";
 
-export abstract class HitboxBase extends ComponentBase {
+export abstract class HitboxBase extends ComponentBase implements IDebugDrawable {
     readonly HitboxType: HitboxType = HitboxType.Base;
     protected _boundingRadius: number = 0;
     get BoundingRadius(): number { return this._boundingRadius; }

@@ -1,8 +1,9 @@
 import { Vec2 } from "../../Models/Vectors";
 import { HitboxBase } from "./HitboxBase";
 import { EntityBase } from "../../Entities/EntityBase";
-import { TriggerState, HitboxType, DebugDrawColor } from "../../Models/CollisionModels";
+import { TriggerState, HitboxType } from "../../Models/CollisionModels";
 import { Vec2Utils } from "../../Utility/Vec2";
+import { DebugDrawColors } from "../../Models/GenericInterfaces";
 
 export class HitboxPolygon extends HitboxBase {
     readonly HitboxType: HitboxType = HitboxType.Polygonal;
@@ -37,12 +38,12 @@ export class HitboxPolygon extends HitboxBase {
     get DebugDrawData(): number[] | null {
         if (this.Polyline.length < 2) return null;
 
-        let vertexes: number[] = [];
+        const color = this.TriggerState == TriggerState.NotTrigger ? DebugDrawColors.Hitbox : DebugDrawColors.HitboxTrigger;
         const polyline = this.CanvasReletivePolyline;
+        const vertexes: number[] = [];
 
-        const colorIndex = this.TriggerState == TriggerState.NotTrigger ? DebugDrawColor.Default : DebugDrawColor.Red
         for (let i = 0; i < polyline.length; i++)
-            vertexes.push(polyline[i][0], polyline[i][1], colorIndex);
+            vertexes.push(...polyline[i], ...color);
 
         return vertexes;
     };

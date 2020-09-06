@@ -1,5 +1,5 @@
 export interface IGameState {
-    OnActivated(): void;
+    OnActivated(args?: any): void;
     OnDeactivated(): void;
     Update(delta: number): void;
 }

@@ -27,3 +27,5 @@ This means that if a semi-transparent area was rendered, everything that should 
 Xbox gamepad axes are [left X, left Y, right X, right Y]
 
 Disconnecting a game pad doesn't reset button/axis values, not does it change the timestamp
+
+Some extentions may break the games initialization in unexpected ways (ie NoScript under unknown circumstances (sendSyncMessage))

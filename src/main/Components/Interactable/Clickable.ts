@@ -1,15 +1,39 @@
 import { ComponentBase } from "../ComponentBase";
-import { EntityBase } from "../../Entities/EntityBase";
+import { EntityBase, UiEntityBase } from "../../Entities/EntityBase";
 import { IMouseObserver, IMouseEvent, ButtonState } from "../../Models/InputModels";
 import { Vec2 } from "../../Models/Vectors";
 import { Input } from "../../Workers/InputHandler";
 import { ITransformObserver, ITransformEventArgs } from "../../Models/Transform";
 import { Vec2Utils } from "../../Utility/Vec2";
 import { IsPointInPolygon } from "../../Workers/CollisionChecker";
+import { HorizontalAlignment, VerticalAlignment, IAlignmentContainer, IDebugDrawable } from "../../Models/GenericInterfaces";
+import { MiscUtil } from "../../Utility/Misc";
+import { ScalarUtil } from "../../Utility/Scalar";
 
-abstract class ClickableBaseComponent extends ComponentBase {
+abstract class ClickableBaseComponent extends ComponentBase implements IDebugDrawable {
     private _mouseObserver: IMouseObserver;
     private _transformObserver: ITransformObserver;
+
+    protected _horizontalAlignment: HorizontalAlignment = HorizontalAlignment.Left;
+    get HorizontalAlignment(): HorizontalAlignment { return this._horizontalAlignment; }
+    set HorizontalAlignment(alignment: HorizontalAlignment) {
+        this._horizontalAlignment = alignment;
+        this.CalculateClickArea();
+    }
+
+    protected _verticalAlignment: VerticalAlignment = VerticalAlignment.Bottom;
+    get VerticalAlignment(): VerticalAlignment { return this._verticalAlignment; }
+    set VerticalAlignment(alignment: VerticalAlignment) {
+        this._verticalAlignment = alignment;
+        this.CalculateClickArea();
+    }
+
+    get Alignment(): IAlignmentContainer { return { horizontal: this._horizontalAlignment, vertical: this._verticalAlignment }; }
+    set Alignment(alignment: IAlignmentContainer) {
+        this._verticalAlignment = alignment.vertical;
+        this._horizontalAlignment = alignment.horizontal;
+        this.CalculateClickArea();
+    }
 
     private ClickCallback: () => void;
     set OnClickCallback(callback: () => void) { this.ClickCallback = callback; }
@@ -25,6 +49,8 @@ abstract class ClickableBaseComponent extends ComponentBase {
 
     protected _down: boolean = false;
     get IsDown(): boolean { return this._down; }
+
+    abstract get DebugDrawData(): number[] | null;
 
     constructor(parent: EntityBase) {
         super(parent);
@@ -51,9 +77,7 @@ abstract class ClickableBaseComponent extends ComponentBase {
         }
         Input.MouseObservable.Subscribe(this._mouseObserver);
 
-        this._transformObserver = {
-            OnObservableNotified: (args: ITransformEventArgs): void => this.CalculateClickArea()
-        }
+        this._transformObserver = { OnObservableNotified: (args: ITransformEventArgs): void => this.CalculateClickArea() };
         this._parent.worldRelativeTransform.Subscribe(this._transformObserver);
     }
 
@@ -98,24 +122,32 @@ export class ClickboxComponent extends ClickableBaseComponent {
     constructor(parent: EntityBase, size: Vec2) {
         super(parent);
         this.Size = size;
+        this.CalculateClickArea();
     }
 
     IsPointInButton(point: Vec2): boolean {
         return IsPointInPolygon(point, this._clickArea);
     }
 
-    protected CalculateClickArea(): void {
-        const trans = this._parent.worldRelativeTransform;
-        this._clickArea = [
-            [trans.Position[0] + this._size[0] / 2 * trans.Scale[0], trans.Position[1] + this._size[1] / 2 * trans.Scale[1]],
-            [trans.Position[0] - this._size[0] / 2 * trans.Scale[0], trans.Position[1] + this._size[1] / 2 * trans.Scale[1]],
-            [trans.Position[0] - this._size[0] / 2 * trans.Scale[0], trans.Position[1] - this._size[1] / 2 * trans.Scale[1]],
-            [trans.Position[0] + this._size[0] / 2 * trans.Scale[0], trans.Position[1] - this._size[1] / 2 * trans.Scale[1]]
-        ];
+    get DebugDrawData(): number[] {
+        return [
+            this._clickArea[0][0], this._clickArea[0][1], 1, 1, 1,
+            this._clickArea[1][0], this._clickArea[1][1], 1, 1, 1,
+            this._clickArea[2][0], this._clickArea[2][1], 1, 1, 1,
+            this._clickArea[3][0], this._clickArea[3][1], 1, 1, 1,
+        ]
+    }
 
-        if (trans.Rotation != 0)
+    protected CalculateClickArea(): void {
+        const pos = this._parent.worldRelativeTransform.Position;
+        const scale = this._parent.worldRelativeTransform.Scale;
+        const rot = this._parent.worldRelativeTransform.RotationRadian;
+
+        this._clickArea = MiscUtil.CreateAlignmentBasedBox(pos, this._verticalAlignment, this._horizontalAlignment, Vec2Utils.Mult(this._size, scale));
+
+        if (rot)
             for (let i = 0; i < this._clickArea.length; i++)
-                this._clickArea[i] = Vec2Utils.RotatePointAroundCenter(this._clickArea[i], trans.RotationRadian, trans.Position);
+                this._clickArea[i] = Vec2Utils.RotatePointAroundCenter(this._clickArea[i], rot, pos);
     }
 }
 
@@ -152,6 +184,12 @@ export class ClickPolygonComponent extends ClickableBaseComponent {
                 this._clickArea.push(Vec2Utils.Sum(Vec2Utils.RotatePointAroundCenter(Vec2Utils.Mult(p, trans.Scale), trans.RotationRadian, trans.Position), trans.Position));
         }
     }
+
+    get DebugDrawData(): number[] {
+        const returned: number[] = [];
+        this._clickArea.forEach((v: Vec2) => returned.push(v[0], v[1], 1, 1, 1));
+        return returned;
+    }
 }
 
 export class ClickCircleComponent extends ClickableBaseComponent {
@@ -175,5 +213,16 @@ export class ClickCircleComponent extends ClickableBaseComponent {
 
     protected CalculateClickArea(): void {
         this._clickRadius = this._radius * Math.max(this._parent.worldRelativeTransform.Scale[0], this._parent.worldRelativeTransform.Scale[1]);
+    }
+
+    get DebugDrawData(): number[] {
+        const returned: number[] = [];
+        const pos = this._parent.worldRelativeTransform.Position;
+        const radius = (this._parent.worldRelativeTransform.Scale[0] + this._parent.worldRelativeTransform.Scale[1]) * 0.5 * this._radius;
+
+        for (let a = 0; a < 360; a += 10)
+            returned.push(...Vec2Utils.RotatePointAroundCenter([radius, 0], ScalarUtil.ToRadian(a), pos), 1, 1, 1);
+
+        return returned;
     }
 }

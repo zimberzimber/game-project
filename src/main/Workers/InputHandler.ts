@@ -3,6 +3,7 @@ import { Vec2 } from "../Models/Vectors";
 import { Observable } from "../Models/Observable";
 import { KeymapContainer, IKeymap, ControlKey } from "../Models/ControlKeys";
 import { GamepadContainer, IGamepadObserver, IGamepadAxisEvent, IGamepadButtonEvent, GamepadAxis } from "../Models/Controller";
+import { Camera } from "./CameraManager";
 
 const GamepadButtonKeymap = {
     0: ControlKey.action1,
@@ -211,21 +212,27 @@ class InputHandler {
     }
 
     private OnKeyDown(e: KeyboardEvent, simulated: boolean = false): void {
-        const key = this._keymapContainer.GetKeyForCharcode(e.keyCode);
-        if (key !== null && !this._keysDown[key]) {
-            this._keysDown[key] = true;
-            this.KeyboardObservable.Notify({ key: key, state: ButtonState.Down });
+        if (this._keymapContainer) {
+            const key = this._keymapContainer.GetKeyForCharcode(e.keyCode);
+            if (key !== null && !this._keysDown[key]) {
+                this._keysDown[key] = true;
+                this.KeyboardObservable.Notify({ key: key, state: ButtonState.Down });
+            }
         }
+
         if (!simulated)
             this.KeyboardFullObservable.Notify(e);
     }
 
     private OnKeyUp(e: KeyboardEvent, simulated: boolean = false): void {
-        const key = this._keymapContainer.GetKeyForCharcode(e.keyCode);
-        if (key !== null && this._keysDown[key]) {
-            delete this._keysDown[key];
-            this.KeyboardObservable.Notify({ key: key, state: ButtonState.Up });
+        if (this._keymapContainer) {
+            const key = this._keymapContainer.GetKeyForCharcode(e.keyCode);
+            if (key !== null && this._keysDown[key]) {
+                delete this._keysDown[key];
+                this.KeyboardObservable.Notify({ key: key, state: ButtonState.Up });
+            }
         }
+
         if (!simulated)
             this.KeyboardFullObservable.Notify(e);
     }
@@ -250,7 +257,12 @@ class InputHandler {
 
     private GetRelativePosition(x: number, y: number): Vec2 {
         const rect: DOMRect = this._mouseElementBindingbox!;
-        return [(x - rect.left) - rect.width / 2, (rect.height - (y - rect.top)) - rect.height / 2];
+        const cs = Camera.Transform.Scale;
+
+        return [
+            (x - rect.left) / rect.width * cs[0] - cs[0] * 0.5,
+            (rect.height - (y - rect.top)) / rect.height * cs[1] - cs[1] * 0.5
+        ];
     }
 }
 

@@ -5,6 +5,7 @@ import { ISpriteFrame } from "../../Models/SpriteModels";
 import { Vec2Utils } from "../../Utility/Vec2";
 import { HorizontalAlignment, VerticalAlignment } from "../../Models/GenericInterfaces";
 import { ScalarUtil } from "../../Utility/Scalar";
+import { MiscUtil } from "../../Utility/Misc";
 
 export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
     protected _frameData: ISpriteFrame = { origin: [0, 0], size: [0, 0] };
@@ -57,48 +58,7 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
         const trans = this._parent.worldRelativeTransform;
         const origin = trans.Position; // prevent redundant copying from source
 
-        const ox = this._size[0] * trans.Scale[0];
-        const oy = this._size[1] * trans.Scale[1];
-        const points: Vec2[] = [
-            [origin[0], origin[1]],
-            [origin[0], origin[1]],
-            [origin[0], origin[1]],
-            [origin[0], origin[1]],
-        ];
-
-        switch (this._horizontalAlignment) {
-            case HorizontalAlignment.Left:
-                points[0][0] += ox;
-                points[3][0] += ox;
-                break;
-            case HorizontalAlignment.Middle:
-                points[0][0] += ox / 2;
-                points[1][0] -= ox / 2;
-                points[2][0] -= ox / 2;
-                points[3][0] += ox / 2;
-                break;
-            case HorizontalAlignment.Right:
-                points[1][0] -= ox;
-                points[2][0] -= ox;
-                break;
-        }
-
-        switch (this._verticalAlignment) {
-            case VerticalAlignment.Top:
-                points[2][1] -= oy;
-                points[3][1] -= oy;
-                break;
-            case VerticalAlignment.Middle:
-                points[0][1] += oy / 2;
-                points[1][1] += oy / 2;
-                points[2][1] -= oy / 2;
-                points[3][1] -= oy / 2;
-                break;
-            case VerticalAlignment.Bottom:
-                points[0][1] += oy;
-                points[1][1] += oy;
-                break;
-        }
+        const points: Vec2[] = MiscUtil.CreateAlignmentBasedBox(origin, this._verticalAlignment, this._horizontalAlignment, Vec2Utils.Mult(this._size, trans.Scale));
 
         // Rotate points around the origin. Keeps alignment in mind.
         if (trans.RotationRadian != 0)
@@ -108,10 +68,10 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
         // Add the draw offset here, after the rotation so that the image is always rotated relative to itself.
         const f = this._frameData;
         this._webglData.attributes = [
-            points[0][0] + this._drawOffset[0], points[0][1] + this._drawOffset[1], trans.Depth, f.origin[0] + f.size[0], f.origin[1], this._opacity,
-            points[1][0] + this._drawOffset[0], points[1][1] + this._drawOffset[1], trans.Depth, f.origin[0], f.origin[1], this._opacity,
-            points[2][0] + this._drawOffset[0], points[2][1] + this._drawOffset[1], trans.Depth, f.origin[0], f.origin[1] + f.size[1], this._opacity,
-            points[3][0] + this._drawOffset[0], points[3][1] + this._drawOffset[1], trans.Depth, f.origin[0] + f.size[0], f.origin[1] + f.size[1], this._opacity,
+            points[0][0] + this._drawOffset[0], points[0][1] + this._drawOffset[1], trans.Depth + this._depthOffset, f.origin[0] + f.size[0], f.origin[1], this._opacity,
+            points[1][0] + this._drawOffset[0], points[1][1] + this._drawOffset[1], trans.Depth + this._depthOffset, f.origin[0], f.origin[1], this._opacity,
+            points[2][0] + this._drawOffset[0], points[2][1] + this._drawOffset[1], trans.Depth + this._depthOffset, f.origin[0], f.origin[1] + f.size[1], this._opacity,
+            points[3][0] + this._drawOffset[0], points[3][1] + this._drawOffset[1], trans.Depth + this._depthOffset, f.origin[0] + f.size[0], f.origin[1] + f.size[1], this._opacity,
         ];
 
         // Apply cutoff

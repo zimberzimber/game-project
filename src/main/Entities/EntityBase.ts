@@ -1,6 +1,7 @@
 import { ComponentBase } from "../Components/ComponentBase";
 import { Transform, ITransformObserver, ITransformEventArgs } from "../Models/Transform";
 import { Game } from "../Workers/Game";
+import { Log } from "../Workers/Logger";
 
 export abstract class EntityBase implements ITransformObserver {
 
@@ -34,6 +35,19 @@ export abstract class EntityBase implements ITransformObserver {
     }
 
     AddComponent(component: ComponentBase): void {
+        // Don't add the component if this entity is not its parent
+        if (component.Parent !== this) {
+            Log.Warn(`Component ${component.toString()} is child of ${this.toString()} entity.`);
+            return;
+        }
+
+        // Don't add the component if its already present
+        for (const c of this._components)
+            if (c === component) {
+                Log.Warn(`Component ${component.toString()} is already part of ${this.toString()} entity.`);
+                return;
+            }
+
         this._components.push(component);
     }
 
@@ -60,8 +74,19 @@ export abstract class EntityBase implements ITransformObserver {
     }
 
     AddChildEntity(child: EntityBase): void {
-        if (child._parent)
-            child._parent.RemoveChildEntity(child);
+        // Don't add the entity if its already someones child, or a root entity
+        if (child._parent !== this || Game.IsRootEntity(child)) {
+            Log.Warn(`Failed adding entity ${child.toString()} as a child to entity ${this.toString()} as its either a child to another entity or a root entity.`);
+            return;
+        }
+
+        // Don't add the entity if its already a child
+        for (const c of this._children)
+            if (c === child) {
+                Log.Warn(`Entity ${child.toString()} is already a child of ${this.toString()}`);
+                return;
+            }
+
         child._parent = this;
         this._children.push(child);
     }

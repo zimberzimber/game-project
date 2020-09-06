@@ -12,6 +12,8 @@ import { StateManager } from "./GameStateManager";
 import { IsPointInPolygon } from "./CollisionChecker";
 import { ISceneDrawData } from "../Renderers/SceneRenderer";
 import { SortedLinkedList } from "../Utility/Misc";
+import { IsDebugDrawable } from "../Models/GenericInterfaces";
+import { ScalarUtil } from "../Utility/Scalar";
 
 class GameManager implements IConfigObserver {
     private _entities: EntityBase[] = [];
@@ -23,7 +25,7 @@ class GameManager implements IConfigObserver {
     private _mousePosition: Vec2 = [0, 0];
 
     // Used for FPS display
-    private _displayFps: boolean = Config.GetConfig('debug', false);
+    private _debug: boolean = Config.GetConfig('debug', false);
     private _frameTimes: number[] = [];
     private _lastFpsDisplayTime: number = Date.now();
 
@@ -57,7 +59,7 @@ class GameManager implements IConfigObserver {
     OnObservableNotified(args: IConfigEventArgs): void {
         switch (args.field) {
             case 'debug':
-                this._displayFps = args.newValue;
+                this._debug = args.newValue;
                 break;
         }
     }
@@ -166,6 +168,29 @@ class GameManager implements IConfigObserver {
         return children;
     }
 
+    GetAllEntitiesWithGuardMethod(method: (entity: EntityBase) => boolean): EntityBase[] {
+        let entities: EntityBase[] = [];
+        this._entities.forEach(entity => {
+            if (method(entity))
+                entities.push(entity);
+            if (entity.Children.length > 0)
+                entities.push(...this.GetAllEntitiesWithGuardMethodHelper(entity, method));
+        });
+        return entities;
+    }
+
+    // Recursive helper function for obtaining children of a give parent entity.
+    private GetAllEntitiesWithGuardMethodHelper(parent: EntityBase, method: (entity: EntityBase) => boolean): EntityBase[] {
+        let children: EntityBase[] = [];
+        parent.Children.forEach(child => {
+            if (method(child))
+                children.push(child);
+            if (child.Children.length > 0)
+                children.push(...this.GetAllEntitiesHelper(child));
+        })
+        return children;
+    }
+
     // Get components of a certain type from all the entities within the game.
     // Calls 'GetAllEntities' to obtain all the current entities, and passes that as a collection to 'GetAllComponentsOfTypeFromEntityCollection'
     GetAllComponentsOfType(type: any, activeOnly: boolean = false): ComponentBase[] {
@@ -198,19 +223,17 @@ class GameManager implements IConfigObserver {
         const uiEntities: UiEntityBase[] = [];
 
         allEntities.forEach(e => {
-            if (e instanceof GameEntityBase)
-                gameEntities.push(e);
-            else if (e instanceof UiEntityBase)
-                uiEntities.push(e);
+            if (e instanceof GameEntityBase) gameEntities.push(e);
+            else if (e instanceof UiEntityBase) uiEntities.push(e);
         });
-
 
         // Collect scene draw data
         const sceneDDs = Game.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveBase, gameEntities, true) as DrawDirectiveBase[];
         CollectSceneRendererData('scene', sceneDDs);
 
+        // Collect UI draw data
         const uiDDs = Game.GetAllComponentsOfTypeFromEntityCollection(DrawDirectiveBase, uiEntities, true) as DrawDirectiveBase[];
-        CollectSceneRendererData('ui', uiDDs);
+        CollectSceneRendererData('ui', uiDDs, false);
 
         // Collect lighting data for scene (UI doesn't support lighting)
         const lights: number[] = [];
@@ -220,10 +243,45 @@ class GameManager implements IConfigObserver {
         });
         Rendering.SetDrawData('lighting', lights)
 
-        // Rendering.SetUniformData('post', 'u_offsetPower', [Math.abs(Math.sin(Date.now() * 0.001)) / 2]);
+        // Collect debug draw data if relevant
+        if (this._debug) {
+            const dd: number[][] = [];
+
+            gameEntities.forEach(e => e.GetComponentsOfType(ComponentBase, true).forEach(c => {
+                if (IsDebugDrawable(c) && c.DebugDrawData)
+                    dd.push(c.DebugDrawData);
+            }));
+
+            // Behold, a band aid fix to un-make camera related changes
+            const camPos = Camera.Transform.Position;
+            const camRad = -Camera.Transform.RotationRadian;
+            uiEntities.forEach(e => e, this.GetAllComponentsOfType(ComponentBase, true).forEach(c => {
+                if (IsDebugDrawable(c)) {
+                    const cdd = c.DebugDrawData;
+                    if (cdd) {
+                        for (let i = 0; i < cdd.length / 5; i++) {
+                            cdd[i * 5] += camPos[0];
+                            cdd[i * 5 + 1] += camPos[1];
+
+                            if (camRad) {
+                                const rotated = Vec2Utils.RotatePointAroundCenter([cdd[i * 5], cdd[i * 5 + 1]], camRad, camPos);
+                                cdd[i * 5] = rotated[0];
+                                cdd[i * 5 + 1] = rotated[1];
+                            }
+                        }
+                        dd.push(cdd);
+                    }
+                }
+            }));
+
+            Rendering.SetDrawData('debug', dd);
+        } else {
+            Rendering.SetDrawData('debug', []);
+        }
+
         Rendering.Render()
 
-        if (this._displayFps) {
+        if (this._debug) {
             const time = Date.now();
 
             while (this._frameTimes.length > 0 && this._frameTimes[0] <= time - 1000)
@@ -238,12 +296,12 @@ class GameManager implements IConfigObserver {
                     element.innerHTML = fps.toString();
             }
         }
-        
+
         requestAnimationFrame(this.Update.bind(this));
     }
 }
 
-const CollectSceneRendererData = (rendererName: string, collection: DrawDirectiveBase[]) => {
+const CollectSceneRendererData = (rendererName: string, collection: DrawDirectiveBase[], inViewOnly: boolean = true) => {
     const data: ISceneDrawData = { opaque: {}, translucent: [] };
     const depthList = new SortedLinkedList<DrawDirectiveBase>((dd1: DrawDirectiveBase, dd2: DrawDirectiveBase) => {
         if (dd1.Parent.worldRelativeTransform.Depth < dd2.Parent.worldRelativeTransform.Depth) return -1;
@@ -259,7 +317,7 @@ const CollectSceneRendererData = (rendererName: string, collection: DrawDirectiv
         // Skip directives outside of view
         const dTrans = dd.Parent.worldRelativeTransform
 
-        if (dd.Opacity > 0 && Camera.IsInView(dTrans.Position, dd.BoundingRadius)) {
+        if (dd.Opacity > 0 && (!inViewOnly || Camera.IsInView(dTrans.Position, dd.BoundingRadius))) {
             let indexOffset = 0;
 
             if (dd.IsTranslucent || dd.Opacity < 1) {

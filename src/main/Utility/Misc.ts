@@ -1,6 +1,7 @@
 import { ISpriteFrame, IMultiFrameSpriteDefinition } from "../Models/SpriteModels";
 import { Vec2 } from "../Models/Vectors";
-import { IComparingMethod } from "../Models/GenericInterfaces";
+import { IComparingMethod, VerticalAlignment, HorizontalAlignment } from "../Models/GenericInterfaces";
+import { Vec2Utils } from "./Vec2";
 
 export class MiscUtil {
     // Taken from: https://stackoverflow.com/questions/9267899/arraybuffer-to-base64-encoded-string
@@ -42,6 +43,12 @@ export class MiscUtil {
         maxDescent += outlineWidth;
         maxAscent += outlineWidth;
 
+        // Must be set before calculating char widths for canvas dimensions
+        ctx.font = fontShorthand;
+        ctx.lineWidth = outlineWidth;
+        ctx.strokeStyle = 'black';
+        ctx.fillStyle = 'white';
+
         offset = [outlineWidth, fontSize]
         let canvasWidth = 0;
         for (const c of fullAscii) {
@@ -56,6 +63,8 @@ export class MiscUtil {
 
         ctx.canvas.width = canvasWidth;
         ctx.canvas.height = offset[1] + maxDescent;
+
+        // Must be set again after changing canvas params so the actual texts is drawn accordingly
         ctx.font = fontShorthand;
         ctx.lineWidth = outlineWidth;
         ctx.strokeStyle = 'black';
@@ -119,6 +128,51 @@ export class MiscUtil {
     }
 
     static DeleteObjectContents = (obj: Object): void => { for (let i in obj) delete obj[i]; }
+
+    static CreateAlignmentBasedBox = (point: Vec2, verticalAlignment: VerticalAlignment, horizontalAlignment: HorizontalAlignment, size: Vec2): [Vec2, Vec2, Vec2, Vec2] => {
+        const copy: [Vec2, Vec2, Vec2, Vec2] = [
+            Vec2Utils.Copy(point),
+            Vec2Utils.Copy(point),
+            Vec2Utils.Copy(point),
+            Vec2Utils.Copy(point),
+        ]
+
+        switch (horizontalAlignment) {
+            case HorizontalAlignment.Left:
+                copy[0][0] += size[0];
+                copy[3][0] += size[0];
+                break;
+            case HorizontalAlignment.Middle:
+                copy[0][0] += size[0] * 0.5;
+                copy[1][0] -= size[0] * 0.5;
+                copy[2][0] -= size[0] * 0.5;
+                copy[3][0] += size[0] * 0.5;
+                break;
+            case HorizontalAlignment.Right:
+                copy[1][0] -= size[0];
+                copy[2][0] -= size[0];
+                break;
+        }
+
+        switch (verticalAlignment) {
+            case VerticalAlignment.Top:
+                copy[2][1] -= size[1];
+                copy[3][1] -= size[1];
+                break;
+            case VerticalAlignment.Middle:
+                copy[0][1] += size[1] * 0.5;
+                copy[1][1] += size[1] * 0.5;
+                copy[2][1] -= size[1] * 0.5;
+                copy[3][1] -= size[1] * 0.5;
+                break;
+            case VerticalAlignment.Bottom:
+                copy[0][1] += size[1];
+                copy[1][1] += size[1];
+                break;
+        }
+
+        return copy;
+    }
 }
 
 class LinkedListNode<T> {

@@ -12,23 +12,9 @@ import { IGameState } from "./GameStateBase";
 import { ButtonBasicEntity } from "../Entities/Ui/ButtonBasic";
 import { WindowBasicEntity } from "../Entities/Ui/WindowBasic";
 
-export class GameStateGame implements IGameState, IConfigObserver {
-    private _debugDraw: boolean = Config.GetConfig('debugDraw', false);
-
-    OnObservableNotified(args: IConfigEventArgs): void {
-        switch (args.field) {
-            case 'debugDraw':
-                this._debugDraw = args.newValue;
-                if (!this._debugDraw)
-                    Rendering.SetDrawData('debug', null);
-                break;
-        }
-    }
+export class GameStateGame implements IGameState {
 
     OnActivated(): void {
-        this._debugDraw = Config.GetConfig('debugDraw', false);
-        Config.Observable.Subscribe(this);
-
         let p = new PlayerEntity();
         Game.AddEntity(p);
 
@@ -58,9 +44,7 @@ export class GameStateGame implements IGameState, IConfigObserver {
         Game.AddEntity(temp);
     }
 
-    OnDeactivated(): void {
-        Config.Observable.Unsubscribe(this);
-    }
+    OnDeactivated(): void { }
 
     Update(delta: number): void {
         // Update all entities
@@ -99,29 +83,6 @@ export class GameStateGame implements IGameState, IConfigObserver {
                 if (t.CollisionGroup & c.CollideWithGroup && CheckCollision(t, c))
                     c.CollideWith(t);
             }
-        }
-
-        if (this._debugDraw) {
-            const lines: { red: number[][]; yellow: number[][]; } = { red: [], yellow: [] };
-            const hitboxes = Game.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities, true) as HitboxBase[];
-            hitboxes.forEach((hb: HitboxBase) => {
-                // Skip draws outside of view
-                const hTrans = hb.Parent.worldRelativeTransform;
-                const hRadius = hb.BoundingRadius * Math.max(hb.Parent.worldRelativeTransform.Scale[0], hb.Parent.worldRelativeTransform.Scale[1]);
-
-                if (Camera.IsInView(hTrans.Position, hRadius)) {
-                    const hData: number[] | null = hb.DebugDrawData;
-                    if (hData) {
-                        if (hb.TriggerState == TriggerState.NotTrigger) {
-                            lines.yellow.push(hData);
-                        }
-                        else {
-                            lines.red.push(hData);
-                        }
-                    }
-                }
-            });
-            Rendering.SetDrawData('debug', lines);
         }
     }
 }

@@ -1,6 +1,6 @@
 import { ComponentBase } from "../ComponentBase";
 import { EntityBase } from "../../Entities/EntityBase";
-import { ISoundDefinition } from "../../Models/SoundModels";
+import { ISoundDefinition, ControllerType } from "../../Models/SoundModels";
 import { Audio } from "../../Workers/SoundPlayer";
 import { ITransformObserver, ITransformEventArgs } from "../../Models/Transform";
 import { SoundDefinitions } from "../../AssetDefinitions/SoundDefinitions";
@@ -59,6 +59,7 @@ export class SoundSingleInstanceComponent extends ComponentBase implements ITran
 
         if (!Audio.IsActive(this._currentSoundId))
             this.Play();
+        Audio.SetControllerValueForSound(this._currentSoundId, ControllerType.Volume, 0);
         Audio.FadeVolumeForSound(this._currentSoundId, 1, time);
     }
 

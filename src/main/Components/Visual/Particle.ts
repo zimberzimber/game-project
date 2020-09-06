@@ -156,10 +156,10 @@ export class ParticleComponent extends DrawDirectiveBase {
 
         const op = inst.actualOpacity * this._opacity;
         this._webglData.attributes.push(
-            coords[0][0] + this._drawOffset[0], coords[0][1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1], op,
-            coords[1][0] + this._drawOffset[0], coords[1][1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1], op,
-            coords[2][0] + this._drawOffset[0], coords[2][1] + this._drawOffset[1], trans.Depth, frame.origin[0], frame.origin[1] + frame.size[1], op,
-            coords[3][0] + this._drawOffset[0], coords[3][1] + this._drawOffset[1], trans.Depth, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1], op,
+            coords[0][0] + this._drawOffset[0], coords[0][1] + this._drawOffset[1], trans.Depth + this._depthOffset, frame.origin[0] + frame.size[0], frame.origin[1], op,
+            coords[1][0] + this._drawOffset[0], coords[1][1] + this._drawOffset[1], trans.Depth + this._depthOffset, frame.origin[0], frame.origin[1], op,
+            coords[2][0] + this._drawOffset[0], coords[2][1] + this._drawOffset[1], trans.Depth + this._depthOffset, frame.origin[0], frame.origin[1] + frame.size[1], op,
+            coords[3][0] + this._drawOffset[0], coords[3][1] + this._drawOffset[1], trans.Depth + this._depthOffset, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1], op,
         );
 
         const index = this._webglData.indexes.length > 0 ? this._webglData.indexes[this._webglData.indexes.length - 1] + 1 : 0

@@ -16,7 +16,7 @@ let Util = {
         return tiles;
     },
 
-    AddWindowBox: (name: string, sourceImageName, origin: Vec2, sizes: IVec2Grid3x3): { [key: string]: ISingleFrameSpriteDefinition } => {
+    AddWindowBox: (name: string, sourceImageName: string, origin: Vec2, sizes: IVec2Grid3x3): { [key: string]: ISingleFrameSpriteDefinition } => {
         const defs: { [key: string]: ISingleFrameSpriteDefinition } = {};
         const offset: Vec2 = [0, 0];
 
@@ -63,10 +63,107 @@ let Util = {
                 },
             ]
         };
-    }
+    },
+
+    AddSlider: (name: string, sourceImageName: string, barOrigin: Vec2, barSize: Vec2, pinOrigin: Vec2, pinSize: Vec2, nubOrigin: Vec2, nubSize: Vec2, leftBorderOrigin: Vec2, leftBorderSize: Vec2, rightBorderOrigin: Vec2, rightBorderSize: Vec2): { [key: string]: ISingleFrameSpriteDefinition } => {
+        return {
+            [`${name}_bar`]: {
+                sourceImageName,
+                frame: {
+                    origin: barOrigin,
+                    size: barSize
+                }
+            },
+            [`${name}_pin`]: {
+                sourceImageName,
+                frame: {
+                    origin: pinOrigin,
+                    size: pinSize
+                }
+            },
+            [`${name}_nub`]: {
+                sourceImageName,
+                frame: {
+                    origin: nubOrigin,
+                    size: nubSize
+                }
+            },
+            [`${name}_border_l`]: {
+                sourceImageName,
+                frame: {
+                    origin: leftBorderOrigin,
+                    size: leftBorderSize
+                }
+            },
+            [`${name}_border_r`]: {
+                sourceImageName,
+                frame: {
+                    origin: rightBorderOrigin,
+                    size: rightBorderSize
+                }
+            }
+        };
+    },
 }
 
 export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition } = {
+    color_yellow: {
+        sourceImageName: 'colors',
+        frame: {
+            origin: [0, 0],
+            size: [1, 1]
+        }
+    },
+    color_red: {
+        sourceImageName: 'colors',
+        frame: {
+            origin: [1, 0],
+            size: [1, 1]
+        }
+    },
+    color_green: {
+        sourceImageName: 'colors',
+        frame: {
+            origin: [2, 0],
+            size: [1, 1]
+        }
+    },
+    color_blue: {
+        sourceImageName: 'colors',
+        frame: {
+            origin: [3, 0],
+            size: [1, 1]
+        }
+    },
+    color_white: {
+        sourceImageName: 'colors',
+        frame: {
+            origin: [0, 1],
+            size: [1, 1]
+        }
+    },
+    color_gray: {
+        sourceImageName: 'colors',
+        frame: {
+            origin: [1, 1],
+            size: [1, 1]
+        }
+    },
+    color_black: {
+        sourceImageName: 'colors',
+        frame: {
+            origin: [2, 1],
+            size: [1, 1]
+        }
+    },
+    color_transparent: {
+        sourceImageName: 'colors',
+        frame: {
+            origin: [3, 1],
+            size: [1, 1]
+        }
+    },
+
     asset_missing: {
         sourceImageName: 'sprites',
         frame: {
@@ -322,44 +419,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
         }
     },
 
-
-    scroll_h_border_l: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [29, 0],
-            size: [3, 5]
-        }
-    },
-    scroll_h_border_r: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [39, 0],
-            size: [3, 5]
-        }
-    },
-    scroll_h_line: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [32, 0],
-            size: [3, 5]
-        }
-    },
-    scroll_h_pin: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [35, 0],
-            size: [1, 5]
-        }
-    },
-    scroll_h_slider: {
-        sourceImageName: 'uiElements',
-        frame: {
-            origin: [36, 0],
-            size: [3, 5]
-        }
-    },
-
-
     tick_box: {
         sourceImageName: 'uiElements',
         names: ['unselected', 'selected'],
@@ -390,12 +449,14 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
         }
     },
 
+    button_wide: Util.AddButton('uiElements', [0, 23], [33, 7]),
+
     ...Util.AddWindowBox('window_simple', 'uiElements', [0, 0], [
         [[3, 3], [1, 3], [3, 3]],
         [[3, 1], [1, 1], [3, 1]],
         [[3, 3], [1, 3], [3, 3]]]),
 
-    button_wide: Util.AddButton('uiElements', [0, 23], [33, 7])
+    ...Util.AddSlider('slider_basic', 'uiElements', [32, 0], [3, 5], [35, 0], [1, 5], [36, 0], [3, 5], [29, 0], [3, 5], [39, 0], [3, 5]),
 }
 
 export let FontDefinitions: { [key: string]: { font: string, size: number, outlineWidth: number } } = {

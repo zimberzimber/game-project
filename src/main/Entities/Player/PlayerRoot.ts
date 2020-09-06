@@ -96,11 +96,7 @@ export class PlayerEntity extends GameEntityBase {
 
         this.kuEntity = new KuEntity(this);
         this.AddChildEntity(this.kuEntity);
-        this.AddComponent(this.l);
-        this.l.Play();
     }
-
-    l = new SoundSingleInstanceComponent(this, 'loop', true);
 
     time = 0;
     Update(delta: number) {
