@@ -50,12 +50,12 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
     }
 
     private CalculateBoundingRadius(): void {
-        const trans = this._parent.worldRelativeTransform;
+        const trans = this._parent.WorldRelativeTransform;
         this._boundingRadius = Math.sqrt(Math.pow(this._size[0] * trans.Scale[0], 2) + Math.pow(this._size[1] * trans.Scale[1], 2));
     }
 
     protected UpdateWebglData() {
-        const trans = this._parent.worldRelativeTransform;
+        const trans = this._parent.WorldRelativeTransform;
         const origin = trans.Position; // prevent redundant copying from source
 
         const points: Vec2[] = MiscUtil.CreateAlignmentBasedBox(origin, this._verticalAlignment, this._horizontalAlignment, Vec2Utils.Mult(this._size, trans.Scale));
@@ -76,7 +76,7 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
 
         // Apply cutoff
         if (this._cutOff) {
-            const scale = this.Parent.worldRelativeTransform.Scale;
+            const scale = this.Parent.WorldRelativeTransform.Scale;
 
             // 0  . . 3  . .
             // 6  . . 9  . .

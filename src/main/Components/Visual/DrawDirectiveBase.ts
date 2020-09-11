@@ -60,11 +60,11 @@ export abstract class DrawDirectiveBase extends ComponentBase implements ITransf
 
     constructor(parent: EntityBase) {
         super(parent);
-        this.Parent.worldRelativeTransform.Subscribe(this);
+        this.Parent.WorldRelativeTransform.Subscribe(this);
     }
 
     Unitialize() {
-        this.Parent.worldRelativeTransform.Unsubscribe(this);
+        this.Parent.WorldRelativeTransform.Unsubscribe(this);
         super.Unitialize();
     }
 

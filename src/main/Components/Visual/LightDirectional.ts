@@ -33,7 +33,7 @@ export class DirectionalLightComponent extends LightComponent {
 
     protected CaulculateWebglData(): void {
         super.CaulculateWebglData();
-        const dir = (this._direction + this.Parent.worldRelativeTransform.Rotation) % 360;
+        const dir = (this._direction + this.Parent.WorldRelativeTransform.Rotation) % 360;
 
         this._webglData[9] = dir;
         this._webglData[10] = this._angle;

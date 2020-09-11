@@ -58,6 +58,10 @@ abstract class ClickableBaseComponent extends ComponentBase implements IDebugDra
         this._mouseObserver = {
             // this._hovered already takes care of finding out whether the cursor is inside the clickbox or not
             OnObservableNotified: (args: IMouseEvent): void => {
+                
+                // Do nothing while disabled through hierarchy
+                if (!this.IsEnabledByHeirarchy()) return;
+
                 if (args.button == 0) {
                     if (this._down) {
                         if (args.state == ButtonState.Up) {
@@ -78,11 +82,17 @@ abstract class ClickableBaseComponent extends ComponentBase implements IDebugDra
         Input.MouseObservable.Subscribe(this._mouseObserver);
 
         this._transformObserver = { OnObservableNotified: (args: ITransformEventArgs): void => this.CalculateClickArea() };
-        this._parent.worldRelativeTransform.Subscribe(this._transformObserver);
+        this._parent.WorldRelativeTransform.Subscribe(this._transformObserver);
     }
 
     Update(delta: number): void {
         super.Update(delta);
+
+        // Disabled hovering while disabled through hierarchy
+        if (!this.IsEnabledByHeirarchy()) {
+            this._hovered = false;
+            return;
+        }
 
         // Call the hover callback when the cursor is inside the clickbox and it wasn't marked as hovered
         // Or when the cursor is not inside the clickbox but it is marked as hovered
@@ -101,7 +111,7 @@ abstract class ClickableBaseComponent extends ComponentBase implements IDebugDra
 
     Unitialize(): void {
         Input.MouseObservable.Unsubscribe(this._mouseObserver);
-        this._parent.worldRelativeTransform.Unsubscribe(this._transformObserver);
+        this._parent.WorldRelativeTransform.Unsubscribe(this._transformObserver);
         super.Unitialize();
     }
 
@@ -139,9 +149,9 @@ export class ClickboxComponent extends ClickableBaseComponent {
     }
 
     protected CalculateClickArea(): void {
-        const pos = this._parent.worldRelativeTransform.Position;
-        const scale = this._parent.worldRelativeTransform.Scale;
-        const rot = this._parent.worldRelativeTransform.RotationRadian;
+        const pos = this._parent.WorldRelativeTransform.Position;
+        const scale = this._parent.WorldRelativeTransform.Scale;
+        const rot = this._parent.WorldRelativeTransform.RotationRadian;
 
         this._clickArea = MiscUtil.CreateAlignmentBasedBox(pos, this._verticalAlignment, this._horizontalAlignment, Vec2Utils.Mult(this._size, scale));
 
@@ -173,7 +183,7 @@ export class ClickPolygonComponent extends ClickableBaseComponent {
     }
 
     protected CalculateClickArea(): void {
-        const trans = this._parent.worldRelativeTransform;
+        const trans = this._parent.WorldRelativeTransform;
         this._clickArea = [];
 
         if (trans.Rotation != 0) {
@@ -208,17 +218,17 @@ export class ClickCircleComponent extends ClickableBaseComponent {
     }
 
     IsPointInButton(point: Vec2): boolean {
-        return Vec2Utils.Distance(point, this._parent.worldRelativeTransform.Position) <= this._clickRadius;
+        return Vec2Utils.Distance(point, this._parent.WorldRelativeTransform.Position) <= this._clickRadius;
     }
 
     protected CalculateClickArea(): void {
-        this._clickRadius = this._radius * Math.max(this._parent.worldRelativeTransform.Scale[0], this._parent.worldRelativeTransform.Scale[1]);
+        this._clickRadius = this._radius * Math.max(this._parent.WorldRelativeTransform.Scale[0], this._parent.WorldRelativeTransform.Scale[1]);
     }
 
     get DebugDrawData(): number[] {
         const returned: number[] = [];
-        const pos = this._parent.worldRelativeTransform.Position;
-        const radius = (this._parent.worldRelativeTransform.Scale[0] + this._parent.worldRelativeTransform.Scale[1]) * 0.5 * this._radius;
+        const pos = this._parent.WorldRelativeTransform.Position;
+        const radius = (this._parent.WorldRelativeTransform.Scale[0] + this._parent.WorldRelativeTransform.Scale[1]) * 0.5 * this._radius;
 
         for (let a = 0; a < 360; a += 10)
             returned.push(...Vec2Utils.RotatePointAroundCenter([radius, 0], ScalarUtil.ToRadian(a), pos), 1, 1, 1);

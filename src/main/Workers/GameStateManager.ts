@@ -11,7 +11,7 @@ interface IStateContainer {
     nextStates: string[];
 }
 
-const initialState = 'title';
+const initialState = 'intro';
 const GameStateDictionary: { [key: string]: IStateContainer } = {
     intro: {
         stateInstance: new GameStateIntro(),

@@ -9,21 +9,19 @@ import { SoundSingleInstanceComponent } from "../Components/Sound/SoundSingleIns
 export class TestEntity extends GameEntityBase {
     constructor(parent: GameEntityBase | void | null) {
         super(parent);
-        this.transform.Depth = -5;
-        this.AddComponent(new DrawDirectiveStaticImage(this, "spikes", [17, 9]));
+        this.Transform.Depth = -5;
+        new DrawDirectiveStaticImage(this, "spikes", [17, 9]);
 
         const hitbox = new HitboxRectangle(this, 17, 10);
         hitbox.CollisionGroup = CollisionGroup.Hazard;
         hitbox.CollideWithGroup = CollisionGroup.Player;
 
         const sound = new SoundSingleInstanceComponent(this, 'sfx', true);
-        this.AddComponent(sound);
 
         hitbox.TriggerState = TriggerState.OnEnterTrigger;
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => sound.Play();
 
-        this.AddComponent(hitbox);
-        this.AddComponent(new LightComponent(this, [0.25, 0, 0.25], 50, 0));
+        new LightComponent(this, [0.25, 0, 0.25], 50, 0);
     }
 
     Update(delta: number) {

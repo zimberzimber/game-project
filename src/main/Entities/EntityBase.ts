@@ -4,10 +4,9 @@ import { Game } from "../Workers/Game";
 import { Log } from "../Workers/Logger";
 
 export abstract class EntityBase implements ITransformObserver {
-
-    readonly entityId: number;
-    readonly transform: Transform = new Transform();
-    readonly worldRelativeTransform: Transform = new Transform();
+    readonly EntityId: number;
+    readonly Transform: Transform = new Transform();
+    readonly WorldRelativeTransform: Transform = new Transform();
 
     protected _parent: EntityBase | undefined;
     protected _children: EntityBase[] = [];
@@ -16,11 +15,27 @@ export abstract class EntityBase implements ITransformObserver {
     get Parent(): EntityBase | undefined { return this._parent; }
     get Children(): EntityBase[] { return this._children; }
 
+    private _enabled: boolean = true;
+    get Enabled(): boolean { return this._enabled; }
+    set Enabled(enable: boolean) {
+        if (this._enabled != enable) {
+            this._enabled = enable;
+            if (enable)
+                this.OnEnabled();
+            else
+                this.OnDisabled();
+        }
+    }
+
     constructor(parent: EntityBase | void | null) {
         this._parent = parent || undefined;
-        this.entityId = Game.NextEntityId;
+        this.EntityId = Game.NextEntityId;
 
-        this.transform.Subscribe(this);
+        // Add the entity as a child to the parent, or to the entity tree root
+        if (parent) parent.AddChildEntity(this);
+        else Game.AddEntity(this);
+
+        this.Transform.Subscribe(this);
         EntityBase.CalculateWorlRelativeTransform(this);
     }
 
@@ -29,6 +44,8 @@ export abstract class EntityBase implements ITransformObserver {
         this._children.forEach(c => c.OnObservableNotified(args));
     }
 
+    protected OnEnabled(): void { };
+    protected OnDisabled(): void { };
     Update(delta: number): void {
         this._components.forEach(c => c.Update(delta));
         this._children.forEach(c => c.Update(delta));
@@ -118,8 +135,8 @@ export abstract class EntityBase implements ITransformObserver {
             delete this._parent;
         }
 
-        this.transform.UnsubscribeAll();
-        this.worldRelativeTransform.UnsubscribeAll();
+        this.Transform.UnsubscribeAll();
+        this.WorldRelativeTransform.UnsubscribeAll();
         this.RemoveAllComponents();
         this.RemoveAllChildEntities();
 
@@ -131,22 +148,31 @@ export abstract class EntityBase implements ITransformObserver {
         let relative: Transform;
 
         if (entity._parent == undefined)
-            relative = Transform.Copy(entity.transform);
+            relative = Transform.Copy(entity.Transform);
         else {
-            relative = entity.transform;
+            relative = entity.Transform;
             let current: EntityBase | undefined = entity._parent;
             while (current) {
-                relative = Transform.TranformByTransform(relative, current.transform);
+                relative = Transform.TranformByTransform(relative, current.Transform);
                 current = current.Parent;
             }
         }
 
         // Changing the original transform instead of overriding it to retain observers and prevent memory leaks
-        entity.worldRelativeTransform.SetTransformParams(relative.Position, relative.Rotation, relative.Scale, relative.Depth);
+        entity.WorldRelativeTransform.SetTransformParams(relative.Position, relative.Rotation, relative.Scale, relative.Depth);
+    }
+
+    IsEnabledByHeirarchy(): boolean {
+        let e: EntityBase | undefined = this;
+        do {
+            if (!e._enabled) return false;
+            e = e._parent;
+        } while (e);
+        
+        return true;
     }
 
     toString = (): string => this.constructor.name;
-
 }
 
 export class UiEntityBase extends EntityBase {

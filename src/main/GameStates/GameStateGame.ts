@@ -9,17 +9,15 @@ import { GameEntityBase } from "../Entities/EntityBase";
 import { PlayerEntity } from "../Entities/Player/PlayerRoot";
 import { DrawDirectiveScrollableTiledImage } from "../Components/Visual/DrawDirectiveTiledImage";
 import { IGameState } from "./GameStateBase";
-import { ButtonBasicEntity } from "../Entities/Ui/ButtonBasic";
-import { WindowBasicEntity } from "../Entities/Ui/WindowBasic";
+import { ButtonBasicEntity } from "../Entities/Ui/Composite/Buttons";
+import { WindowBaseEntity } from "../Entities/Ui/WindowBase";
+import { WindowBackgroundEntity } from "../Entities/Ui/Composite/WindowBackground";
 
 export class GameStateGame implements IGameState {
 
     OnActivated(): void {
         let p = new PlayerEntity();
-        Game.AddEntity(p);
-
-        let w = new WindowBasicEntity(null, [100, 67], 10, 'e');
-        Game.AddEntity(w);
+        let w = new WindowBackgroundEntity(null, [100, 67], 10, 'e');
 
         // for (let i = 0; i < 3; i++) {
         //     for (let j = 0; j < 3; j++) {
@@ -33,15 +31,13 @@ export class GameStateGame implements IGameState {
         // let test = new TestEntity();
         // Game.AddEntity(test);
         let button = new ButtonBasicEntity(null, [30, 10], 'button_wide');
-        Game.AddEntity(button);
 
         button.OnClick = () => console.log('badabing');
         button.OnUnclick = (isInside: boolean) => console.log(`Badaboom in: ${isInside}`);
         button.HoverEvent = (hovered: boolean) => console.log(`Hovered: ${hovered}`);
 
         let temp = new GameEntityBase();
-        temp.AddComponent(new DrawDirectiveScrollableTiledImage(temp, 'water', [50, 50], [64, 500], [0, 10]));
-        Game.AddEntity(temp);
+        new DrawDirectiveScrollableTiledImage(temp, 'water', [50, 50], [64, 500], [0, 10]);
     }
 
     OnDeactivated(): void { }

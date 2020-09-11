@@ -24,7 +24,7 @@ export class HitboxPolygon extends HitboxBase {
     }
 
     get CanvasReletivePolyline(): Vec2[] {
-        const trans = this._parent.worldRelativeTransform;
+        const trans = this._parent.WorldRelativeTransform;
         const radian = trans.RotationRadian;
         const polyline: Vec2[] = [];
 

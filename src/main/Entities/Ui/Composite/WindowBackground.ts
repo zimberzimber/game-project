@@ -1,10 +1,10 @@
-import { UiEntityBase } from "../EntityBase";
-import { Vec2 } from "../../Models/Vectors";
-import { DrawDirectiveStaticImage } from "../../Components/Visual/DrawDirectiveStaticImage";
-import { Vec2Utils } from "../../Utility/Vec2";
-import { VerticalAlignment, HorizontalAlignment } from "../../Models/GenericInterfaces";
+import { UiEntityBase } from "../../EntityBase";
+import { DrawDirectiveStaticImage } from "../../../Components/Visual/DrawDirectiveStaticImage";
+import { Vec2 } from "../../../Models/Vectors";
+import { Vec2Utils } from "../../../Utility/Vec2";
+import { VerticalAlignment, HorizontalAlignment } from "../../../Models/GenericInterfaces";
 
-export class WindowBasicEntity extends UiEntityBase {
+export class WindowBackgroundEntity extends UiEntityBase {
     private _dds: DrawDirectiveStaticImage[][] = [];
 
     private _size: Vec2;
@@ -33,7 +33,6 @@ export class WindowBasicEntity extends UiEntityBase {
                 const c = new DrawDirectiveStaticImage(this, `${spriteName}_${y}${x}`);
                 c.Alignment = { vertical: VerticalAlignment.Bottom, horizontal: HorizontalAlignment.Left };
                 this._dds[x][y] = c;
-                this.AddComponent(c);
             }
         }
         this.RecalculateDrawDirectives();

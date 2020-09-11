@@ -20,14 +20,14 @@ export class SoundSingleInstanceComponent extends ComponentBase implements ITran
 
             this._isSpatial = spatial;
             if (spatial)
-                this.Parent.worldRelativeTransform.Subscribe(this);
+                this.Parent.WorldRelativeTransform.Subscribe(this);
         } else
-            Log.Error(`Entity ID ${this.Parent.entityId} initialized a sound component with an undefined sound: ${soundName}`);
+            Log.Error(`Entity ID ${this.Parent.EntityId} initialized a sound component with an undefined sound: ${soundName}`);
     }
 
     OnObservableNotified(args: ITransformEventArgs): void {
         if (this.Enabled && args.position && Audio.IsActive(this._currentSoundId))
-            SpatialSoundManagement.UpdateOrigin(this._currentSoundId, this.Parent.worldRelativeTransform.Position);
+            SpatialSoundManagement.UpdateOrigin(this._currentSoundId, this.Parent.WorldRelativeTransform.Position);
     }
 
     Play(): void {
@@ -38,7 +38,7 @@ export class SoundSingleInstanceComponent extends ComponentBase implements ITran
         else {
             this._currentSoundId = Audio.PlaySound(this._soundDefinition);
             if (this._isSpatial)
-                SpatialSoundManagement.AddSound(this._currentSoundId, this.Parent.worldRelativeTransform.Position, this._soundDefinition);
+                SpatialSoundManagement.AddSound(this._currentSoundId, this.Parent.WorldRelativeTransform.Position, this._soundDefinition);
         }
     }
 
@@ -70,7 +70,7 @@ export class SoundSingleInstanceComponent extends ComponentBase implements ITran
     Unitialize(): void {
         if (Audio.IsActive(this._currentSoundId) && Audio.GetLooping(this._currentSoundId))
             Audio.SetLooping(this._currentSoundId, false);
-        this.Parent.worldRelativeTransform.Unsubscribe(this);
+        this.Parent.WorldRelativeTransform.Unsubscribe(this);
         super.Unitialize();
     }
 }

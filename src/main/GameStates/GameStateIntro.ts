@@ -7,6 +7,7 @@ import { DrawDirectiveStaticImage } from "../Components/Visual/DrawDirectiveStat
 import { Vec2Utils } from "../Utility/Vec2";
 import { Camera } from "../Workers/CameraManager";
 import { IntroSplash } from "../Entities/Ui/Premade/IntroSplash";
+import { HorizontalAlignment, VerticalAlignment } from "../Models/GenericInterfaces";
 
 const fadeDuration = 0.75;
 const stayDuration = 2.5;
@@ -21,18 +22,14 @@ export class GameStateIntro implements IGameState {
     OnActivated(): void {
         this._time = 0;
         this._splash = new IntroSplash();
-        Game.AddEntity(this._splash);
 
         const me = new UiEntityBase();
         this._music = new SoundSingleInstanceComponent(me, 'music_main', false);
-        me.AddComponent(this._music);
-        Game.AddEntity(me);
         
         const blackEnt = new UiEntityBase();
         this._black = new DrawDirectiveStaticImage(blackEnt, 'color_black', Vec2Utils.SumS(Camera.Transform.Scale, 10));
-        blackEnt.transform.Depth = 10;
-        blackEnt.AddComponent(this._black);
-        Game.AddEntity(blackEnt);
+        this._black.Alignment = { horizontal: HorizontalAlignment.Middle, vertical: VerticalAlignment.Middle };
+        blackEnt.Transform.Depth = 10;
 
         this._music.FadeIn(4);
     }

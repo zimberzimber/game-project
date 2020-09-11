@@ -6,38 +6,38 @@ export enum ControlKey {
 
 // control key : character code
 export interface IKeymap {
-    [ControlKey.up]: number;
-    [ControlKey.down]: number;
-    [ControlKey.left]: number;
-    [ControlKey.right]: number;
-    [ControlKey.pause]: number;
-    [ControlKey.action1]: number;
-    [ControlKey.action2]: number;
-    [ControlKey.action3]: number;
-    [ControlKey.action4]: number;
+    [ControlKey.up]: string;
+    [ControlKey.down]: string;
+    [ControlKey.left]: string;
+    [ControlKey.right]: string;
+    [ControlKey.pause]: string;
+    [ControlKey.action1]: string;
+    [ControlKey.action2]: string;
+    [ControlKey.action3]: string;
+    [ControlKey.action4]: string;
 }
 
 export class KeymapContainer {
     private _keyToCharcode: IKeymap;
-    private _chardcodeToKey: { [key: number]: ControlKey };
+    private _codeToKey: { [key: number]: ControlKey };
 
     set Keymap(keymap: IKeymap) {
         this._keyToCharcode = Object.assign({}, keymap);
-        this._chardcodeToKey = {};
+        this._codeToKey = {};
         for (let key in keymap)
             //@ts-ignore
-            this._chardcodeToKey[keymap[key]] = ControlKey[ControlKey[key]];
+            this._codeToKey[keymap[key]] = ControlKey[ControlKey[key]];
     }
 
     constructor(keymap: IKeymap) {
         this.Keymap = keymap;
     }
 
-    GetKeyForCharcode(charcode: number): ControlKey | null {
-        return this._chardcodeToKey[charcode] !== undefined ? this._chardcodeToKey[charcode] : null;
+    GetKeyForCharcode(code: string): ControlKey | null {
+        return this._codeToKey[code] !== undefined ? this._codeToKey[code] : null;
     }
 
-    GetCharcodeForKey(key: ControlKey): number | null {
+    GetCharcodeForKey(key: ControlKey): string | null {
         return this._keyToCharcode[key] !== undefined ? this._keyToCharcode[key] : null;
     }
 }

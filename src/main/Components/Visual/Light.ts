@@ -49,7 +49,7 @@ export class LightComponent extends ComponentBase implements ITransformObserver 
     constructor(parent: EntityBase, color: Vec3, radius: number, hardness: number) {
         super(parent);
         this._radius = radius;
-        this.Parent.worldRelativeTransform.Subscribe(this);
+        this.Parent.WorldRelativeTransform.Subscribe(this);
         this.Color = color; // Also calculates webgl data
         this.Hardness = hardness; // Also calculates webgl data
     }
@@ -60,7 +60,7 @@ export class LightComponent extends ComponentBase implements ITransformObserver 
     }
 
     protected CaulculateWebglData(): void {
-        const trans = this.Parent.worldRelativeTransform;
+        const trans = this.Parent.WorldRelativeTransform;
         const scaledRadius = (trans.Scale[0] + trans.Scale[1]) / 2 * this._radius;
         this._boundingRadius = scaledRadius;
 
@@ -76,7 +76,7 @@ export class LightComponent extends ComponentBase implements ITransformObserver 
     }
 
     Unitialize(): void {
-        this.Parent.worldRelativeTransform.Unsubscribe(this);
+        this.Parent.WorldRelativeTransform.Unsubscribe(this);
         super.Unitialize();
     }
 }

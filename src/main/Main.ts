@@ -78,6 +78,7 @@ IDB.OpenDatabase(gameSchema)
             Assets.Dispose();
 
             const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
+            canvas.oncontextmenu = () => false; // Prevent context menu on right click
             const aspectRatio = 4 / 3;
 
             canvas.width = canvas.clientWidth;
@@ -90,7 +91,6 @@ IDB.OpenDatabase(gameSchema)
             Camera.Transform.Rotation = 0;
 
             Input.MouseElement = canvas;
-            Input.Keymap = Settings.GetSetting(UserSetting.ControlsKeymap);
 
             StateManager.Initialize();
             requestAnimationFrame(Game.Update.bind(Game))

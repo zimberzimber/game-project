@@ -66,33 +66,33 @@ class GameManager implements IConfigObserver {
 
     // Add an entity to the entity tree root
     AddEntity(entity: EntityBase): void {
-        this._entities[entity.entityId] = entity;
+        this._entities[entity.EntityId] = entity;
     }
 
     // Remove an entity
     RemoveEntity(entity: EntityBase): void {
-        if (this._entities[entity.entityId]) {
-            delete this._entities[entity.entityId];
+        if (this._entities[entity.EntityId]) {
+            delete this._entities[entity.EntityId];
         }
         entity.Delete();
     }
 
     IsRootEntity(entity: EntityBase): boolean {
-        return this._entities[entity.entityId] ? true : false;
+        return this._entities[entity.EntityId] ? true : false;
     }
 
     GetEntityById(id: number): EntityBase | null {
-        const e = this.GetAllEntities().filter(e => e.entityId == id);
+        const e = this.GetAllEntities().filter(e => e.EntityId == id);
         if (e[0])
             return e[0];
         return null;
     }
 
-    GetEntitiesInRadius(origin: Vec2, radius: number): GameEntityBase[] {
+    GetEntitiesInRadius(origin: Vec2, radius: number, enabledOnly: boolean = true): GameEntityBase[] {
         const entities: GameEntityBase[] = [];
 
         this.GetAllEntities().forEach(e => {
-            if (e instanceof GameEntityBase && Vec2Utils.Distance(origin, e.worldRelativeTransform.Position) <= radius)
+            if (e instanceof GameEntityBase && Vec2Utils.Distance(origin, e.WorldRelativeTransform.Position) <= radius)
                 entities.push(e);
         });
 
@@ -103,7 +103,7 @@ class GameManager implements IConfigObserver {
         const entities: GameEntityBase[] = [];
 
         this.GetAllEntities().forEach(e => {
-            if (e instanceof GameEntityBase && IsPointInPolygon(e.worldRelativeTransform.Position, polygon))
+            if (e instanceof GameEntityBase && IsPointInPolygon(e.WorldRelativeTransform.Position, polygon))
                 entities.push(e);
         });
 
@@ -114,7 +114,7 @@ class GameManager implements IConfigObserver {
         const entities: GameEntityBase[] = [];
 
         this.GetAllEntities().forEach(e => {
-            const pos = e.worldRelativeTransform.Position;
+            const pos = e.WorldRelativeTransform.Position;
             if (e instanceof GameEntityBase
                 && pos[0] >= bottomLeft[0] && pos[0] <= topRight[0]
                 && pos[1] >= bottomLeft[1] && pos[1] <= topRight[1])
@@ -139,7 +139,7 @@ class GameManager implements IConfigObserver {
             str = `|${str}`;
 
         //@ts-ignore (object.constructor.name is not recognized by TypeScript)
-        str = `${str}(${parent.entityId})${parent.constructor.name}`;
+        str = `${str}(${parent.EntityId})${parent.constructor.name}`;
         parent.Children.forEach(c => {
             str = `${str}\n${this.GetEntityTreeStringHelper(c, depth + 1)}`
         });
@@ -147,58 +147,66 @@ class GameManager implements IConfigObserver {
     }
 
     // Function returning a collection of all the entities within the game. Utilizes 'GetAllEntitiesHelper'.
-    GetAllEntities(): EntityBase[] {
+    GetAllEntities(activeOnly: boolean = true): EntityBase[] {
         let entities: EntityBase[] = [];
         this._entities.forEach(entity => {
-            entities.push(entity);
-            if (entity.Children.length > 0)
-                entities.push(...this.GetAllEntitiesHelper(entity));
+            if (!activeOnly || entity.Enabled) {
+                entities.push(entity);
+                if (entity.Children.length > 0)
+                    entities.push(...this.GetAllEntitiesHelper(entity, activeOnly));
+            }
         });
         return entities;
     }
 
     // Recursive helper function for obtaining children of a give parent entity.
-    private GetAllEntitiesHelper(parent: EntityBase): EntityBase[] {
+    private GetAllEntitiesHelper(parent: EntityBase, activeOnly: boolean): EntityBase[] {
         let children: EntityBase[] = [];
         parent.Children.forEach(child => {
-            children.push(child);
-            if (child.Children.length > 0)
-                children.push(...this.GetAllEntitiesHelper(child));
+            if (!activeOnly || child.Enabled) {
+                children.push(child);
+                if (child.Children.length > 0)
+                    children.push(...this.GetAllEntitiesHelper(child, activeOnly));
+            }
         })
         return children;
     }
 
-    GetAllEntitiesWithGuardMethod(method: (entity: EntityBase) => boolean): EntityBase[] {
+    GetAllEntitiesWithGuardMethod(method: (entity: EntityBase) => boolean, activeOnly: boolean = true): EntityBase[] {
         let entities: EntityBase[] = [];
         this._entities.forEach(entity => {
-            if (method(entity))
-                entities.push(entity);
-            if (entity.Children.length > 0)
-                entities.push(...this.GetAllEntitiesWithGuardMethodHelper(entity, method));
+            if (!activeOnly || entity.Enabled) {
+                if (method(entity))
+                    entities.push(entity);
+                if (entity.Children.length > 0)
+                    entities.push(...this.GetAllEntitiesWithGuardMethodHelper(entity, method, activeOnly));
+            }
         });
         return entities;
     }
 
     // Recursive helper function for obtaining children of a give parent entity.
-    private GetAllEntitiesWithGuardMethodHelper(parent: EntityBase, method: (entity: EntityBase) => boolean): EntityBase[] {
+    private GetAllEntitiesWithGuardMethodHelper(parent: EntityBase, method: (entity: EntityBase) => boolean, activeOnly: boolean): EntityBase[] {
         let children: EntityBase[] = [];
         parent.Children.forEach(child => {
-            if (method(child))
-                children.push(child);
-            if (child.Children.length > 0)
-                children.push(...this.GetAllEntitiesHelper(child));
+            if (!activeOnly || child.Enabled) {
+                if (method(child))
+                    children.push(child);
+                if (child.Children.length > 0)
+                    children.push(...this.GetAllEntitiesWithGuardMethodHelper(child, method, activeOnly));
+            }
         })
         return children;
     }
 
     // Get components of a certain type from all the entities within the game.
     // Calls 'GetAllEntities' to obtain all the current entities, and passes that as a collection to 'GetAllComponentsOfTypeFromEntityCollection'
-    GetAllComponentsOfType(type: any, activeOnly: boolean = false): ComponentBase[] {
-        return this.GetAllComponentsOfTypeFromEntityCollection(type, this.GetAllEntities(), activeOnly);
+    GetAllComponentsOfType(type: any, activeOnly: boolean = true): ComponentBase[] {
+        return this.GetAllComponentsOfTypeFromEntityCollection(type, this.GetAllEntities(activeOnly), activeOnly);
     }
 
     // Get components of a certain type from the given collection.
-    GetAllComponentsOfTypeFromEntityCollection(type: any, collection: EntityBase[], activeOnly: boolean = false): ComponentBase[] {
+    GetAllComponentsOfTypeFromEntityCollection(type: any, collection: EntityBase[], activeOnly: boolean = true): ComponentBase[] {
         let returned: ComponentBase[] = [];
         collection.forEach(e => returned.push(...e.GetComponentsOfType(type, activeOnly)));
         return returned;
@@ -238,7 +246,7 @@ class GameManager implements IConfigObserver {
         // Collect lighting data for scene (UI doesn't support lighting)
         const lights: number[] = [];
         Game.GetAllComponentsOfTypeFromEntityCollection(LightComponent, gameEntities, true).forEach((l: LightComponent) => {
-            if (Camera.IsInView(l.Parent.worldRelativeTransform.Position, l.BoundingRadius))
+            if (Camera.IsInView(l.Parent.WorldRelativeTransform.Position, l.BoundingRadius))
                 lights.push(...l.WebglData);
         });
         Rendering.SetDrawData('lighting', lights)
@@ -304,8 +312,8 @@ class GameManager implements IConfigObserver {
 const CollectSceneRendererData = (rendererName: string, collection: DrawDirectiveBase[], inViewOnly: boolean = true) => {
     const data: ISceneDrawData = { opaque: {}, translucent: [] };
     const depthList = new SortedLinkedList<DrawDirectiveBase>((dd1: DrawDirectiveBase, dd2: DrawDirectiveBase) => {
-        if (dd1.Parent.worldRelativeTransform.Depth < dd2.Parent.worldRelativeTransform.Depth) return -1;
-        if (dd1.Parent.worldRelativeTransform.Depth > dd2.Parent.worldRelativeTransform.Depth) return 1;
+        if (dd1.Parent.WorldRelativeTransform.Depth < dd2.Parent.WorldRelativeTransform.Depth) return -1;
+        if (dd1.Parent.WorldRelativeTransform.Depth > dd2.Parent.WorldRelativeTransform.Depth) return 1;
         return 0;
     });
 
@@ -315,15 +323,15 @@ const CollectSceneRendererData = (rendererName: string, collection: DrawDirectiv
     // Collect draw data
     collection.forEach((dd: DrawDirectiveBase) => {
         // Skip directives outside of view
-        const dTrans = dd.Parent.worldRelativeTransform
+        const dTrans = dd.Parent.WorldRelativeTransform
 
         if (dd.Opacity > 0 && (!inViewOnly || Camera.IsInView(dTrans.Position, dd.BoundingRadius))) {
             let indexOffset = 0;
 
             if (dd.IsTranslucent || dd.Opacity < 1) {
                 depthList.Add(dd);
-                if (dd.Parent.worldRelativeTransform.Depth < lowestDepth)
-                    lowestDepth = dd.Parent.worldRelativeTransform.Depth;
+                if (dd.Parent.WorldRelativeTransform.Depth < lowestDepth)
+                    lowestDepth = dd.Parent.WorldRelativeTransform.Depth;
             } else {
                 if (data.opaque[dd.ImageId])
                     indexOffset = data.opaque[dd.ImageId].indexes[data.opaque[dd.ImageId].indexes.length - 1] + 1;
@@ -341,7 +349,7 @@ const CollectSceneRendererData = (rendererName: string, collection: DrawDirectiv
         let indexOffset = 0;
 
         // Part 2 of dealing with negative depth
-        const d = dd.Parent.worldRelativeTransform.Depth - lowestDepth;
+        const d = dd.Parent.WorldRelativeTransform.Depth - lowestDepth;
         if (!data.translucent[d])
             data.translucent[d] = [];
 

@@ -18,10 +18,11 @@ export abstract class ComponentBase {
 
     constructor(parent: EntityBase) {
         this._parent = parent;
+        parent.AddComponent(this);
     }
 
-    OnEnabled(): void { };
-    OnDisabled(): void { };
+    protected OnEnabled(): void { };
+    protected OnDisabled(): void { };
     Update(delta: number): void { };
 
     Unitialize(): void {
@@ -30,5 +31,9 @@ export abstract class ComponentBase {
 
     toString(): string {
         return this.constructor.name;
+    }
+
+    IsEnabledByHeirarchy(): boolean {
+        return this._enabled ? this._parent.IsEnabledByHeirarchy() : false;
     }
 }

@@ -1,11 +1,11 @@
-import { UiEntityBase } from "../EntityBase";
-import { Vec2 } from "../../Models/Vectors";
-import { Vec2Utils } from "../../Utility/Vec2";
-import { ScalarUtil } from "../../Utility/Scalar";
-import { ClickboxComponent } from "../../Components/Interactable/Clickable";
-import { Game } from "../../Workers/Game";
-import { DrawDirectiveStaticImage } from "../../Components/Visual/DrawDirectiveStaticImage";
-import { VerticalAlignment, HorizontalAlignment } from "../../Models/GenericInterfaces";
+import { UiEntityBase } from "../../EntityBase";
+import { Vec2 } from "../../../Models/Vectors";
+import { Vec2Utils } from "../../../Utility/Vec2";
+import { ScalarUtil } from "../../../Utility/Scalar";
+import { ClickboxComponent } from "../../../Components/Interactable/Clickable";
+import { Game } from "../../../Workers/Game";
+import { DrawDirectiveStaticImage } from "../../../Components/Visual/DrawDirectiveStaticImage";
+import { VerticalAlignment, HorizontalAlignment } from "../../../Models/GenericInterfaces";
 
 interface ISliderValueChanged {
     (oldValue: number, newValue: number): void;
@@ -77,21 +77,17 @@ export class SliderBasicEntity extends UiEntityBase {
         this._bar = new DrawDirectiveStaticImage(this, 'slider_basic_bar', Vec2Utils.Copy(size));
         this._bar.VerticalAlignment = VerticalAlignment.Middle;
         this._bar.HorizontalAlignment = HorizontalAlignment.Left;
-        this.AddComponent(this._bar);
 
         this._nubEntity = new UiEntityBase(this);
-        this.AddChildEntity(this._nubEntity);
 
         this._nubImage = new DrawDirectiveStaticImage(this._nubEntity, 'slider_basic_nub', [size[1], size[1]]);
         this._nubImage.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
-        this._nubEntity.AddComponent(this._nubImage);
 
         this._clickable = new ClickboxComponent(this._nubEntity, [size[1], size[1]]);
         this._clickable.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
         this._clickable.OnClickCallback = this.ClickableDown.bind(this);
         this._clickable.OnUnclickCallback = this.ClickableUp.bind(this);
         this._clickable.HoverEventCallback = this.ClickableHover.bind(this);
-        this._nubEntity.AddComponent(this._clickable);
 
         // Will update the nubs position accordingly as well
         this.Value = initialValue;
@@ -107,14 +103,14 @@ export class SliderBasicEntity extends UiEntityBase {
 
     private UpdateNubPosition(): void {
         const pcnt = (this._value - this._range[0]) / (this._range[1] - this._range[0])
-        this._nubEntity.transform.Position = [this._size[0] * pcnt, this._nubEntity.transform.Position[1]];
+        this._nubEntity.Transform.Position = [this._size[0] * pcnt, this._nubEntity.Transform.Position[1]];
     }
 
     Update(delta: number): void {
         super.Update(delta);
 
         if (this._isDragging) {
-            const pos = this.worldRelativeTransform.Position;
+            const pos = this.WorldRelativeTransform.Position;
             const mousePos = Game.MousePosition;
 
             const pcnt = ScalarUtil.Clamp(0, (mousePos[0] - pos[0]) / this._size[0], 1);

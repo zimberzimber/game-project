@@ -35,7 +35,7 @@ export class ParticleComponent extends DrawDirectiveBase {
     constructor(parent: EntityBase, particleName: string) {
         super(parent);
         // Unsibscribe from the transform observable as its not needed.
-        this.Parent.worldRelativeTransform.Unsubscribe(this);
+        this.Parent.WorldRelativeTransform.Unsubscribe(this);
 
         this._particleData = particleDefinitions[particleName];
 
@@ -115,15 +115,15 @@ export class ParticleComponent extends DrawDirectiveBase {
         const inst: IParticleInstance = this._particleController.CreateInstance();
 
         if (!this._particleData.relativePositioning) {
-            inst.position[0] += this.Parent.worldRelativeTransform.Position[0];
-            inst.position[1] += this.Parent.worldRelativeTransform.Position[1];
+            inst.position[0] += this.Parent.WorldRelativeTransform.Position[0];
+            inst.position[1] += this.Parent.WorldRelativeTransform.Position[1];
         }
 
         this._particleInstances.push(inst);
     }
 
     private InsertWebglDataFromInstace(inst: IParticleInstance): void {
-        const trans = this.Parent.worldRelativeTransform;
+        const trans = this.Parent.WorldRelativeTransform;
         // Looks prettier when compiled
         const frame: ISpriteFrame = (this._spriteData as IMultiFrameSpriteStorage).frames ? (this._spriteData as IMultiFrameSpriteStorage).frames[inst.frame] : (this._spriteData as ISingleFrameSpriteStorage).frame || { origin: [0, 0], size: [0, 0] };
 
@@ -168,7 +168,7 @@ export class ParticleComponent extends DrawDirectiveBase {
             index, index + 2, index + 3
         );
 
-        const boundingRadius = Vec2Utils.Distance(origin, this.Parent.transform.Position) + instanceBoundingRadius;
+        const boundingRadius = Vec2Utils.Distance(origin, this.Parent.Transform.Position) + instanceBoundingRadius;
         if (this._boundingRadius < boundingRadius)
             this._boundingRadius = boundingRadius;
     }

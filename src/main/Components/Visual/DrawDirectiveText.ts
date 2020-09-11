@@ -14,21 +14,26 @@ export class DrawDirectiveText extends DrawDirectiveBase {
     get ImageId(): number { return DrawDirectiveText._fontImageId; }
     get IsTranslucent(): boolean { return false; }
 
-    constructor(parent: EntityBase, size: number, text: string) {
+    constructor(parent: EntityBase, size: number, text: any) {
         super(parent);
         this._spriteData = Sprites.GetAnimatedSpriteData('font_arial') || { imageId: 0, frames: [], isTranslucent: false };
         this._fontSize = size;
-        this._text = text;
-        this.UpdateWebglData();
+        this.Text = text; // updates Webgl data as well
 
         if (DrawDirectiveText._fontImageId == -2)
             DrawDirectiveText._fontImageId = Images.GetImageIdFromName('font_arial');
     }
 
     private _text: string = '';
-    get Text(): string { return this._text };
-    set Text(text: string) {
-        this._text = text;
+    get Text(): any { return this._text };
+    set Text(text: any) {
+        if (text && typeof text == 'string')
+            this._text = text
+        else if (text)
+            this._text = text.toString();
+        else
+            this._text = '';
+
         this.UpdateWebglData();
     };
 
@@ -47,7 +52,7 @@ export class DrawDirectiveText extends DrawDirectiveBase {
     }
 
     protected UpdateWebglData() {
-        const trans = this._parent.worldRelativeTransform;
+        const trans = this._parent.WorldRelativeTransform;
         const fontSizeMultiplier = this._fontSize / this._spriteData.metadata.originalFontSize;
         const maxCharHeight = this._spriteData.metadata.maxCharHeight as number * trans.Scale[0] * fontSizeMultiplier;
         this._webglData = { attributes: [], indexes: [] };
@@ -105,8 +110,8 @@ export class DrawDirectiveText extends DrawDirectiveBase {
                 const charWidth = frame.size[0] * trans.Scale[0] * fontSizeMultiplier;
 
                 let p1: Vec2 = [trans.Position[0] + offset[0] * trans.Scale[0] + charWidth, trans.Position[1] + offset[1] * trans.Scale[1] + maxCharHeight];
-                let p2: Vec2 = [trans.Position[0] + offset[0] * trans.Scale[0],             trans.Position[1] + offset[1] * trans.Scale[1] + maxCharHeight];
-                let p3: Vec2 = [trans.Position[0] + offset[0] * trans.Scale[0],             trans.Position[1] + offset[1] * trans.Scale[1]];
+                let p2: Vec2 = [trans.Position[0] + offset[0] * trans.Scale[0], trans.Position[1] + offset[1] * trans.Scale[1] + maxCharHeight];
+                let p3: Vec2 = [trans.Position[0] + offset[0] * trans.Scale[0], trans.Position[1] + offset[1] * trans.Scale[1]];
                 let p4: Vec2 = [trans.Position[0] + offset[0] * trans.Scale[0] + charWidth, trans.Position[1] + offset[1] * trans.Scale[1]];
 
                 if (trans.RotationRadian != 0) {
@@ -125,9 +130,9 @@ export class DrawDirectiveText extends DrawDirectiveBase {
                     p1[1] += o; p2[1] += o; p3[1] += o; p4[1] += o;
                 }
 
-                this._webglData.attributes.push(p1[0], p1[1], trans.Depth + this._depthOffset, frame.origin[0] + frame.size[0], frame.origin[1],                 this._opacity);
-                this._webglData.attributes.push(p2[0], p2[1], trans.Depth + this._depthOffset, frame.origin[0],                 frame.origin[1],                 this._opacity);
-                this._webglData.attributes.push(p3[0], p3[1], trans.Depth + this._depthOffset, frame.origin[0],                 frame.origin[1] + frame.size[1], this._opacity);
+                this._webglData.attributes.push(p1[0], p1[1], trans.Depth + this._depthOffset, frame.origin[0] + frame.size[0], frame.origin[1], this._opacity);
+                this._webglData.attributes.push(p2[0], p2[1], trans.Depth + this._depthOffset, frame.origin[0], frame.origin[1], this._opacity);
+                this._webglData.attributes.push(p3[0], p3[1], trans.Depth + this._depthOffset, frame.origin[0], frame.origin[1] + frame.size[1], this._opacity);
                 this._webglData.attributes.push(p4[0], p4[1], trans.Depth + this._depthOffset, frame.origin[0] + frame.size[0], frame.origin[1] + frame.size[1], this._opacity);
 
                 const o = (i - currentLine) * 4;

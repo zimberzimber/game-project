@@ -22,13 +22,9 @@ export class OriEntity extends GameEntityBase {
     constructor(parent: GameEntityBase | void | null) {
         super(parent);
         this.dd = new DrawDirectiveAnimatedImage(this, "ori", [5, 15]);
-        this.AddComponent(this.dd);
-
-        this.light = new DirectionalLightComponent(this, [0.85, 0.85, 1], 150, 0.25, 45, 90)
-        this.AddComponent(this.light);
-
+        this.light = new DirectionalLightComponent(this, [0.85, 0.85, 1], 150, 0.25, 45, 90);
         this.particle = new ParticleComponent(this, 'test');
-        this.AddComponent(this.particle);
+
         this.particle.Start();
     }
 
@@ -54,7 +50,6 @@ export class KuEntity extends GameEntityBase {
     constructor(parent: GameEntityBase | void | null) {
         super(parent);
         this.dd = new DrawDirectiveAnimatedImage(this, "ku", [18, 13]);
-        this.AddComponent(this.dd);
     }
 
     Update(delta: number) {
@@ -75,10 +70,10 @@ export class PlayerEntity extends GameEntityBase {
 
     constructor(parent: GameEntityBase | void | null) {
         super(parent);
-        this.transform.Depth = -50;
-        this.transform.Scale = [3, 3];
+        this.Transform.Depth = -50;
+        this.Transform.Scale = [3, 3];
 
-        this.AddComponent(new PlayerMovementComponent(this));
+        new PlayerMovementComponent(this);
 
         const hitbox = new HitboxRectangle(this, 5, 15);
         hitbox.CollisionGroup = CollisionGroup.Player;
@@ -88,14 +83,11 @@ export class PlayerEntity extends GameEntityBase {
         hitbox.CollisionScript = (e: HitboxBase): void => {
             // e.Parent.transform.MoveTowards(this.transform.Position, -5);
         }
-        this.AddComponent(hitbox);
 
         this.oriEntity = new OriEntity(this);
-        this.oriEntity.transform.SetTransformParams([0, 5], null, null, -1);
-        this.AddChildEntity(this.oriEntity);
+        this.oriEntity.Transform.SetTransformParams([0, 5], null, null, -1);
 
         this.kuEntity = new KuEntity(this);
-        this.AddChildEntity(this.kuEntity);
     }
 
     time = 0;

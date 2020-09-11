@@ -4,6 +4,8 @@ import { Observable } from "../Models/Observable";
 import { KeymapContainer, IKeymap, ControlKey } from "../Models/ControlKeys";
 import { GamepadContainer, IGamepadObserver, IGamepadAxisEvent, IGamepadButtonEvent, GamepadAxis } from "../Models/Controller";
 import { Camera } from "./CameraManager";
+import { Settings } from "./SettingsManager";
+import { ISettingsEventArgs, UserSetting } from "../Models/IUserSettings";
 
 const GamepadButtonKeymap = {
     0: ControlKey.action1,
@@ -161,15 +163,12 @@ class InputHandler {
 
     private _keysDown: { [key: string]: boolean } = {};
     private _keymapContainer: KeymapContainer;
-    set Keymap(keymap: IKeymap) {
-        this._keymapContainer = new KeymapContainer(keymap);
-    }
 
-    GetCharcodeForKey(key: ControlKey): number | null {
+    GetCharcodeForKey(key: ControlKey): string | null {
         return this._keymapContainer.GetCharcodeForKey(key);
     }
-    GetKeyForCharcode(charcode: number): number | null {
-        return this._keymapContainer.GetKeyForCharcode(charcode);
+    GetKeyForCharcode(code: string): number | null {
+        return this._keymapContainer.GetKeyForCharcode(code);
     }
 
     private _mouseElement: HTMLElement | undefined = undefined;
@@ -191,15 +190,23 @@ class InputHandler {
     constructor() {
         window.addEventListener('keydown', this.OnKeyDown.bind(this));
         window.addEventListener('keyup', this.OnKeyUp.bind(this));
+
+        this._keymapContainer = new KeymapContainer(Settings.GetSetting(UserSetting.ControlsKeymap));
+        Settings.Observable.Subscribe({
+            OnObservableNotified(args: ISettingsEventArgs): void {
+                if (args.setting == UserSetting.ControlsKeymap)
+                    Input._keymapContainer = new KeymapContainer(args.newValue);
+            }
+        })
     }
 
-    SimulateKey(keyCode: number, down: boolean): void {
+    SimulateKey(key: string, down: boolean): void {
         if (down)
             //@ts-ignore "Trust me"
-            this.OnKeyDown({ keyCode })
+            this.OnKeyDown({ key })
         else
             //@ts-ignore "Trust me"
-            this.OnKeyUp({ keyCode })
+            this.OnKeyUp({ key })
     }
 
     SimulateMouse(button: number, position: Vec2, down: boolean): void {
@@ -213,7 +220,7 @@ class InputHandler {
 
     private OnKeyDown(e: KeyboardEvent, simulated: boolean = false): void {
         if (this._keymapContainer) {
-            const key = this._keymapContainer.GetKeyForCharcode(e.keyCode);
+            const key = this._keymapContainer.GetKeyForCharcode(e.code);
             if (key !== null && !this._keysDown[key]) {
                 this._keysDown[key] = true;
                 this.KeyboardObservable.Notify({ key: key, state: ButtonState.Down });
@@ -226,7 +233,7 @@ class InputHandler {
 
     private OnKeyUp(e: KeyboardEvent, simulated: boolean = false): void {
         if (this._keymapContainer) {
-            const key = this._keymapContainer.GetKeyForCharcode(e.keyCode);
+            const key = this._keymapContainer.GetKeyForCharcode(e.code);
             if (key !== null && this._keysDown[key]) {
                 delete this._keysDown[key];
                 this.KeyboardObservable.Notify({ key: key, state: ButtonState.Up });

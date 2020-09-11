@@ -14,14 +14,14 @@ import { ScalarUtil } from "../Utility/Scalar";
 const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
     Point: {
         HitboxRectangle: (point: Vec2, c: HitboxRectangle): boolean => {
-            const cTrans = c.Parent.worldRelativeTransform;
+            const cTrans = c.Parent.WorldRelativeTransform;
             if (point[0] >= cTrans.Position[0] - c.Width / 2 && point[0] <= cTrans.Position[0] + c.Width / 2
                 && point[1] >= cTrans.Position[1] - c.Height / 2 && point[1] <= cTrans.Position[1] + c.Height / 2)
                 return true;
             return false;
         },
         HitboxCircle: (point: Vec2, c: HitboxCircle): boolean => {
-            return Vec2Utils.Distance(point, c.Parent.worldRelativeTransform.Position) <= c.Radius;
+            return Vec2Utils.Distance(point, c.Parent.WorldRelativeTransform.Position) <= c.Radius;
         },
         HitboxPolygon: (point: Vec2, c: HitboxPolygon): boolean => {
             return IsPointInPolygon(point, c.CanvasReletivePolyline);
@@ -30,8 +30,8 @@ const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
 
     HitboxRectangle: {
         HitboxRectangle: (a: HitboxRectangle, b: HitboxRectangle): boolean => {
-            const aTrans = a.Parent.worldRelativeTransform;
-            const bTrans = b.Parent.worldRelativeTransform;
+            const aTrans = a.Parent.WorldRelativeTransform;
+            const bTrans = b.Parent.WorldRelativeTransform;
 
             const aw = a.Width / 2 * aTrans.Scale[0];
             const ah = a.Height / 2 * aTrans.Scale[1];
@@ -62,8 +62,8 @@ const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
             return false;
         },
         HitboxCircle: (a: HitboxRectangle, b: HitboxCircle): boolean => {
-            const aTrans = a.Parent.worldRelativeTransform;
-            const bTrans = b.Parent.worldRelativeTransform;
+            const aTrans = a.Parent.WorldRelativeTransform;
+            const bTrans = b.Parent.WorldRelativeTransform;
 
             const aw = a.Width * aTrans.Scale[0] / 2;
             const ah = a.Height * aTrans.Scale[1] / 2;
@@ -95,8 +95,8 @@ const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
             return false;
         },
         HitboxPolygon: (a: HitboxRectangle, b: HitboxPolygon): boolean => {
-            const aTrans = a.Parent.worldRelativeTransform;
-            const bTrans = b.Parent.worldRelativeTransform;
+            const aTrans = a.Parent.WorldRelativeTransform;
+            const bTrans = b.Parent.WorldRelativeTransform;
 
             const aw = a.Width / 2 * aTrans.Scale[0];
             const ah = a.Height / 2 * aTrans.Scale[1];
@@ -119,14 +119,14 @@ const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
     },
     HitboxCircle: {
         HitboxCircle: (a: HitboxCircle, b: HitboxCircle): boolean => {
-            const aTrans = a.Parent.worldRelativeTransform;
-            const bTrans = b.Parent.worldRelativeTransform;
+            const aTrans = a.Parent.WorldRelativeTransform;
+            const bTrans = b.Parent.WorldRelativeTransform;
             const collisionDistance = (aTrans.Scale[0] + aTrans.Scale[1]) / 2 * a.Radius + (bTrans.Scale[0] + bTrans.Scale[1]) / 2 * b.Radius;
             return Vec2Utils.Distance(aTrans.Position, bTrans.Position) <= collisionDistance;
         },
         HitboxPolygon: (a: HitboxCircle, b: HitboxPolygon): boolean => {
             const polyline = b.CanvasReletivePolyline;
-            const aTrans = a.Parent.worldRelativeTransform;
+            const aTrans = a.Parent.WorldRelativeTransform;
 
             // Check if the center of the circle is inside the polygon, as the only uncovered case further down is that the circle is fully inside the polygon
             if (IsPointInPolygon(aTrans.Position, polyline)) return true;
@@ -154,8 +154,8 @@ const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
             if (DoPolygonsIntersect(aPolyline, bPolyline)) return true;
 
             // Check for full immerssion
-            const aTrans = a.Parent.worldRelativeTransform;
-            const bTrans = b.Parent.worldRelativeTransform;
+            const aTrans = a.Parent.WorldRelativeTransform;
+            const bTrans = b.Parent.WorldRelativeTransform;
             if (IsPointInPolygon(aPolyline[0], bPolyline)) return true;
             if (IsPointInPolygon(bPolyline[0], aPolyline)) return true;
 
@@ -170,7 +170,7 @@ const MethodDictionary: { [key: string]: { [key: string]: Function } } = {
  * @param hitbox Within which hitbox to check
  */
 export const IsPointInCollider = (point: Vec2, hitbox: HitboxBase): boolean => {
-    if (Vec2Utils.Distance(point, hitbox.Parent.worldRelativeTransform.Position))
+    if (Vec2Utils.Distance(point, hitbox.Parent.WorldRelativeTransform.Position))
         if (MethodDictionary.Point[hitbox.constructor.name])
             if (MethodDictionary.Point[hitbox.constructor.name](point, hitbox))
                 return true;
@@ -202,8 +202,8 @@ export const CheckCollision = (hitbox1: HitboxBase, hitbox2: HitboxBase): boolea
 // Initial check - Checks whether the distance between the two colliders is small enough before performing more complex checks
 // Basically checks if the distance between the center of two colliders is not greater than the sum of their HitboxOverallRadius
 const IsInCollisionRange = (a: HitboxBase, b: HitboxBase): boolean => {
-    const aTrans = a.Parent.worldRelativeTransform;
-    const bTrans = b.Parent.worldRelativeTransform;
+    const aTrans = a.Parent.WorldRelativeTransform;
+    const bTrans = b.Parent.WorldRelativeTransform;
     const distance = Vec2Utils.Distance(aTrans.Position, bTrans.Position);
     return distance <= a.BoundingRadius * Math.max(aTrans.Scale[0], aTrans.Scale[1]) + b.BoundingRadius * Math.max(bTrans.Scale[0], bTrans.Scale[1]);
 }

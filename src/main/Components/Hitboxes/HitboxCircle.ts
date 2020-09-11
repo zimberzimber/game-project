@@ -26,7 +26,7 @@ export class HitboxCircle extends HitboxBase {
     }
 
     get DebugDrawData(): number[] | null {
-        const absTransform = this._parent.worldRelativeTransform;
+        const absTransform = this._parent.WorldRelativeTransform;
         const radius = (absTransform.Scale[0] + absTransform.Scale[1]) / 2 * this._radius;
         const color = this.TriggerState == TriggerState.NotTrigger ? DebugDrawColors.Hitbox : DebugDrawColors.HitboxTrigger;
 

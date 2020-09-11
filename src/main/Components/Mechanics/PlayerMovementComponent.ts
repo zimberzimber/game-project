@@ -23,7 +23,7 @@ export class PlayerMovementComponent extends ComponentBase implements IKeyboardO
     }
 
     Update(delta: number): void {
-        this.Parent.transform.TranslateByVec2(Vec2Utils.MultS(this._movement, this._speed * delta));
+        this.Parent.Transform.TranslateByVec2(Vec2Utils.MultS(this._movement, this._speed * delta));
     }
 
     OnObservableNotified(args: IKeyboardEvent): void {

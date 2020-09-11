@@ -14,7 +14,7 @@ export class SoundEmitterComponent extends ComponentBase {
         if (SoundDefinitions[soundName])
             this._soundDefinition = SoundDefinitions[soundName];
         else
-            Log.Error(`Entity ID ${this.Parent.entityId} initialized a sound component with an undefined sound: ${soundName}`);
+            Log.Error(`Entity ID ${this.Parent.EntityId} initialized a sound component with an undefined sound: ${soundName}`);
     }
 
     constructor(parent: EntityBase, soundName: string, spatialEmission: boolean) {
@@ -28,7 +28,7 @@ export class SoundEmitterComponent extends ComponentBase {
             const soundId = Audio.PlaySound(this._soundDefinition);
 
             if (this._isSpatial)
-                SpatialSoundManagement.AddSound(soundId, this.Parent.worldRelativeTransform.Position, this._soundDefinition);
+                SpatialSoundManagement.AddSound(soundId, this.Parent.WorldRelativeTransform.Position, this._soundDefinition);
         }
     }
 }

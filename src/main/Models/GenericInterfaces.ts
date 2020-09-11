@@ -8,8 +8,8 @@ export interface IDataOrErrorContainer {
 
 export interface IComparingMethod<T> { (val1: T, val2: T): 0 | 1 | -1; }
 
-export enum HorizontalAlignment { Left, Middle, Right }
-export enum VerticalAlignment { Top, Middle, Bottom }
+export enum HorizontalAlignment { Left = -1, Middle = 0, Right = 1 };
+export enum VerticalAlignment { Top = 1, Middle = 0, Bottom = -1 };
 export interface IAlignmentContainer {
     horizontal: HorizontalAlignment;
     vertical: VerticalAlignment;
@@ -28,3 +28,7 @@ export const DebugDrawColors = Object.freeze({
     Hitbox: [1, 1, 0],
     HitboxTrigger: [1, 0, 0],
 });
+
+export interface IGenericCallback {
+    (args?: any): any;
+}

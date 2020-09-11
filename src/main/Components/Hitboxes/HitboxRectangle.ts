@@ -34,7 +34,7 @@ export class HitboxRectangle extends HitboxBase {
 
     // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
     get DebugDrawData(): number[] | null {
-        const absTransform = this._parent.worldRelativeTransform;
+        const absTransform = this._parent.WorldRelativeTransform;
         const width = this._width * absTransform.Scale[0] / 2;
         const height = this._height * absTransform.Scale[1] / 2;
 

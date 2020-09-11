@@ -8,15 +8,15 @@ const GetDefaultSettings = (): IUserSettings => {
         [UserSetting.SfxVolume]: 1,
         [UserSetting.MusicVolume]: 1,
         [UserSetting.ControlsKeymap]: {
-            [ControlKey.up]: 87,
-            [ControlKey.down]: 83,
-            [ControlKey.left]: 65,
-            [ControlKey.right]: 68,
-            [ControlKey.pause]: 80,
-            [ControlKey.action1]: 69,
-            [ControlKey.action2]: 27,
-            [ControlKey.action3]: 82,
-            [ControlKey.action4]: 81,
+            [ControlKey.up]: 'KeyW',
+            [ControlKey.down]: 'KeyS',
+            [ControlKey.left]: 'KeyA',
+            [ControlKey.right]: 'KeyD',
+            [ControlKey.pause]: 'Escape',
+            [ControlKey.action1]: 'Space',
+            [ControlKey.action2]: 'KeyQ',
+            [ControlKey.action3]: 'KeyE',
+            [ControlKey.action4]: 'KeyR',
         }
     }
 }
@@ -34,11 +34,13 @@ class UserSettings {
             this.Reset();
     }
 
-    GetSetting(setting: UserSetting): any { return this._settings[setting]; }
+    GetSetting(setting: UserSetting): any {
+        return typeof this._settings[setting] == 'object' ? JSON.parse(JSON.stringify(this._settings[setting])) : this._settings[setting];
+    }
 
     SetSetting(setting: UserSetting, value: any): void {
         if (this._settings[setting] === undefined || this._settings[setting] !== value) {
-            this._settings[setting] = value;
+            this._settings[setting] = typeof value == 'object' ? JSON.parse(JSON.stringify(value)) : value;
             localStorage.setItem(settingsStorageKey, JSON.stringify(this._settings));
             this.Observable.Notify({ setting: setting, newValue: value });
         }

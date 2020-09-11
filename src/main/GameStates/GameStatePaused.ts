@@ -16,12 +16,9 @@ export class GameStatePaused implements IGameState {
         Audio.PlaySound(SoundDefinitions.ui);
 
         this.temp = new UiEntityBase();
-        this.temp.transform.Position = Camera.Transform.Position;
+        this.temp.Transform.Position = Camera.Transform.Position;
         const t = new DrawDirectiveText(this.temp, 20, 'PAUSED');
         t.Alignment = { horizontal: HorizontalAlignment.Middle, vertical: VerticalAlignment.Middle };
-        this.temp.AddComponent(t);
-        Game.AddEntity(this.temp);
-
     }
 
     OnDeactivated(): void {

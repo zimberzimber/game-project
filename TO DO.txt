@@ -1,28 +1,21 @@
 
         TO DO:
 - Add Ribbon particles
-- Add an options menu
 
         Done:
-+ Added basic intro + transition to title
-+ Added brightness controls to post processing and UI
-+ Fixed input handler crashing before initializing
-+ Corrected alpha blending... again.
-+ Audio context now gets resumed when the window is focused on
-+ Fixed ASCII text glyph image generation issue regarding wrong stroke parameters during canvas size calculation
-+ Text draw directive now actually uses the font size property
-+ Components can no longer be added to entities that already have them, or are not their parent.
-+ Entities can no longer be added as a child if they're a root entity, or to entities that already parent them.
-+ Added depth offset to draw directives
-+ Added a simple horizontal slider
-+ Made settings observable
-+ Changing volume settings now affects sound volume
-+ Fixed settings resetting if their value is 0
-+ Added an utility to create an alignment based box originating from a point
-+ Defaulted all drawables to bottom left alignment
-+ Moved debug draw data collection to Game from the game state so its always active when debugDraw is enabled
-+ Added type guard to find debug drawables
-+ Changed debug draw to accept a colors for the lines instead of a colors index
-+ UI Entities debug draw is now drawn correctly
-+ Fixed relative mouse position not matching world space when cameras dimensions and canvas sizes are different
-+ Added debug draw to clickables
++ Right clicking on the game canvas no longer opens the context menu.
++ Added alignment controls to ButtonBasic
++ Text draw directive converts non-text to text and no longer crashes on undefineds/nulls
++ Changed input handler to work based on event.code instead of event.keyCode
++ Settings no longer pass references to objects, but clones instead. Also fixed passing an object with the same reference not updating the settings.
++ Added a key remapping menu
++ Added simple button with text creating utility
++ Moved window background to a separate composite UI entity
++ WindowBasic now has a close callback, and a closing method
++ Components and entities now add themselves to a target entity (or the entity tree root for entities without a parent)
++ Entities can now be disabled
++ Entities and components can now check if they're enabled/disabled through heirarchy
++ Added Ui utility
++ Added an utility to get an origins offset based on the alignments of a parent element and the subject
++ Input now observes the control map setting, and sets up a keymap accordingly on its own
++ Added an options menu
