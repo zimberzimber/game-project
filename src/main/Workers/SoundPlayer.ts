@@ -3,7 +3,7 @@ import { SoundType, IActiveSound, ISoundDefinition, ControllerType, ISoundplayer
 import { OneTimeLog } from './OneTimeLogger';
 import { Sounds } from './SoundManager';
 import { ScalarUtil } from "../Utility/Scalar";
-import { ISettingsObserver, UserSetting, IUserSettings, ISettingsEventArgs } from "../Models/IUserSettings";
+import { ISettingsObserver, UserSetting, ISettingsEventArgs } from "../Models/IUserSettings";
 import { Settings } from "./SettingsManager";
 
 class SoundPlayer {
@@ -73,7 +73,13 @@ class SoundPlayer {
         window.addEventListener('focus', () => this.context.resume());
     }
 
-    SetConvolverImpulse(soundName: string): void {
+    SetConvolverImpulse(soundName: string | null): void {
+        if (!soundName) {
+            if (this.convolverConnected)
+                this.masterConvolver.buffer = null;
+            return;
+        }
+
         const buffer = Sounds.GetSoundSourceByName(soundName);
         if (!buffer) {
             OneTimeLog.Log(`soundPlayer_failedLoading_${soundName}`, `Failed retrieving sound named '${soundName}' from sound manager.`, LogLevel.Error);

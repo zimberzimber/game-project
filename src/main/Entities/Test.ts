@@ -10,13 +10,13 @@ export class TestEntity extends GameEntityBase {
     constructor(parent: GameEntityBase | void | null) {
         super(parent);
         this.Transform.Depth = -5;
-        new DrawDirectiveStaticImage(this, "spikes", [17, 9]);
+        new DrawDirectiveStaticImage(this, "spikes", [50, 18]);
 
-        const hitbox = new HitboxRectangle(this, 17, 10);
+        const hitbox = new HitboxRectangle(this, 50, 18);
         hitbox.CollisionGroup = CollisionGroup.Hazard;
         hitbox.CollideWithGroup = CollisionGroup.Player;
 
-        const sound = new SoundSingleInstanceComponent(this, 'sfx', true);
+        const sound = new SoundSingleInstanceComponent(this, 'item_key', true);
 
         hitbox.TriggerState = TriggerState.OnEnterTrigger;
         hitbox.CollisionScript = (trigerredBy: HitboxBase) => sound.Play();

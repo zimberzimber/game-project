@@ -23,6 +23,7 @@ export class DrawDirectiveAnimatedImage extends DrawDirectiveImageBase {
             Log.Warn(`Could not retrieve animated sprite for DrawDirectiveAnimatedImage: ${spriteName}`);
         }
 
+        this.Frame = 0;
         this.UpdateWebglData();
     }
 

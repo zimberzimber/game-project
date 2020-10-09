@@ -1,5 +1,5 @@
 import { ISpriteFrame, IMultiFrameSpriteDefinition } from "../Models/SpriteModels";
-import { Vec2 } from "../Models/Vectors";
+import { Vec2, Vec3 } from "../Models/Vectors";
 import { IComparingMethod, VerticalAlignment, HorizontalAlignment } from "../Models/GenericInterfaces";
 import { Vec2Utils } from "./Vec2";
 
@@ -173,7 +173,36 @@ export class MiscUtil {
 
         return copy;
     }
+
+    static RGBByteToMultiplier = (byte: Vec3): Vec3 => [byte[0] / 255, byte[3] / 255, byte[2] / 255];
+
+    // Taken from https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+    static HexToRGB = (hex: string): Vec3 => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return !result ? [0, 0, 0] : [
+            parseInt(result[1], 16),
+            parseInt(result[2], 16),
+            parseInt(result[3], 16)
+        ];
+    }
+
+    // For comparing prototypes, with which I can tell if we've reached the end of a classes inheritance chain
+    private static baseProto = Object.getPrototypeOf(class Dummy { });
+
+    static IsTypeChildOfType(child: any, parent: any): boolean {
+        if (child === parent) return true;
+
+        let current = child;
+        while (current != this.baseProto && current != null) {
+            const next = Object.getPrototypeOf(current);
+            if (next == parent)
+                return true;
+            current = next;
+        }
+        return false;
+    }
 }
+
 
 class LinkedListNode<T> {
     Next: LinkedListNode<T> | undefined;

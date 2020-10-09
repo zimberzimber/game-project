@@ -77,6 +77,16 @@ class GameManager implements IConfigObserver {
         entity.Delete();
     }
 
+    RemoveEntities(entities: EntityBase[]): void {
+        for (const ent of entities)
+            this.RemoveEntity(ent);
+    }
+
+    RemoveAllEntities(): void {
+        for (const ent of this._entities)
+            this.RemoveEntity(ent);
+    }
+
     IsRootEntity(entity: EntityBase): boolean {
         return this._entities[entity.EntityId] ? true : false;
     }
@@ -255,7 +265,7 @@ class GameManager implements IConfigObserver {
         if (this._debug) {
             const dd: number[][] = [];
 
-            gameEntities.forEach(e => e.GetComponentsOfType(ComponentBase, true).forEach(c => {
+            gameEntities.forEach(e => e.GetAllComponents(true).forEach(c => {
                 if (IsDebugDrawable(c) && c.DebugDrawData)
                     dd.push(c.DebugDrawData);
             }));
@@ -263,7 +273,7 @@ class GameManager implements IConfigObserver {
             // Behold, a band aid fix to un-make camera related changes
             const camPos = Camera.Transform.Position;
             const camRad = -Camera.Transform.RotationRadian;
-            uiEntities.forEach(e => e, this.GetAllComponentsOfType(ComponentBase, true).forEach(c => {
+            uiEntities.forEach(e => e.GetAllComponents(true).forEach(c => {
                 if (IsDebugDrawable(c)) {
                     const cdd = c.DebugDrawData;
                     if (cdd) {
@@ -312,8 +322,8 @@ class GameManager implements IConfigObserver {
 const CollectSceneRendererData = (rendererName: string, collection: DrawDirectiveBase[], inViewOnly: boolean = true) => {
     const data: ISceneDrawData = { opaque: {}, translucent: [] };
     const depthList = new SortedLinkedList<DrawDirectiveBase>((dd1: DrawDirectiveBase, dd2: DrawDirectiveBase) => {
-        if (dd1.Parent.WorldRelativeTransform.Depth < dd2.Parent.WorldRelativeTransform.Depth) return -1;
-        if (dd1.Parent.WorldRelativeTransform.Depth > dd2.Parent.WorldRelativeTransform.Depth) return 1;
+        if (dd1.Parent.WorldRelativeTransform.Depth + dd1.DepthOffset < dd2.Parent.WorldRelativeTransform.Depth + dd2.DepthOffset) return -1;
+        if (dd1.Parent.WorldRelativeTransform.Depth + dd1.DepthOffset > dd2.Parent.WorldRelativeTransform.Depth + dd2.DepthOffset) return 1;
         return 0;
     });
 
@@ -324,14 +334,15 @@ const CollectSceneRendererData = (rendererName: string, collection: DrawDirectiv
     collection.forEach((dd: DrawDirectiveBase) => {
         // Skip directives outside of view
         const dTrans = dd.Parent.WorldRelativeTransform
+        const depth = dTrans.Depth + dd.DepthOffset;
 
         if (dd.Opacity > 0 && (!inViewOnly || Camera.IsInView(dTrans.Position, dd.BoundingRadius))) {
             let indexOffset = 0;
 
             if (dd.IsTranslucent || dd.Opacity < 1) {
                 depthList.Add(dd);
-                if (dd.Parent.WorldRelativeTransform.Depth < lowestDepth)
-                    lowestDepth = dd.Parent.WorldRelativeTransform.Depth;
+                if (depth < lowestDepth)
+                    lowestDepth = depth;
             } else {
                 if (data.opaque[dd.ImageId])
                     indexOffset = data.opaque[dd.ImageId].indexes[data.opaque[dd.ImageId].indexes.length - 1] + 1;
@@ -349,13 +360,13 @@ const CollectSceneRendererData = (rendererName: string, collection: DrawDirectiv
         let indexOffset = 0;
 
         // Part 2 of dealing with negative depth
-        const d = dd.Parent.WorldRelativeTransform.Depth - lowestDepth;
+        const d = dd.Parent.WorldRelativeTransform.Depth + dd.DepthOffset - lowestDepth;
         if (!data.translucent[d])
             data.translucent[d] = [];
 
         // I don't even care anymore :D
         if (data.translucent[d][dd.ImageId])
-            indexOffset = data.translucent[d][dd.ImageId].indexes[data.translucent[d][dd.ImageId].indexes.length - 1];
+            indexOffset = data.translucent[d][dd.ImageId].indexes[data.translucent[d][dd.ImageId].indexes.length - 1] + 1;
         else
             data.translucent[d][dd.ImageId] = { attributes: [], indexes: [] }
 

@@ -47,8 +47,8 @@ export abstract class EntityBase implements ITransformObserver {
     protected OnEnabled(): void { };
     protected OnDisabled(): void { };
     Update(delta: number): void {
-        this._components.forEach(c => c.Update(delta));
         this._children.forEach(c => c.Update(delta));
+        this._components.forEach(c => c.Update(delta));
     }
 
     AddComponent(component: ComponentBase): void {
@@ -83,11 +83,18 @@ export abstract class EntityBase implements ITransformObserver {
         this._components = [];
     }
 
-    GetComponentsOfType(type: any, activeOnly: boolean = false): ComponentBase[] {
-        if (activeOnly)
-            return this._components.filter(c => c.Enabled && c instanceof type);
+    GetAllComponents(activeOnly: boolean = true): ComponentBase[] {
+        if (!activeOnly)
+            return Array.from(this._components);
         else
-            return this._components.filter(c => c instanceof type);
+            return this._components.filter(c => c.Enabled);
+    }
+
+    GetComponentsOfType<T extends ComponentBase>(type: new (...params: any[]) => T, activeOnly: boolean = true): T[] {
+        if (activeOnly)
+            return this._components.filter(c => c.Enabled && c instanceof type) as T[];
+        else
+            return this._components.filter(c => c instanceof type) as T[];
     }
 
     AddChildEntity(child: EntityBase): void {
@@ -162,13 +169,15 @@ export abstract class EntityBase implements ITransformObserver {
         entity.WorldRelativeTransform.SetTransformParams(relative.Position, relative.Rotation, relative.Scale, relative.Depth);
     }
 
-    IsEnabledByHeirarchy(): boolean {
+    get IsEnabledByHeirarchy(): boolean {
+        if (!this.Enabled) return false;
+
         let e: EntityBase | undefined = this;
         do {
             if (!e._enabled) return false;
             e = e._parent;
         } while (e);
-        
+
         return true;
     }
 

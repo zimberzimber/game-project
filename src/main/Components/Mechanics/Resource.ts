@@ -1,17 +1,17 @@
 import { ComponentBase } from "../ComponentBase";
 import { EntityBase } from "../../Entities/EntityBase";
 
-export class ResourceComponent extends ComponentBase {
+abstract class ResourceComponent extends ComponentBase {
     private _maxValue: number;
     get MaxValue(): number { return this._maxValue; }
     set MaxValue(max: number) {
         this._maxValue = Math.max(0, max);
-        this.CurrentValue = Math.min(this._currentValue, max);
+        this.Value = Math.min(this._currentValue, max);
     }
 
-    private _currentValue: number;
-    get CurrentValue(): number { return this._currentValue; }
-    set CurrentValue(value: number) {
+    private _currentValue: number = 0;
+    get Value(): number { return this._currentValue; }
+    set Value(value: number) {
         const delta = Math.max(0, Math.min(value, this._maxValue)) - this._currentValue;
         if (delta != 0) {
             this._currentValue += delta;
@@ -42,20 +42,33 @@ export class ResourceComponent extends ComponentBase {
         this.Full = callback;
     }
 
-    constructor(parent: EntityBase, maxValue: number, startingValue: number) {
+    constructor(parent: EntityBase, maxValue: number, startingValue?: number) {
         super(parent);
         this.MaxValue = maxValue;
-        this.CurrentValue = startingValue;
+        this.Value = startingValue ? startingValue : maxValue;
     }
 
     SetValueToPercent(percent: number) {
         percent = Math.max(0, Math.min(percent, 1));
-        this.CurrentValue = this._maxValue * percent;
+        this.Value = this._maxValue * percent;
     }
 
     SetMaxKeepRelativeValue(max: number) {
         const percent = this._maxValue == 0 ? 0 : this._currentValue / this._maxValue;
         this._maxValue = max;
         this._currentValue = max * percent;
+    }
+}
+
+// For differentiating
+export class HealthResourceComponent extends ResourceComponent { }
+export class EnergyResourceComponent extends ResourceComponent { }
+export class GenericResourceComponent extends ResourceComponent {
+    private _name: string;
+    get Name(): string { return this._name };
+
+    constructor(parent: EntityBase, name: string, maxValue: number, startingValue?: number) {
+        super(parent, maxValue, startingValue);
+        this._name = name;
     }
 }

@@ -40,6 +40,14 @@ export class Vec2Utils {
         return [origin[0] + dirX / third * distance, origin[1] + dirY / third * distance];
     }
 
+    static MoveTowardsAngle = (origin: Vec2, angle: number, distance: number): Vec2 => {
+        const rad = ScalarUtil.ToRadian(angle);
+        return [
+            origin[0] + distance * Math.cos(rad),
+            origin[1] + distance * Math.sin(rad),
+        ]
+    }
+
     // https://www.gamefromscratch.com/post/2012/11/24/GameDev-math-recipes-Rotating-one-point-around-another-point.aspx
     static RotatePointAroundCenter = (point: Vec2, radian: number, center: Vec2): Vec2 =>
         [

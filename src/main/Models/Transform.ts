@@ -53,6 +53,13 @@ export class Transform extends Observable<ITransformObserver, ITransformEventArg
 
     get RotationRadian(): number { return ScalarUtil.ToRadian(this._rotation); }
 
+    /** Copy a transforms parameters into this one.
+     * @param transform The transform to copy from
+     */
+    CopyFromTransform(transform: Transform): void {
+        this.SetTransformParams(transform.Position, transform.Rotation, transform.Scale, transform.Depth);
+    }
+
     /** Update multiple transform fields. Use this when changing multiple fields to prevent multiple redundant observer notifications.
      * @param position New position, or null to remain unchanged
      * @param rotation New rotation, or null to remain unchanged
@@ -165,6 +172,9 @@ export class Transform extends Observable<ITransformObserver, ITransformEventArg
         return result;
     }
 
+    /** Create a new transform instance, with its parameters equal to the original.
+     * @param original Original transform to copy.
+     */
     static Copy(original: Transform): Transform {
         const copy = new Transform();
         copy._position = Vec2Utils.Copy(original._position);

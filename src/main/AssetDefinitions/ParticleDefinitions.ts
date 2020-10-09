@@ -26,5 +26,27 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
         relativePositioning: false,
         faceForceDirection: true,
         sizeGrowth: 1,
+    },
+
+    missile_fire: {
+        spriteName: 'color_yellow',
+        size: [5, 5],
+        sizeMultiplier: [0.75, 2],
+        initialRotation: [0, 360],
+
+        emissionRate: 100,
+        maxParticles: 300,
+        lifeSpan: 1.5,
+
+        spawnBox: [[-0.3, -0.2], [0.3, -1]],
+
+        opacity: [0.8, 1],
+        fadeInTime: 0.1,
+        fadeOutStartTime: 0.2,
+
+        // Movement
+        relativePositioning: false,
+        sizeGrowth: 1,
+        rotationSpeed: 30
     }
 }

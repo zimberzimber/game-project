@@ -191,6 +191,13 @@ class InputHandler {
         window.addEventListener('keydown', this.OnKeyDown.bind(this));
         window.addEventListener('keyup', this.OnKeyUp.bind(this));
 
+        // Resizing the window changes the elements binding box
+        // Anything that alters the elements actual position does, but I'm only taking the window into account since it shouldn't move otherwise
+        window.addEventListener('resize', () => {
+            if (this._mouseElement)
+                this._mouseElementBindingbox = this._mouseElement.getBoundingClientRect();
+        })
+
         this._keymapContainer = new KeymapContainer(Settings.GetSetting(UserSetting.ControlsKeymap));
         Settings.Observable.Subscribe({
             OnObservableNotified(args: ISettingsEventArgs): void {

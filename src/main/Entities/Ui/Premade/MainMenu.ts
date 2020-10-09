@@ -17,7 +17,7 @@ export class TitleScreenUi extends UiEntityBase {
 
         const startBT = new TextButtonEntity(this, [200, 33], 'button_wide', 'Start Game', 20);
         startBT.Transform.Position = [-125, 25];
-        startBT.OnUnclick = (isInside: boolean) => { if (isInside) StateManager.ChangeState('game'); };
+        startBT.OnUnclick = (isInside: boolean) => { if (isInside) StateManager.ChangeState('game', 'lv_00'); };
 
         const optionsBT = new TextButtonEntity(this, [200, 33], 'button_wide', 'Options', 20);
         optionsBT.Transform.Position = [125, 25];

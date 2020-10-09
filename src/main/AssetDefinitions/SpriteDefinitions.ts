@@ -16,7 +16,7 @@ let Util = {
         return tiles;
     },
 
-    AddWindowBox: (name: string, sourceImageName: string, origin: Vec2, sizes: IVec2Grid3x3): { [key: string]: ISingleFrameSpriteDefinition } => {
+    AddWindowBox: (name: string, sourceImageName: string, origin: Vec2, isTranslucent: boolean, sizes: IVec2Grid3x3): { [key: string]: ISingleFrameSpriteDefinition } => {
         const defs: { [key: string]: ISingleFrameSpriteDefinition } = {};
         const offset: Vec2 = [0, 0];
 
@@ -24,6 +24,7 @@ let Util = {
             for (let c = 0; c < sizes[r].length; c++) {
                 defs[`${name}_${r}${c}`] = {
                     sourceImageName,
+                    isTranslucent: isTranslucent ? true : undefined,
                     frame: {
                         origin: [
                             origin[0] + offset[0],
@@ -44,10 +45,11 @@ let Util = {
         return defs;
     },
 
-    AddButton: (sourceImageName: string, origin: Vec2, size: Vec2): IMultiFrameSpriteDefinition => {
+    AddButton: (sourceImageName: string, origin: Vec2, size: Vec2, isTranslucent: boolean = false): IMultiFrameSpriteDefinition => {
         return {
             sourceImageName,
             names: ['passive', 'hovered', 'pressed'],
+            isTranslucent: isTranslucent ? true : undefined,
             frames: [
                 {
                     origin: Vec2Utils.Copy(origin),
@@ -107,28 +109,28 @@ let Util = {
 }
 
 export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IMultiFrameSpriteDefinition } = {
-    color_yellow: {
+    color_red: {
         sourceImageName: 'colors',
         frame: {
             origin: [0, 0],
             size: [1, 1]
         }
     },
-    color_red: {
+    color_green: {
         sourceImageName: 'colors',
         frame: {
             origin: [1, 0],
             size: [1, 1]
         }
     },
-    color_green: {
+    color_blue: {
         sourceImageName: 'colors',
         frame: {
             origin: [2, 0],
             size: [1, 1]
         }
     },
-    color_blue: {
+    color_yellow: {
         sourceImageName: 'colors',
         frame: {
             origin: [3, 0],
@@ -449,9 +451,35 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
         }
     },
 
-    button_wide: Util.AddButton('uiElements', [0, 23], [33, 7]),
+    floater: {
+        sourceImageName: 'enemies',
+        frame: {
+            origin: [0, 0],
+            size: [45, 40]
+        }
+    },
+    floater_death: {
+        sourceImageName: 'enemies',
+        names: ['0', '1', '2'],
+        frames: [
+            {
+                origin: [45, 0],
+                size: [45, 40]
+            },
+            {
+                origin: [90, 0],
+                size: [45, 40]
+            },
+            {
+                origin: [135, 0],
+                size: [45, 40]
+            },
+        ]
+    },
 
-    ...Util.AddWindowBox('window_simple', 'uiElements', [0, 0], [
+    button_wide: Util.AddButton('uiElements', [0, 23], [33, 7], true),
+
+    ...Util.AddWindowBox('window_simple', 'uiElements', [0, 0], true, [
         [[3, 3], [1, 3], [3, 3]],
         [[3, 1], [1, 1], [3, 1]],
         [[3, 3], [1, 3], [3, 3]]]),

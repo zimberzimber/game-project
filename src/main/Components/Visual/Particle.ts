@@ -25,7 +25,9 @@ export class ParticleComponent extends DrawDirectiveBase {
     private _particleController: ParticleController;
 
     get ImageId(): number { return this._spriteData.imageId; }
-    get IsTranslucent(): boolean { return this._spriteData.isTranslucent; }
+
+    private _isTranslucent: boolean;
+    get IsTranslucent(): boolean { return this._isTranslucent; }
 
     private OnEndedCallback: () => void;
     set OnEnded(callback: () => void) {
@@ -48,6 +50,25 @@ export class ParticleComponent extends DrawDirectiveBase {
 
         this._spriteData = sd;
         this._particleController = new ParticleController(this._particleData, this._spriteData);
+
+
+        // Was curious how it would look as one line. Result was funny to me.
+        const pd = this._particleData;
+        this._isTranslucent = !pd ? false : (sd.isTranslucent ? true : (pd.opacity !== undefined && pd.opacity < 1 ? true : (pd.fadeInTime || pd.fadeOutStartTime !== undefined) ? true : false));
+
+        // if (this._particleData) {
+        //     if (sd.isTranslucent)
+        //         this._isTranslucent = true;
+        //     else {
+        //         if (this._particleData.opacity !== undefined && this._particleData.opacity < 1)
+        //             this._isTranslucent = true;
+        //         else if (this._particleData.fadeInTime || this._particleData.fadeOutStartTime !== undefined)
+        //             this._isTranslucent = true;
+        //         else
+        //             this._isTranslucent = false;
+        //     }
+        // } else
+        //     this._isTranslucent = false;
     }
 
     // Both of these are redundant here, as its all handled through Update regardless.
@@ -65,17 +86,13 @@ export class ParticleComponent extends DrawDirectiveBase {
             if (this._particleData.emissionTime && now - this._startedEmitting >= this._particleData.emissionTime * 1000) {
                 stopEmitting = true;
             } else {
-                const timeDifference = now - this._lastEmission;
-                const msPerEmission = 1 / this._particleData.emissionRate * 1000;
-                const msLeftover = timeDifference % msPerEmission;
-
-                // This method could easily have something as small as a lag spike snowball into a full on lag fest.
-                // this.Emit(Math.floor(timeDifference / msPerEmission));
-
-                // So I resort to emitting just one instance, even if 100 instances should've been emitted because of the time difference
-                if (timeDifference > msPerEmission) {
-                    this.Emit();
-                    this._lastEmission += timeDifference - msLeftover;
+                // This could easily have something as small as a lag spike snowball into a full on lag fest, so I'm hard capping it to 15 per tick.
+                // This means emissionRate is indirectly capped at 450 at 60 fps
+                const count = Math.min(Math.floor(this._particleData.emissionRate * 0.001 * (now - this._lastEmission)), 15);
+                if (count > 0) {
+                    this._lastEmission = now;
+                    for (let i = 0; i < count; i++)
+                        this.Emit();
                 }
             }
         }

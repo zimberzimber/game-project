@@ -25,6 +25,8 @@ export const GetFrameFromMultiFrameStorage = (frameStorage: IMultiFrameSpriteSto
     if (typeof (frame) == "number") {
         if (frameStorage.frames[frame])
             return frame;
+        else
+            return GetFrameFromMultiFrameStorage(frameStorage, frame.toString());
     }
     else {
         if (frameStorage.names) {

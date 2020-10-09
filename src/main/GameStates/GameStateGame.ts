@@ -2,50 +2,90 @@ import { Game } from "../Workers/Game";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { TriggerState, CollisionGroup } from "../Models/CollisionModels";
 import { CheckCollision } from "../Workers/CollisionChecker";
-import { Camera } from "../Workers/CameraManager";
-import { Rendering } from "../Workers/RenderingPipeline";
-import { Config, IConfigObserver, IConfigEventArgs } from "../Proxies/ConfigProxy";
 import { GameEntityBase } from "../Entities/EntityBase";
 import { PlayerEntity } from "../Entities/Player/PlayerRoot";
-import { DrawDirectiveScrollableTiledImage } from "../Components/Visual/DrawDirectiveTiledImage";
 import { IGameState } from "./GameStateBase";
-import { ButtonBasicEntity } from "../Entities/Ui/Composite/Buttons";
-import { WindowBaseEntity } from "../Entities/Ui/WindowBase";
-import { WindowBackgroundEntity } from "../Entities/Ui/Composite/WindowBackground";
+import { Log } from "../Workers/Logger";
+import { StateManager } from "../Workers/GameStateManager";
+import { SoundSingleInstanceComponent } from "../Components/Sound/SoundSingleInstance";
+import { Audio } from "../Workers/SoundPlayer";
+import { Camera } from "../Workers/CameraManager";
+import { BackgroundControllerEntity } from "../Entities/Controllers/BackgroundController";
+import { LevelDictionary } from "../AssetDefinitions/LevelDefinitions";
+import { Vec2Utils } from "../Utility/Vec2";
+import { MiscUtil } from "../Utility/Misc";
 
 export class GameStateGame implements IGameState {
+    private _speed = 0;
+    private _levelLength = 0;
+    private _player: PlayerEntity;
+    private _bge: BackgroundControllerEntity;
 
-    OnActivated(): void {
-        let p = new PlayerEntity();
-        let w = new WindowBackgroundEntity(null, [100, 67], 10, 'e');
+    OnActivated(args: any): void {
+        if (!args || typeof (args) != 'string') {
+            Log.Error(`Returning to title, invalid level name: ${args}`);
+            StateManager.ChangeState('title');
+            return;
+        }
 
-        // for (let i = 0; i < 3; i++) {
-        //     for (let j = 0; j < 3; j++) {
-        //         setTimeout(() => {
-        //             let p1 = new PlayerEntity();
-        //             p1.transform.Position = [25 * i - 150, 25 * j - 150]
-        //             Game.AddEntity(p1);
-        //         }, (i + 1) * 100 + (j + 1) * 10)
-        //     }
-        // }
-        // let test = new TestEntity();
-        // Game.AddEntity(test);
-        let button = new ButtonBasicEntity(null, [30, 10], 'button_wide');
+        const cfg = LevelDictionary[args];
+        if (!cfg) {
+            Log.Error(`Returning to title, level does not exist: ${args}`);
+            StateManager.ChangeState('title');
+            return;
+        }
 
-        button.OnClick = () => console.log('badabing');
-        button.OnUnclick = (isInside: boolean) => console.log(`Badaboom in: ${isInside}`);
-        button.HoverEvent = (hovered: boolean) => console.log(`Hovered: ${hovered}`);
+        Camera.Transform.Position = [0, 0];
+        this._speed = cfg.speed;
+        this._levelLength = cfg.length;
 
-        let temp = new GameEntityBase();
-        new DrawDirectiveScrollableTiledImage(temp, 'water', [50, 50], [64, 500], [0, 10]);
+        for (const ent of cfg.entities) {
+            // Check if the passed type is a game entity type.
+            if (!MiscUtil.IsTypeChildOfType(ent.entityType, GameEntityBase)) {
+                Log.Warn(`Attempted to initialize non-entity type ${ent.entityType} as entity. Skipping.`)
+                continue;
+            }
+
+            // Pass constructor arguments if there are any past the parent.
+            const e: GameEntityBase = new ent.entityType(undefined, ...ent.contructorArgs || []);
+            if (ent.position) e.Transform.Position = ent.position;
+            if (ent.rotation !== undefined) e.Transform.Rotation = ent.rotation;
+            if (ent.scale) e.Transform.Scale = ent.scale;
+            if (ent.depth !== undefined) e.Transform.Depth = ent.depth;
+        }
+
+        Audio.SetConvolverImpulse(cfg.reverb || null);
+        if (cfg.music) {
+            const musC = new SoundSingleInstanceComponent(new GameEntityBase(), cfg.music, false);
+            musC.Play();
+        }
+
+        this._player = new PlayerEntity();
+
+        this._bge = new BackgroundControllerEntity(cfg.bgConfig);
+        this._bge.Transform.Position = Vec2Utils.DivS(Camera.Transform.Scale, -2);
+
+        // const dd = new DrawDirectiveScrollableTiledImage(new GameEntityBase(), 'water', [50, 50], [args.length, 500], [0, 10]);
+        // dd.VerticalAlignment = VerticalAlignment.Middle;
+        // dd.DepthOffset = 5;
     }
 
-    OnDeactivated(): void { }
+    OnDeactivated(): void {
+        Game.RemoveAllEntities();
+        delete this._player;
+        delete this._bge;
+    }
 
     Update(delta: number): void {
+        // Scroll camera, move player and background accordingly
+        this._player.Transform.Translate(this._speed * delta, 0);
+        this._bge.Transform.Translate(this._speed * delta, 0);
+        Camera.Transform.Translate(this._speed * delta, 0);
+
         // Update all entities
         Game.GetAllEntities().forEach(e => e.Update(delta));
 
+        // Collision checking
         // Updating all first and then reobtaining the list because entities may have been created due to other entities updating.
         const allEntities = Game.GetAllEntities();
         let triggers: HitboxBase[] = Game.GetAllComponentsOfTypeFromEntityCollection(HitboxBase, allEntities, true).filter(c => (c as HitboxBase).TriggerState != TriggerState.NotTrigger) as HitboxBase[];
@@ -79,6 +119,10 @@ export class GameStateGame implements IGameState {
                 if (t.CollisionGroup & c.CollideWithGroup && CheckCollision(t, c))
                     c.CollideWith(t);
             }
+        }
+
+        if (Camera.Transform.Position[0] >= this._levelLength) {
+            StateManager.ChangeState('title');
         }
     }
 }

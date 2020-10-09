@@ -31,7 +31,7 @@ export class SoundSingleInstanceComponent extends ComponentBase implements ITran
     }
 
     Play(): void {
-        if (!this.Enabled) return;
+        if (!this.Enabled || !this._soundDefinition) return;
 
         if (Audio.IsActive(this._currentSoundId))
             Audio.RestartSound(this._currentSoundId);

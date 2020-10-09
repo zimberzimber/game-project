@@ -5,14 +5,19 @@ import { Log } from "./Logger";
 import { Config } from "../Proxies/ConfigProxy";
 import { GameStateTitleScreen } from "../GameStates/GameStateTitleScreen";
 import { GameStateIntro } from "../GameStates/GameStateIntro";
+import { GameStateDebug } from "../GameStates/GameStateDebug";
 
 interface IStateContainer {
     stateInstance: IGameState;
     nextStates: string[];
 }
 
-const initialState = 'intro';
+const initialState = 'debug';
 const GameStateDictionary: { [key: string]: IStateContainer } = {
+    debug: {
+        stateInstance: new GameStateDebug(),
+        nextStates: [],
+    },
     intro: {
         stateInstance: new GameStateIntro(),
         nextStates: ['title'],
@@ -70,6 +75,11 @@ class GameStateManager {
 
     StateUpdate(delta: number): void {
         GameStateDictionary[this._currentState].stateInstance.Update(delta);
+    }
+
+    GetCurrentStateParameter(parameterName: string): any {
+        const st = GameStateDictionary[this._currentState];
+        return st && st.stateInstance.PublicParameters ? st.stateInstance.PublicParameters[parameterName] : undefined;
     }
 }
 

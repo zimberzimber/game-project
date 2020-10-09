@@ -21,7 +21,7 @@ export enum CollisionGroup {
     Projectile = 1 << 0,
     Hazard = 1 << 1,
     Player = 1 << 2,
-    UI = 1 << 3,
+    Enemy = 1 << 3,
     All = ~(~0 << 4)
 }
 

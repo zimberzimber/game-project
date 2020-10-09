@@ -60,7 +60,7 @@ abstract class ClickableBaseComponent extends ComponentBase implements IDebugDra
             OnObservableNotified: (args: IMouseEvent): void => {
                 
                 // Do nothing while disabled through hierarchy
-                if (!this.IsEnabledByHeirarchy()) return;
+                if (!this.IsEnabledByHeirarchy) return;
 
                 if (args.button == 0) {
                     if (this._down) {
@@ -89,7 +89,7 @@ abstract class ClickableBaseComponent extends ComponentBase implements IDebugDra
         super.Update(delta);
 
         // Disabled hovering while disabled through hierarchy
-        if (!this.IsEnabledByHeirarchy()) {
+        if (!this.IsEnabledByHeirarchy) {
             this._hovered = false;
             return;
         }

@@ -24,12 +24,12 @@ export abstract class HitboxBase extends ComponentBase implements IDebugDrawable
 
             if (this.UncollisionScript == undefined) {
                 for (let i = 0; i < this.PreviousCollisions.length; i++) {
-                    if (!CheckCollision(this, this.PreviousCollisions[i]))
+                    if (!this.PreviousCollisions[i].IsEnabledByHeirarchy || !CheckCollision(this, this.PreviousCollisions[i]))
                         markedIndexes.push(i);
                 }
             } else {
                 for (let i = 0; i < this.PreviousCollisions.length; i++) {
-                    if (!CheckCollision(this, this.PreviousCollisions[i])) {
+                    if (!this.PreviousCollisions[i].IsEnabledByHeirarchy || !CheckCollision(this, this.PreviousCollisions[i])) {
                         this.UncollisionScript(this.PreviousCollisions[i]);
                         markedIndexes.push(i);
                     }

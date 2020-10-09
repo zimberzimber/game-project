@@ -60,7 +60,7 @@ export class PlayerMovementComponent extends ComponentBase implements IKeyboardO
     }
 
     Unitialize(): void {
-        super.Unitialize();
         Input.KeyboardObservable.Unsubscribe(this);
+        super.Unitialize();
     }
 }

@@ -92,7 +92,7 @@ export class WebglSceneRenderer extends WebglRenderer {
         const gl = this._context;
 
         // Draw opaque normally
-        for (const textureId in this._drawData.opaque) {
+        for (let textureId in this._drawData.opaque) {
             gl.activeTexture(gl.TEXTURE0 + this._activeTextureInfo.textureUnit);
             gl.bindTexture(gl.TEXTURE_2D, SharedWebglTextures.GetTexture(textureId)!);
             gl.bufferData(gl.ARRAY_BUFFER, this._drawData.opaque[textureId].attributes, gl.DYNAMIC_DRAW);
@@ -102,7 +102,7 @@ export class WebglSceneRenderer extends WebglRenderer {
 
         // Draw translucent in depth ascending order
         this._drawData.translucent.forEach(dd => {
-            for (const textureId in dd) {
+            for (let textureId in dd) {
                 gl.activeTexture(gl.TEXTURE0 + this._activeTextureInfo.textureUnit);
                 gl.bindTexture(gl.TEXTURE_2D, SharedWebglTextures.GetTexture(textureId)!);
                 gl.bufferData(gl.ARRAY_BUFFER, dd[textureId].attributes, gl.DYNAMIC_DRAW);

@@ -5,6 +5,7 @@ import { Vec2Utils } from "../../Utility/Vec2";
 import { DrawDirectiveImageBase } from "./DrawDirectiveImageBase";
 import { Sprites } from "../../Workers/SpriteManager";
 import { Log } from "../../Workers/Logger";
+import { ScalarUtil } from "../../Utility/Scalar";
 
 export class DrawDirectiveTiledImage extends DrawDirectiveImageBase {
     private _imageId: number;
@@ -42,6 +43,7 @@ export class DrawDirectiveTiledImage extends DrawDirectiveImageBase {
         if (spriteData) {
             this._frameData = spriteData.frame;
             this._translucent = spriteData.isTranslucent;
+            this._boundingRadius = ScalarUtil.DiagonalLength(size[0], size[1]);
         } else {
             Log.Warn(`Could not retrieve image for DrawDirectiveTiledImage: ${imageName}`);
         }

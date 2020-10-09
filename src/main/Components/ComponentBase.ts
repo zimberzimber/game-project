@@ -33,7 +33,7 @@ export abstract class ComponentBase {
         return this.constructor.name;
     }
 
-    IsEnabledByHeirarchy(): boolean {
-        return this._enabled ? this._parent.IsEnabledByHeirarchy() : false;
+    get IsEnabledByHeirarchy(): boolean {
+        return this._enabled ? this._parent.IsEnabledByHeirarchy : false;
     }
 }
