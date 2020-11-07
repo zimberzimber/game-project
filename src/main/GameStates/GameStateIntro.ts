@@ -6,7 +6,7 @@ import { SoundSingleInstanceComponent } from "../Components/Sound/SoundSingleIns
 import { DrawDirectiveStaticImage } from "../Components/Visual/DrawDirectiveStaticImage";
 import { Vec2Utils } from "../Utility/Vec2";
 import { Camera } from "../Workers/CameraManager";
-import { IntroSplash } from "../Entities/Ui/Premade/IntroSplash";
+import { IntroSplash } from "../Entities/Ui/Windows/IntroSplash";
 import { HorizontalAlignment, VerticalAlignment } from "../Models/GenericInterfaces";
 
 const fadeDuration = 0.75;

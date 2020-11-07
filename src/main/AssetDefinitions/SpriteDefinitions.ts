@@ -183,11 +183,11 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
             },
             {
                 origin: [7, 0],
-                size: [19, 10],
+                size: [13, 10],
             },
             {
                 origin: [20, 0],
-                size: [19, 10],
+                size: [13, 10],
             },
         ]
     },
@@ -201,11 +201,11 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
             },
             {
                 origin: [7, 10],
-                size: [19, 10],
+                size: [13, 10],
             },
             {
                 origin: [20, 10],
-                size: [19, 10],
+                size: [13, 10],
             },
         ]
     },
@@ -475,6 +475,101 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
                 size: [45, 40]
             },
         ]
+    },
+
+    spider: {
+        sourceImageName: 'spiders',
+        names: [
+            "drop_0", "drop_1", "drop_2", "idle_0",
+            "idle_1", "idle_2", "idle_3"
+        ],
+        aliases: {
+            drop_3: "drop_1"
+        },
+        frames: [
+            {
+                origin: [0, 0],
+                size: [24, 26]
+            },
+            {
+                origin: [24, 0],
+                size: [24, 26]
+            },
+            {
+                origin: [48, 0],
+                size: [24, 26]
+            },
+            {
+                origin: [72, 0],
+                size: [24, 26]
+            },
+
+            {
+                origin: [0, 26],
+                size: [24, 26]
+            },
+            {
+                origin: [24, 26],
+                size: [24, 26]
+            },
+            {
+                origin: [48, 26],
+                size: [24, 26]
+            },
+        ]
+    },
+    spider_dead: {
+        sourceImageName: 'spiders',
+        frame: {
+            origin: [48, 26],
+            size: [24, 26]
+        }
+    },
+    spider_web: {
+        sourceImageName: 'spiders',
+        frame: {
+            origin: [72, 26],
+            size: [26, 26]
+        }
+    },
+    spider_string: {
+        sourceImageName: 'spiders',
+        isTranslucent: true,
+        frame: {
+            origin: [96, 0],
+            size: [2, 26]
+        }
+    },
+    spider_string_gib: {
+        sourceImageName: 'spiders',
+        isTranslucent: true,
+        frame: {
+            origin: [0, 52],
+            size: [4, 3]
+        }
+    },
+    pentagon_purple: {
+        sourceImageName: 'particles',
+        frame: {
+            origin: [0, 0],
+            size: [64, 64]
+        },
+    },
+    ori_arrow: {
+        sourceImageName: 'particles',
+        isTranslucent: true,
+        frame: {
+            origin: [64, 0],
+            size: [64, 64]
+        },
+    },
+    flake_white: {
+        sourceImageName: 'particles',
+        isTranslucent: true,
+        frame: {
+            origin: [0, 64],
+            size: [32, 32]
+        },
     },
 
     button_wide: Util.AddButton('uiElements', [0, 23], [33, 7], true),

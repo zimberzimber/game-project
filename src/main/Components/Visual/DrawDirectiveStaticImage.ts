@@ -14,7 +14,7 @@ export class DrawDirectiveStaticImage extends DrawDirectiveImageBase {
     private _translucent: boolean;
     get IsTranslucent(): boolean { return this._translucent; }
 
-    constructor(parent: EntityBase, spriteName: string, size: Vec2 = [0, 0]) {
+    constructor(parent: EntityBase, spriteName: string, size?: number | Vec2) {
         super(parent, size);
 
         const spriteData = Sprites.GetStaticSpriteData(spriteName);

@@ -48,5 +48,60 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
         relativePositioning: false,
         sizeGrowth: 1,
         rotationSpeed: 30
-    }
+    },
+
+    spider_spit_trails: {
+        spriteName: 'pentagon_purple',
+        size: [9, 9],
+        sizeMultiplier: [0.75, 2],
+        initialRotation: [0, 360],
+
+        emissionRate: 100,
+        maxParticles: 300,
+        lifeSpan: 0.25,
+
+        spawnBox: [[-0.1, -0.1], [0.1, 0.1]],
+        fadeOutStartTime: 0.15,
+
+        // Movement
+        relativePositioning: false,
+        sizeGrowth: -1,
+        rotationSpeed: 30
+    },
+
+    spider_string_gib: {
+        spriteName: 'spider_string_gib',
+        size: [9, 9],
+        sizeMultiplier: [0.75, 2],
+        initialRotation: [0, 360],
+        
+        emissionRate: 0,
+        maxParticles: 30,
+        lifeSpan: 2,
+
+        spawnBox: [[-2, 0], [2, 250]],
+        fadeOutStartTime: 0.15,
+
+        // Movement
+        relativePositioning: false,
+        sizeGrowth: -1,
+        rotationSpeed: 30
+    },
+    
+    ori_arrow_trail: {
+        spriteName: 'flake_white',
+        size: [18, 18],
+        sizeMultiplier: [0.75, 1.25],
+
+        emissionRate: 30,
+        maxParticles: 100,
+        lifeSpan: 0.5,
+
+        spawnBox: [[-0.2, -3], [0, 3]],
+        fadeOutStartTime: 0.15,
+
+        // Movement
+        relativePositioning: false,
+        sizeGrowth: -1
+    },
 }

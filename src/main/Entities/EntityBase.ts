@@ -1,4 +1,5 @@
 import { ComponentBase } from "../Components/ComponentBase";
+import { ClassType } from "../Models/GenericInterfaces";
 import { Transform, ITransformObserver, ITransformEventArgs } from "../Models/Transform";
 import { Game } from "../Workers/Game";
 import { Log } from "../Workers/Logger";
@@ -47,8 +48,8 @@ export abstract class EntityBase implements ITransformObserver {
     protected OnEnabled(): void { };
     protected OnDisabled(): void { };
     Update(delta: number): void {
-        this._children.forEach(c => c.Update(delta));
-        this._components.forEach(c => c.Update(delta));
+        this._children.forEach(c => { if (c.Enabled) c.Update(delta) });
+        this._components.forEach(c => { if (c.Enabled) c.Update(delta) });
     }
 
     AddComponent(component: ComponentBase): void {
@@ -90,7 +91,7 @@ export abstract class EntityBase implements ITransformObserver {
             return this._components.filter(c => c.Enabled);
     }
 
-    GetComponentsOfType<T extends ComponentBase>(type: new (...params: any[]) => T, activeOnly: boolean = true): T[] {
+    GetComponentsOfType<T extends ComponentBase>(type: ClassType<T>, activeOnly: boolean = true): T[] {
         if (activeOnly)
             return this._components.filter(c => c.Enabled && c instanceof type) as T[];
         else
@@ -142,6 +143,7 @@ export abstract class EntityBase implements ITransformObserver {
             delete this._parent;
         }
 
+        this.Enabled = false;
         this.Transform.UnsubscribeAll();
         this.WorldRelativeTransform.UnsubscribeAll();
         this.RemoveAllComponents();
@@ -170,8 +172,6 @@ export abstract class EntityBase implements ITransformObserver {
     }
 
     get IsEnabledByHeirarchy(): boolean {
-        if (!this.Enabled) return false;
-
         let e: EntityBase | undefined = this;
         do {
             if (!e._enabled) return false;

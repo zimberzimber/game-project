@@ -2,15 +2,22 @@ import { GameEntityBase } from "../EntityBase";
 import { DrawDirectiveAnimatedImage } from "../../Components/Visual/DrawDirectiveAnimatedImage";
 import { PlayerMovementComponent } from "../../Components/Mechanics/PlayerMovementComponent";
 import { HitboxRectangle } from "../../Components/Hitboxes/HitboxRectangle";
-import { CollisionGroup, TriggerState } from "../../Models/CollisionModels";
+import { CollisionGroup, HitboxType, TriggerState } from "../../Models/CollisionModels";
 import { HitboxBase } from "../../Components/Hitboxes/HitboxBase";
 import { LightComponent } from "../../Components/Visual/Light";
-import { ParticleComponent } from "../../Components/Visual/Particle";
 import { HorizontalAlignment, VerticalAlignment } from "../../Models/GenericInterfaces";
 import { ButtonState, IMouseEvent, IMouseObserver, MouseButton } from "../../Models/InputModels";
 import { Input } from "../../Workers/InputHandler";
 import { ProjectileBasic } from "../Projectiles/ProjectileBase";
-import { HealthResourceComponent } from "../../Components/Mechanics/Resource";
+import { EnergyResourceComponent, HealthResourceComponent } from "../../Components/Mechanics/Resource";
+import { ProjectilePlayerTest } from "../Projectiles/Player/Test";
+
+const cfg = {
+    postDamageInvlunTime: 1,
+    fireColldown: 0.1,
+    maxHp: 10,
+    maxEnergy: 10,
+}
 
 export class OriEntity extends GameEntityBase {
     private dd: DrawDirectiveAnimatedImage;
@@ -72,30 +79,34 @@ export class PlayerEntity extends GameEntityBase {
     private oriEntity: OriEntity;
     private kuEntity: KuEntity;
     private firing: boolean = false;
-    private fireCooldown: number = 0.05;
+    private fireCooldown: number = cfg.fireColldown;
     private fireCooldownProgress: number = 0;
 
     private clickObserver: IMouseObserver;
+    private hp: HealthResourceComponent;
+    private energy: EnergyResourceComponent;
+
+    protected _invulnTime = 0;
+    get IsInvuln(): boolean { return this._invulnTime > 0; }
+
+    get Health(): [number, number] { return [this.hp.Value, this.hp.MaxValue]; }
+    get Energy(): [number, number] { return [this.energy.Value, this.energy.MaxValue]; }
 
     constructor(parent: GameEntityBase | void | null) {
         super(parent);
         this.Transform.Scale = [3, 3];
 
-        const hp = new HealthResourceComponent(this, 10);
-        hp.DepletedCallback = () => {
-            console.log('ded');
-        }
-        hp.ValueChangedCallback = (d: number) => {
-            if (d < 0) {
-                console.log(d);
-                hitbox.Enabled = false;
-                setTimeout(() => hitbox.Enabled = true, 500);
-            }
-        }
+        this.hp = new HealthResourceComponent(this, cfg.maxHp);
+        this.hp.DepletedCallback = () => this.OnDie();
+        this.hp.ValueChangedCallback = (d: number) => { if (d < 0) this.OnDamaged(-d); };
+
+
+        this.energy = new EnergyResourceComponent(this, cfg.maxEnergy);
 
         this.clickObserver = {
             OnObservableNotified: (args: IMouseEvent): void => {
-                if (args.button == MouseButton.M1) this.firing = args.state == ButtonState.Down;
+                if (args.button == MouseButton.M1)
+                    this.firing = args.state == ButtonState.Down;
             }
         }
 
@@ -118,14 +129,16 @@ export class PlayerEntity extends GameEntityBase {
         Input.MouseObservable.Subscribe(this.clickObserver);
     }
 
-    Update(delta: number) {
+    Update(delta: number): void {
         super.Update(delta);
+
+        if (this._invulnTime > 0)
+            this._invulnTime -= delta;
 
         if (this.firing) {
             if (this.fireCooldownProgress <= 0) {
-                const p = new ProjectileBasic();
+                const p = new ProjectilePlayerTest();
                 p.Transform.Position = this.Transform.Position;
-                p.Speed = 600;
                 this.fireCooldownProgress = this.fireCooldown;
             }
         }
@@ -133,8 +146,25 @@ export class PlayerEntity extends GameEntityBase {
             this.fireCooldownProgress -= delta;
     }
 
-    Delete() {
+    Damage(damage: number): void {
+        if (this.IsInvuln) return;
+        this.hp.Value -= damage;
+    }
+
+    Die(): void {
+        this.hp.Value = 0;
+    }
+
+    Delete(): void {
         Input.MouseObservable.Unsubscribe(this.clickObserver);
         super.Delete()
+    }
+
+    private OnDie(): void {
+
+    }
+
+    private OnDamaged(damage: number): void {
+        this._invulnTime = cfg.postDamageInvlunTime;
     }
 }

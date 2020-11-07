@@ -12,7 +12,7 @@ import { StateManager } from "./GameStateManager";
 import { IsPointInPolygon } from "./CollisionChecker";
 import { ISceneDrawData } from "../Renderers/SceneRenderer";
 import { SortedLinkedList } from "../Utility/Misc";
-import { IsDebugDrawable } from "../Models/GenericInterfaces";
+import { ClassType, IsDebugDrawable } from "../Models/GenericInterfaces";
 import { ScalarUtil } from "../Utility/Scalar";
 
 class GameManager implements IConfigObserver {
@@ -163,23 +163,37 @@ class GameManager implements IConfigObserver {
             if (!activeOnly || entity.Enabled) {
                 entities.push(entity);
                 if (entity.Children.length > 0)
-                    entities.push(...this.GetAllEntitiesHelper(entity, activeOnly));
+                    entities.push(...this.GetAllEntitiesHelper<EntityBase>(entity, activeOnly));
+            }
+        });
+        return entities;
+    }
+
+    GetEntitiesOfType<T extends EntityBase>(type:ClassType<T>, activeOnly: boolean = true): T[] {
+        let entities: T[] = [];
+        this._entities.forEach(entity => {
+            if (!activeOnly || entity.Enabled) {
+                if (entity instanceof type)
+                    entities.push(entity as T);
+                if (entity.Children.length > 0)
+                    entities.push(...this.GetAllEntitiesHelper<T>(entity, activeOnly, type));
             }
         });
         return entities;
     }
 
     // Recursive helper function for obtaining children of a give parent entity.
-    private GetAllEntitiesHelper(parent: EntityBase, activeOnly: boolean): EntityBase[] {
+    private GetAllEntitiesHelper<T extends EntityBase>(parent: EntityBase, activeOnly: boolean, type?: ClassType<T>): T[] {
         let children: EntityBase[] = [];
         parent.Children.forEach(child => {
             if (!activeOnly || child.Enabled) {
-                children.push(child);
+                if (!type || child instanceof type)
+                    children.push(child);
                 if (child.Children.length > 0)
-                    children.push(...this.GetAllEntitiesHelper(child, activeOnly));
+                    children.push(...this.GetAllEntitiesHelper(child, activeOnly, type));
             }
         })
-        return children;
+        return children as T[];
     }
 
     GetAllEntitiesWithGuardMethod(method: (entity: EntityBase) => boolean, activeOnly: boolean = true): EntityBase[] {
@@ -211,13 +225,13 @@ class GameManager implements IConfigObserver {
 
     // Get components of a certain type from all the entities within the game.
     // Calls 'GetAllEntities' to obtain all the current entities, and passes that as a collection to 'GetAllComponentsOfTypeFromEntityCollection'
-    GetAllComponentsOfType(type: any, activeOnly: boolean = true): ComponentBase[] {
+    GetAllComponentsOfType<T extends ComponentBase>(type: ClassType<T>, activeOnly: boolean = true): T[] {
         return this.GetAllComponentsOfTypeFromEntityCollection(type, this.GetAllEntities(activeOnly), activeOnly);
     }
 
     // Get components of a certain type from the given collection.
-    GetAllComponentsOfTypeFromEntityCollection(type: any, collection: EntityBase[], activeOnly: boolean = true): ComponentBase[] {
-        let returned: ComponentBase[] = [];
+    GetAllComponentsOfTypeFromEntityCollection<T extends ComponentBase>(type: ClassType<T>, collection: EntityBase[], activeOnly: boolean = true): T[] {
+        let returned: T[] = [];
         collection.forEach(e => returned.push(...e.GetComponentsOfType(type, activeOnly)));
         return returned;
     }

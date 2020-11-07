@@ -6,12 +6,12 @@ import { GameEntityBase } from "../Entities/EntityBase";
 import { Camera } from "../Workers/CameraManager";
 import { LightComponent } from "../Components/Visual/Light";
 import { Vec2Utils } from "../Utility/Vec2";
-import { EnemyFloaterEntity } from "../Entities/Enemies/Floater";
-import { CollisionGroup, HitboxType, TriggerState } from "../Models/CollisionModels";
+import { CollisionGroup, TriggerState } from "../Models/CollisionModels";
 import { HitboxBase } from "../Components/Hitboxes/HitboxBase";
 import { CheckCollision } from "../Workers/CollisionChecker";
-import { EnemyBaseEntity } from "../Entities/Enemies/EnemyBase";
 import { EnemyShooter } from "../Entities/Enemies/Shooter";
+import { EnemyHangingSpider } from "../Entities/Enemies/Spider";
+import { ResourcesInterface } from "../Entities/Ui/Gameplay/Resources";
 
 export class GameStateDebug implements IGameState {
     OnActivated(): void {
@@ -22,20 +22,13 @@ export class GameStateDebug implements IGameState {
         new DrawDirectiveFullImage(bge, 'bg_00', Camera.Transform.Scale);
         bge.Transform.Depth = -10;
 
-        // const l1e = new GameEntityBase();
-        // l1e.Transform.Position = [50, 0];
-        // l1e.Transform.Depth = 3;
-        // this._l1 = new LightComponent(l1e, [0, -1, 1], 150, 1);
-
-        // const l2e = new GameEntityBase();
-        // l2e.Transform.Position = [-50, 0];
-        // l2e.Transform.Depth = 2;
-        // this._l2 = new LightComponent(l2e, [0, 1, -1], 150, 1);
-
         new LightComponent(new GameEntityBase(), [1, 1, 1], 1000, 1);
 
-        const floater1 = new EnemyShooter();
-        floater1.Transform.Position = [100, -100];
+        // const floater1 = new EnemyShooter();
+        // floater1.Transform.Position = [100, -100];
+        new EnemyHangingSpider().Transform.Position = [100, 250];
+
+        new ResourcesInterface();
     }
 
     OnDeactivated(): void {

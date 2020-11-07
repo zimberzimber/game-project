@@ -14,10 +14,10 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
         this.UpdateWebglData();
     }
 
-    protected _size: Vec2;
-    get Size(): Vec2 { return Vec2Utils.Copy(this._size); }
-    set Size(size: Vec2) {
-        this._size = Vec2Utils.Copy(size);
+    protected _size: number | Vec2;
+    get Size(): number | Vec2 { return typeof this._size == "number" ? this._size : Vec2Utils.Copy(this._size); }
+    set Size(size: number | Vec2) {
+        this._size = typeof size == "number" ? size : Vec2Utils.Copy(size);
         this.CalculateBoundingRadius();
         this.UpdateWebglData();
     }
@@ -39,9 +39,9 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
         this.UpdateWebglData();
     }
 
-    constructor(parent: EntityBase, size: Vec2 = [0, 0]) {
+    constructor(parent: EntityBase, size: number | Vec2 = 1) {
         super(parent);
-        this._size = Vec2Utils.Copy(size);
+        this._size = typeof size == "number" ? size : Vec2Utils.Copy(size);
         this.CalculateBoundingRadius();
         this._webglData.indexes = [
             0, 1, 2,
@@ -50,15 +50,26 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
     }
 
     private CalculateBoundingRadius(): void {
-        const trans = this._parent.WorldRelativeTransform;
-        this._boundingRadius = Math.sqrt(Math.pow(this._size[0] * trans.Scale[0], 2) + Math.pow(this._size[1] * trans.Scale[1], 2));
+        const scale = this._parent.WorldRelativeTransform.Scale;
+        const size: Vec2 = typeof this._size == "number" ? [this._frameData.size[0] * this._size, this._frameData.size[1]] : this._size;
+        this._boundingRadius = Math.sqrt(Math.pow(size[0] * scale[0], 2) + Math.pow(size[1] * scale[1], 2));
     }
 
     protected UpdateWebglData() {
         const trans = this._parent.WorldRelativeTransform;
         const origin = trans.Position; // prevent redundant copying from source
+        const f = this._frameData;
 
-        const points: Vec2[] = MiscUtil.CreateAlignmentBasedBox(origin, this._verticalAlignment, this._horizontalAlignment, Vec2Utils.Mult(this._size, trans.Scale));
+        let frameSize: Vec2;
+        if (typeof this._size == "number")
+            frameSize = [
+                f.size[0] * this._size + trans.Scale[0],
+                f.size[1] * this._size + trans.Scale[1],
+            ]
+        else
+            frameSize = this._size
+
+        const points: Vec2[] = MiscUtil.CreateAlignmentBasedBox(origin, this._verticalAlignment, this._horizontalAlignment, Vec2Utils.Mult(frameSize, trans.Scale));
 
         // Rotate points around the origin. Keeps alignment in mind.
         if (trans.RotationRadian != 0)
@@ -66,7 +77,6 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
                 points[i] = Vec2Utils.RotatePointAroundCenter(points[i], trans.RotationRadian, origin)
 
         // Add the draw offset here, after the rotation so that the image is always rotated relative to itself.
-        const f = this._frameData;
         this._webglData.attributes = [
             points[0][0] + this._drawOffset[0], points[0][1] + this._drawOffset[1], trans.Depth + this._depthOffset, f.origin[0] + f.size[0], f.origin[1], this._opacity,
             points[1][0] + this._drawOffset[0], points[1][1] + this._drawOffset[1], trans.Depth + this._depthOffset, f.origin[0], f.origin[1], this._opacity,

@@ -12,7 +12,7 @@ export class DrawDirectiveAnimatedImage extends DrawDirectiveImageBase {
     get ImageId(): number { return this._spriteData.imageId; }
     get IsTranslucent(): boolean { return this._spriteData.isTranslucent; }
 
-    constructor(parent: EntityBase, spriteName: string, size: Vec2 = [0, 0]) {
+    constructor(parent: EntityBase, spriteName: string, size?: number | Vec2) {
         super(parent, size);
 
         const spriteData = Sprites.GetAnimatedSpriteData(spriteName);

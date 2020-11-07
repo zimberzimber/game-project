@@ -1,5 +1,5 @@
 import { IGameState } from "./GameStateBase";
-import { TitleScreenUi } from "../Entities/Ui/Premade/MainMenu";
+import { TitleScreenUi } from "../Entities/Ui/Windows/MainMenu";
 import { Game } from "../Workers/Game";
 import { SoundSingleInstanceComponent } from "../Components/Sound/SoundSingleInstance";
 import { UiEntityBase } from "../Entities/EntityBase";
@@ -7,7 +7,7 @@ import { DrawDirectiveStaticImage } from "../Components/Visual/DrawDirectiveStat
 import { Camera } from "../Workers/CameraManager";
 import { Vec2Utils } from "../Utility/Vec2";
 import { SliderBasicEntity } from "../Entities/Ui/Composite/SliderBasic";
-import { OptionsMenuUi } from "../Entities/Ui/Premade/OptionsMenu";
+import { OptionsMenuUi } from "../Entities/Ui/Windows/OptionsMenu";
 import { VerticalAlignment, HorizontalAlignment } from "../Models/GenericInterfaces";
 import { TextButtonEntity } from "../Entities/Ui/Composite/Buttons";
 

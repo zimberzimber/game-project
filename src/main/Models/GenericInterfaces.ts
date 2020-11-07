@@ -32,3 +32,5 @@ export const DebugDrawColors = Object.freeze({
 export interface IGenericCallback {
     (args?: any): any;
 }
+
+export type ClassType<T> = Function & { prototype: T }

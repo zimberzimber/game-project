@@ -26,6 +26,7 @@ export abstract class ComponentBase {
     Update(delta: number): void { };
 
     Unitialize(): void {
+        this.Enabled = false;
         for (const key in this) delete this[key];
     }
 

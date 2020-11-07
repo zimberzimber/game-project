@@ -48,6 +48,10 @@ export class Vec2Utils {
         ]
     }
 
+    static AngleToVector = (angle: number, distance: number = 1): Vec2 => {
+        return Vec2Utils.MoveTowardsAngle([0, 0], angle, distance);
+    }
+
     // https://www.gamefromscratch.com/post/2012/11/24/GameDev-math-recipes-Rotating-one-point-around-another-point.aspx
     static RotatePointAroundCenter = (point: Vec2, radian: number, center: Vec2): Vec2 =>
         [

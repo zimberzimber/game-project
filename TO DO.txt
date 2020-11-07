@@ -7,23 +7,9 @@
 - Timed entities, with a time to live, and an 'on died' callback
 
         Done:
-- Button and window background sprite definition generates now accept a parameter to count the sprite as translucent
-- Fixed scene draw data collection messing up indexes for translucent directives
-- Particles with any transparency controls shouldn't render as opaque
-- Added RGB related functions to misc utils
-- Added a method to get public parameters from states. (defined within the state)
-- Added a level controller
-- Added level definitions, and a dictionary to hold them
-- The 'game' state loads and manages the level
-- Added an utility for checking whether a type is inheriting from another type
-- Mouse clicks no longer have a wrong click position after resizing the window
-- Added an enum for mouse buttons
-- Split resource component into 2 common types and a generic namable type.
-- Continuous and one time colissions now take into account whether the component is enabled or not
-- Added a timer component
-- Transforms can now copy the parameters from another transform via simple function.
-- Entities now update their children before their components
-- Fixed the math of particle emission calculation
-- Particles can now emit multiple instances at once, up to 15 per tick.
-- Animated sprites will check for numerical frame aliases
-- Added a simple animator
+- Entities now disable themselves before deletion
+- Components now disable themselves before deletion
+- Added a method for getting all entities of type
+- Corrected generic function getting by type to allow obtaining via abstract classes
+- Entities and components are checked if they're enabled before calling their update
+- Image draw directives (other than tiled) can now have a number for size to scale the image linearly
