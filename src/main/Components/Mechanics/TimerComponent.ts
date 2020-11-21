@@ -63,9 +63,9 @@ export class TimerComponent extends BaseTimerComponent {
             this._timesUpCallback();
     }
 
-    Unitialize() {
+    Uninitialize() {
         delete this._timesUpCallback;
-        super.Unitialize();
+        super.Uninitialize();
     }
 }
 

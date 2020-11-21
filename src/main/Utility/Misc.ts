@@ -201,6 +201,24 @@ export class MiscUtil {
         }
         return false;
     }
+
+    // Taken from https://medium.com/javascript-in-plain-english/how-to-deep-copy-objects-and-arrays-in-javascript-7c911359b089
+    static DeepCopyObject<T>(object: T): T {
+        let result: any, key: any, value: any;
+
+        if (typeof object !== "object" || object === null)
+            return object;
+
+        // Create an array or object to hold the values
+        result = Array.isArray(object) ? [] : {};
+
+        for (key in object) {
+            value = object[key];
+            result[key] = this.DeepCopyObject(value);
+        }
+
+        return result;
+    }
 }
 
 

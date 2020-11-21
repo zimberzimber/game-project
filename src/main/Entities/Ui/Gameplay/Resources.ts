@@ -8,10 +8,10 @@ import { PlayerEntity } from "../../Player/PlayerRoot";
 
 export class ResourcesInterface extends UiEntityBase {
     private hp_dds: DrawDirectiveAnimatedImage[] = [];
-    private energy_dds: DrawDirectiveAnimatedImage[] = [];
+    // private energy_dds: DrawDirectiveAnimatedImage[] = [];
     private player: PlayerEntity;
     private oldHp: number;
-    private oldEnergy: number;
+    // private oldEnergy: number;
 
     constructor() {
         super();
@@ -34,14 +34,14 @@ export class ResourcesInterface extends UiEntityBase {
             this.hp_dds.push(dd);
         }
 
-        const energy = this.player.Energy;
-        for (let i = 0; i < energy[1]; i++) {
-            const dd = new DrawDirectiveAnimatedImage(this, 'energy_bar', 2);
-            dd.DrawOffset = [10 + ((13 - 6) * 3 * i), -10];
-            dd.Frame = "full";
-            dd.Opacity = energy[0] <= i ? 0.33 : 1;
-            this.energy_dds.push(dd);
-        }
+        // const energy = this.player.Energy;
+        // for (let i = 0; i < energy[1]; i++) {
+        //     const dd = new DrawDirectiveAnimatedImage(this, 'energy_bar', 2);
+        //     dd.DrawOffset = [10 + ((13 - 6) * 3 * i), -10];
+        //     dd.Frame = "full";
+        //     dd.Opacity = energy[0] <= i ? 0.33 : 1;
+        //     this.energy_dds.push(dd);
+        // }
 
         this.oldHp = hp[0];
     }

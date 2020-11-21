@@ -63,9 +63,9 @@ export abstract class DrawDirectiveBase extends ComponentBase implements ITransf
         this.Parent.WorldRelativeTransform.Subscribe(this);
     }
 
-    Unitialize() {
+    Uninitialize() {
         this.Parent.WorldRelativeTransform.Unsubscribe(this);
-        super.Unitialize();
+        super.Uninitialize();
     }
 
     OnObservableNotified(args: ITransformEventArgs): void {

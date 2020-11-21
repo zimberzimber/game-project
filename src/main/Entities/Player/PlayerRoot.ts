@@ -1,132 +1,66 @@
 import { GameEntityBase } from "../EntityBase";
 import { DrawDirectiveAnimatedImage } from "../../Components/Visual/DrawDirectiveAnimatedImage";
 import { PlayerMovementComponent } from "../../Components/Mechanics/PlayerMovementComponent";
-import { HitboxRectangle } from "../../Components/Hitboxes/HitboxRectangle";
 import { CollisionGroup, HitboxType, TriggerState } from "../../Models/CollisionModels";
 import { HitboxBase } from "../../Components/Hitboxes/HitboxBase";
 import { LightComponent } from "../../Components/Visual/Light";
 import { HorizontalAlignment, VerticalAlignment } from "../../Models/GenericInterfaces";
-import { ButtonState, IMouseEvent, IMouseObserver, MouseButton } from "../../Models/InputModels";
-import { Input } from "../../Workers/InputHandler";
-import { ProjectileBasic } from "../Projectiles/ProjectileBase";
-import { EnergyResourceComponent, HealthResourceComponent } from "../../Components/Mechanics/Resource";
-import { ProjectilePlayerTest } from "../Projectiles/Player/Test";
+import { GameplayInteractiveEntityBase } from "../GameplayInteractiveEntity";
+import { Vec2, Vec3 } from "../../Models/Vectors";
+import { SimpleAnimatorComponent } from "../../Components/Mechanics/TimerComponent";
+import { PlayerWeaponHandlerComponent } from "../../Components/Mechanics/PlayerWeaponHandler";
 
 const cfg = {
     postDamageInvlunTime: 1,
     fireColldown: 0.1,
     maxHp: 10,
-    maxEnergy: 10,
+    hitboxType: HitboxType.Rectangular,
+    hitboxSize: [15, 45] as Vec2,
+
+    ku_size: 3,
+    ku_frameDelta: 0.1,
+    ku_frames: 6,
+
+    ori_size: 3,
+    ori_offset: [0, 0] as Vec2,
+    ori_lightColor: [0.85, 0.85, 0.85] as Vec3,
+    ori_lightRadius: 15,
+    ori_lightHardness: 0.15,
+    ori_frameDelta: 0.25,
+    ori_frames: 4,
+
+    weapon_offset: [0, 30] as Vec2,
 }
 
-export class OriEntity extends GameEntityBase {
-    private dd: DrawDirectiveAnimatedImage;
-    private light: LightComponent;
-    // private particle: ParticleComponent;
+//  Root: Ku DD + Ori legs DD + hitbox + movement + resources
+//      Ori body DD + Ori light + Ori particles
+//          Ori arms + weapon controller
 
-    private frameDelta: number = 0.25;
-    private frameTime: number = 0;
-    private frame: number = 0;
+export class PlayerEntity extends GameplayInteractiveEntityBase {
+    private _kuDd: DrawDirectiveAnimatedImage;
+    private _kuDdAnimation: SimpleAnimatorComponent;
 
-    constructor(parent: GameEntityBase | void | null) {
-        super(parent);
-        this.dd = new DrawDirectiveAnimatedImage(this, "ori", [5, 15]);
-        this.dd.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
+    private _oriEntity: OriEntity;
 
-        this.light = new LightComponent(this, [0.85, 0.85, 1], 15, 0.05);
-        // this.particle = new ParticleComponent(this, 'test');
-        // this.particle.Start();
-    }
-
-    Update(delta: number) {
-        super.Update(delta);
-
-        this.frameTime += delta;
-        if (this.frameTime >= this.frameDelta) {
-            this.frameTime %= this.frameDelta;
-            this.frame = (this.frame + 1) % 4;
-            this.dd.Frame = this.frame.toString();
-        }
-    }
-}
-
-export class KuEntity extends GameEntityBase {
-    private dd: DrawDirectiveAnimatedImage;
-
-    private frameDelta: number = 0.1;
-    private frameTime: number = 0;
-    private frame: number = 0;
-
-    constructor(parent: GameEntityBase | void | null) {
-        super(parent);
-        this.dd = new DrawDirectiveAnimatedImage(this, "ku", [18, 13]);
-        this.dd.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
-    }
-
-    Update(delta: number) {
-        super.Update(delta);
-
-        this.frameTime += delta;
-        if (this.frameTime >= this.frameDelta) {
-            this.frameTime %= this.frameDelta;
-            this.frame = (this.frame + 1) % 6;
-            this.dd.Frame = this.frame.toString();
-        }
-    }
-}
-
-export class PlayerEntity extends GameEntityBase {
-    private oriEntity: OriEntity;
-    private kuEntity: KuEntity;
-    private firing: boolean = false;
-    private fireCooldown: number = cfg.fireColldown;
-    private fireCooldownProgress: number = 0;
-
-    private clickObserver: IMouseObserver;
-    private hp: HealthResourceComponent;
-    private energy: EnergyResourceComponent;
-
-    protected _invulnTime = 0;
+    private _invulnTime = 0;
     get IsInvuln(): boolean { return this._invulnTime > 0; }
 
-    get Health(): [number, number] { return [this.hp.Value, this.hp.MaxValue]; }
-    get Energy(): [number, number] { return [this.energy.Value, this.energy.MaxValue]; }
+    constructor() {
+        super(null, cfg.maxHp, cfg.hitboxType, cfg.hitboxSize, CollisionGroup.Player, CollisionGroup.None, TriggerState.NotTrigger);
 
-    constructor(parent: GameEntityBase | void | null) {
-        super(parent);
-        this.Transform.Scale = [3, 3];
-
-        this.hp = new HealthResourceComponent(this, cfg.maxHp);
-        this.hp.DepletedCallback = () => this.OnDie();
-        this.hp.ValueChangedCallback = (d: number) => { if (d < 0) this.OnDamaged(-d); };
-
-
-        this.energy = new EnergyResourceComponent(this, cfg.maxEnergy);
-
-        this.clickObserver = {
-            OnObservableNotified: (args: IMouseEvent): void => {
-                if (args.button == MouseButton.M1)
-                    this.firing = args.state == ButtonState.Down;
-            }
-        }
+        this._kuDd = new DrawDirectiveAnimatedImage(this, "ku", cfg.ku_size);
+        this._kuDd.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
+        this._kuDdAnimation = new SimpleAnimatorComponent(this, cfg.ku_frameDelta, true, this._kuDd, cfg.ku_frames);
+        this._kuDdAnimation.Start();
 
         new PlayerMovementComponent(this);
 
-        const hitbox = new HitboxRectangle(this, 5, 15);
-        hitbox.CollisionGroup = CollisionGroup.Player;
-        hitbox.CollideWithGroup = CollisionGroup.Hazard;
-        hitbox.TriggerState = TriggerState.NotTrigger;
-
-        hitbox.CollisionScript = (e: HitboxBase): void => {
+        this.hitbox.CollisionScript = (e: HitboxBase): void => {
             // e.Parent.transform.MoveTowards(this.transform.Position, -5);
         }
 
-        this.oriEntity = new OriEntity(this);
-        this.oriEntity.Transform.SetTransformParams([0, 5], null, null, -1);
-
-        this.kuEntity = new KuEntity(this);
-
-        Input.MouseObservable.Subscribe(this.clickObserver);
+        this._oriEntity = new OriEntity(this);
+        this._oriEntity.Transform.SetTransformParams(cfg.ori_offset, null, null, -1);
     }
 
     Update(delta: number): void {
@@ -134,37 +68,40 @@ export class PlayerEntity extends GameEntityBase {
 
         if (this._invulnTime > 0)
             this._invulnTime -= delta;
-
-        if (this.firing) {
-            if (this.fireCooldownProgress <= 0) {
-                const p = new ProjectilePlayerTest();
-                p.Transform.Position = this.Transform.Position;
-                this.fireCooldownProgress = this.fireCooldown;
-            }
-        }
-        if (this.fireCooldownProgress > 0)
-            this.fireCooldownProgress -= delta;
     }
 
     Damage(damage: number): void {
         if (this.IsInvuln) return;
-        this.hp.Value -= damage;
+        super.Damage(damage);
     }
 
-    Die(): void {
-        this.hp.Value = 0;
+    protected OnDied(): void {
+        console.log("ded");
+        this._kuDdAnimation.Stop();
     }
 
-    Delete(): void {
-        Input.MouseObservable.Unsubscribe(this.clickObserver);
-        super.Delete()
-    }
-
-    private OnDie(): void {
-
-    }
-
-    private OnDamaged(damage: number): void {
+    protected OnDamaged(damage: number): void {
         this._invulnTime = cfg.postDamageInvlunTime;
+        super.OnDamaged(damage);
+    }
+}
+
+class OriEntity extends GameEntityBase {
+    private _dd: DrawDirectiveAnimatedImage;
+    private _animator: SimpleAnimatorComponent;
+    private _light: LightComponent;
+    private _weapons: PlayerWeaponHandlerComponent;
+
+    constructor(parent: GameEntityBase | void | null) {
+        super(parent);
+        this._dd = new DrawDirectiveAnimatedImage(this, "ori", cfg.ori_size);
+        this._dd.Alignment = { vertical: VerticalAlignment.Bottom, horizontal: HorizontalAlignment.Middle };
+
+        this._animator = new SimpleAnimatorComponent(this, cfg.ori_frameDelta, true, this._dd, cfg.ori_frames);
+        this._animator.Start();
+
+        this._light = new LightComponent(this, cfg.ori_lightColor, cfg.ori_lightRadius, cfg.ori_lightHardness);
+
+        this._weapons = new PlayerWeaponHandlerComponent(this, cfg.weapon_offset);
     }
 }

@@ -20,6 +20,7 @@ import { MiscUtil } from "./Utility/Misc";
 import { CDN } from "./Workers/CdnManager";
 import { StateManager } from "./Workers/GameStateManager";
 import { UserSetting } from "./Models/IUserSettings";
+import { ButtonState, IMouseEvent } from "./Models/InputModels";
 
 let domCompletionPromise: any = PromiseUtil.CreateCompletionPromise();
 window.addEventListener('DOMContentLoaded', domCompletionPromise.resolve);
@@ -284,4 +285,29 @@ if (Config.GetConfig('debug', false) === true) {
 
     //@ts-ignore
     window.closeDbs = () => { for (let name in IDB.dbs) IDB.dbs[name].context.close(); }
+
+    let debugPauseStuff = {
+        tempUpdateCache: undefined as any,
+        mouseObserver: {
+            OnObservableNotified: (args: IMouseEvent) => {
+                if (args.state == ButtonState.Up)
+                    console.log(Game.GetEntitiesInRadius(args.position, 10, true));
+            }
+        }
+    }
+    //@ts-ignore
+    window.DebugPause = (turnOn: boolean) => {
+        // As disgusting as it is useful :D
+
+        if (turnOn && !debugPauseStuff.tempUpdateCache) {
+            debugPauseStuff.tempUpdateCache = Game.Update;
+            Game.Update = () => { };
+            Input.MouseObservable.Subscribe(debugPauseStuff.mouseObserver);
+        } else if (!turnOn && debugPauseStuff.tempUpdateCache) {
+            Input.MouseObservable.Unsubscribe(debugPauseStuff.mouseObserver);
+            Game.Update = debugPauseStuff.tempUpdateCache;
+            delete debugPauseStuff.tempUpdateCache;
+            Game.Update();
+        }
+    }
 }

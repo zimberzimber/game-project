@@ -11,6 +11,7 @@ import { GameEntityBase } from "./EntityBase";
 export class GameplayInteractiveEntityBase extends GameEntityBase {
     protected hitbox: HitboxBase;
     protected hp: HealthResourceComponent;
+    get Health(): [number, number] { return [this.hp.Value, this.hp.MaxValue]; }
 
     private _onDiedCallback: null | (() => void);
     set OnDiedCallback(callback: null | (() => void)) {
@@ -44,7 +45,7 @@ export class GameplayInteractiveEntityBase extends GameEntityBase {
             case HitboxType.Polygonal:
                 // First check if size not number, then if size[0][0] is number. ([0] of a number = undefined, which would be the case for Vec2)
                 if (typeof hitboxSize != 'number' && hitboxSize[0][0] !== undefined)
-                    this.hitbox = new HitboxPolygon(this, ...(hitboxSize as Vec2[]));
+                    this.hitbox = new HitboxPolygon(this, hitboxSize as Vec2[]);
                 else
                     failMessage = `Bad hitbox size for initialized entity: ${hitboxSize}, expected array of Vec2`;
                 break;
@@ -62,10 +63,12 @@ export class GameplayInteractiveEntityBase extends GameEntityBase {
         this.hitbox.CollisionGroup = collisionGroup;
         this.hitbox.CollideWithGroup = collidesWith;
         this.hitbox.TriggerState = triggerState;
-        this.hitbox.CollisionScript = (h) => {
-            const hp = h.Parent.GetComponentsOfType(HealthResourceComponent);
-            if (hp[0]) hp[0].Value--;
-        }
+
+        if (triggerState != TriggerState.NotTrigger)
+            this.hitbox.CollisionScript = (h) => {
+                const hp = h.Parent.GetComponentsOfType(HealthResourceComponent);
+                if (hp[0]) hp[0].Value--;
+            }
 
         this.hp = new HealthResourceComponent(this, health, health);
         this.hp.DepletedCallback = () => this.OnDied()
@@ -84,7 +87,6 @@ export class GameplayInteractiveEntityBase extends GameEntityBase {
     }
 
     protected OnDamaged(damage: number): void {
-        this.hp.Value -= damage;
         if (this._onDamagedCallback) this._onDamagedCallback(damage);
     }
 

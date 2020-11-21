@@ -75,9 +75,9 @@ export class LightComponent extends ComponentBase implements ITransformObserver 
         ];
     }
 
-    Unitialize(): void {
+    Uninitialize(): void {
         this.Parent.WorldRelativeTransform.Unsubscribe(this);
-        super.Unitialize();
+        super.Uninitialize();
     }
 }
 

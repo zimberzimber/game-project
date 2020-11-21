@@ -109,10 +109,10 @@ abstract class ClickableBaseComponent extends ComponentBase implements IDebugDra
         }
     }
 
-    Unitialize(): void {
+    Uninitialize(): void {
         Input.MouseObservable.Unsubscribe(this._mouseObserver);
         this._parent.WorldRelativeTransform.Unsubscribe(this._transformObserver);
-        super.Unitialize();
+        super.Uninitialize();
     }
 
     protected abstract CalculateClickArea(): void;

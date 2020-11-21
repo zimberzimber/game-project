@@ -7,16 +7,20 @@ import { DebugDrawColors } from "../../Models/GenericInterfaces";
 
 export class HitboxPolygon extends HitboxBase {
     readonly HitboxType: HitboxType = HitboxType.Polygonal;
-    private Polyline: Vec2[];
+    private _polyline: Vec2[];
 
-    constructor(parent: EntityBase, ...points: Vec2[]) {
-        super(parent);
-        this.Polyline = points;
+    set Polyline(points: Vec2[]) {
+        this._polyline = points;
         this.CalculateBoundingRadius();
     }
 
+    constructor(parent: EntityBase, points: Vec2[]) {
+        super(parent);
+        this.Polyline = points;
+    }
+
     protected CalculateBoundingRadius() {
-        this.Polyline.forEach(p => {
+        this._polyline.forEach(p => {
             let distance = Vec2Utils.DistanceFrom00(p);
             if (distance > this._boundingRadius)
                 this._boundingRadius = distance;
@@ -28,15 +32,15 @@ export class HitboxPolygon extends HitboxBase {
         const radian = trans.RotationRadian;
         const polyline: Vec2[] = [];
 
-        for (let i = 0; i < this.Polyline.length; i++)
-            polyline.push(Vec2Utils.Sum(trans.Position, Vec2Utils.RotatePoint(Vec2Utils.Mult(this.Polyline[i], trans.Scale), radian)));
+        for (let i = 0; i < this._polyline.length; i++)
+            polyline.push(Vec2Utils.Sum(trans.Position, Vec2Utils.RotatePoint(Vec2Utils.Mult(this._polyline[i], trans.Scale), radian)));
 
         return polyline;
     }
 
     // transformX, transformY, layer,  offsetX, offsetY,  rotX, rotY,  texX, texY
     get DebugDrawData(): number[] | null {
-        if (this.Polyline.length < 2) return null;
+        if (this._polyline.length < 2) return null;
 
         const color = this.TriggerState == TriggerState.NotTrigger ? DebugDrawColors.Hitbox : DebugDrawColors.HitboxTrigger;
         const polyline = this.CanvasReletivePolyline;

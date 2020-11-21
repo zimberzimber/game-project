@@ -25,7 +25,7 @@ export abstract class ComponentBase {
     protected OnDisabled(): void { };
     Update(delta: number): void { };
 
-    Unitialize(): void {
+    Uninitialize(): void {
         this.Enabled = false;
         for (const key in this) delete this[key];
     }

@@ -103,11 +103,12 @@ export class ParticleComponent extends DrawDirectiveBase {
         };
 
         if (this._particleInstances.length == 0) {
-            if (this._isEmitting && stopEmitting) {
+            if (this._isEmitting && stopEmitting)
                 this._isEmitting = false;
-                if (this.OnEndedCallback)
-                    this.OnEndedCallback();
-            }
+
+            if (!this._isEmitting && this.OnEndedCallback)
+                this.OnEndedCallback();
+
         } else {
             let hasDeleted = false;
 

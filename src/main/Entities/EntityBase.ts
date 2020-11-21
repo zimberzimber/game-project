@@ -72,7 +72,7 @@ export abstract class EntityBase implements ITransformObserver {
     RemoveComponent(component: ComponentBase): void {
         this._components = this._components.filter(c => {
             if (c === component) {
-                c.Unitialize();
+                c.Uninitialize();
                 return false;
             }
             return true;
@@ -80,7 +80,7 @@ export abstract class EntityBase implements ITransformObserver {
     }
 
     RemoveAllComponents(): void {
-        this._components.forEach(c => c.Unitialize());
+        this._components.forEach(c => c.Uninitialize());
         this._components = [];
     }
 

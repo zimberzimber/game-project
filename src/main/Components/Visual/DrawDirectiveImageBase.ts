@@ -14,6 +14,32 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
         this.UpdateWebglData();
     }
 
+    protected _flipping: [boolean, boolean] = [false, false];
+    set Flipping(flipping: { horizonal: boolean, vertical: boolean }) {
+        if (this._flipping[0] != flipping.horizonal || this._flipping[1] != flipping.vertical) {
+            this._flipping[0] = flipping.horizonal;
+            this._flipping[1] = flipping.vertical;
+            this.UpdateWebglData();
+        }
+    }
+
+    get HorizontalFlip(): boolean { return this._flipping[0]; }
+    set HorizontalFlip(flip: boolean) {
+        if (this._flipping[0] != flip) {
+            this._flipping[0] = flip;
+            this.UpdateWebglData();
+        }
+    }
+
+    get VerticalFlip(): boolean { return this._flipping[1]; }
+    set VerticalFlip(flip: boolean) {
+        if (this._flipping[1] != flip) {
+            this._flipping[1] = flip;
+            this.UpdateWebglData();
+        }
+    }
+
+
     protected _size: number | Vec2;
     get Size(): number | Vec2 { return typeof this._size == "number" ? this._size : Vec2Utils.Copy(this._size); }
     set Size(size: number | Vec2) {
@@ -77,12 +103,38 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
                 points[i] = Vec2Utils.RotatePointAroundCenter(points[i], trans.RotationRadian, origin)
 
         // Add the draw offset here, after the rotation so that the image is always rotated relative to itself.
+        // Sprite coordinates are assigned further ahead
         this._webglData.attributes = [
-            points[0][0] + this._drawOffset[0], points[0][1] + this._drawOffset[1], trans.Depth + this._depthOffset, f.origin[0] + f.size[0], f.origin[1], this._opacity,
-            points[1][0] + this._drawOffset[0], points[1][1] + this._drawOffset[1], trans.Depth + this._depthOffset, f.origin[0], f.origin[1], this._opacity,
-            points[2][0] + this._drawOffset[0], points[2][1] + this._drawOffset[1], trans.Depth + this._depthOffset, f.origin[0], f.origin[1] + f.size[1], this._opacity,
-            points[3][0] + this._drawOffset[0], points[3][1] + this._drawOffset[1], trans.Depth + this._depthOffset, f.origin[0] + f.size[0], f.origin[1] + f.size[1], this._opacity,
+            points[0][0] + this._drawOffset[0], points[0][1] + this._drawOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
+            points[1][0] + this._drawOffset[0], points[1][1] + this._drawOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
+            points[2][0] + this._drawOffset[0], points[2][1] + this._drawOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
+            points[3][0] + this._drawOffset[0], points[3][1] + this._drawOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
         ];
+
+        // Assign sprite coordinates based on whether its flipped or not
+        if (this.HorizontalFlip) {
+            this._webglData.attributes[3] = f.origin[0];
+            this._webglData.attributes[9] = f.origin[0] + f.size[0];
+            this._webglData.attributes[15] = f.origin[0] + f.size[0];
+            this._webglData.attributes[21] = f.origin[0];
+        } else {
+            this._webglData.attributes[3] = f.origin[0] + f.size[0];
+            this._webglData.attributes[9] = f.origin[0];
+            this._webglData.attributes[15] = f.origin[0];
+            this._webglData.attributes[21] = f.origin[0] + f.size[0];
+        }
+
+        if (this.VerticalFlip) {
+            this._webglData.attributes[4] = f.origin[1] + f.size[1];
+            this._webglData.attributes[10] = f.origin[1] + f.size[1];
+            this._webglData.attributes[16] = f.origin[1];
+            this._webglData.attributes[22] = f.origin[1];
+        } else {
+            this._webglData.attributes[4] = f.origin[1];
+            this._webglData.attributes[10] = f.origin[1];
+            this._webglData.attributes[16] = f.origin[1] + f.size[1];
+            this._webglData.attributes[22] = f.origin[1] + f.size[1];
+        }
 
         // Apply cutoff
         if (this._cutOff) {

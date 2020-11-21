@@ -42,6 +42,14 @@ export const SoundDefinitions: { [key: string]: ISoundDefinition } = {
         type: SoundType.UI
     },
 
+    bow_shot: {
+        soundSourceName: 'bow_shot',
+        volume: 1,
+        playbackRate: 1,
+        loop: false,
+        type: SoundType.Default
+    },
+
     // Music
     music_game: {
         soundSourceName: 'music_game',

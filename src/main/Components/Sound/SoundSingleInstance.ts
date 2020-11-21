@@ -67,10 +67,10 @@ export class SoundSingleInstanceComponent extends ComponentBase implements ITran
         this.Stop();
     }
 
-    Unitialize(): void {
+    Uninitialize(): void {
         if (Audio.IsActive(this._currentSoundId) && Audio.GetLooping(this._currentSoundId))
             Audio.SetLooping(this._currentSoundId, false);
         this.Parent.WorldRelativeTransform.Unsubscribe(this);
-        super.Unitialize();
+        super.Uninitialize();
     }
 }

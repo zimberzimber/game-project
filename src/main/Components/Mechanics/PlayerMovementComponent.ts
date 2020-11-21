@@ -59,8 +59,8 @@ export class PlayerMovementComponent extends ComponentBase implements IKeyboardO
         this._movement = Vec2Utils.Normalize([this._horizontalDirection, this._verticalDirection]);
     }
 
-    Unitialize(): void {
+    Uninitialize(): void {
         Input.KeyboardObservable.Unsubscribe(this);
-        super.Unitialize();
+        super.Uninitialize();
     }
 }

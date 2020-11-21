@@ -572,6 +572,30 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
         },
     },
 
+    
+    ori_sword_swing: {
+        sourceImageName: 'sword_swing',
+        isTranslucent: true,
+        frames: [
+            {
+                origin: [0, 0],
+                size: [131, 119]
+            },
+            {
+                origin: [131, 0],
+                size: [131, 119]
+            },
+            {
+                origin: [262, 0],
+                size: [131, 119]
+            },
+            {
+                origin: [393, 0],
+                size: [131, 119]
+            }
+        ]
+    },
+
     button_wide: Util.AddButton('uiElements', [0, 23], [33, 7], true),
 
     ...Util.AddWindowBox('window_simple', 'uiElements', [0, 0], true, [

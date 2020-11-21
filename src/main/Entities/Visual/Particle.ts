@@ -8,6 +8,7 @@ export class ParticleFireAndForgetEntity extends GameEntityBase {
     constructor(particle: string, customMaxDuration?: number) {
         super();
         this._particle = new ParticleComponent(this, particle);
+        this.OnEnded = null; // Set default OnEnded behavior
 
         if (customMaxDuration) {
             const timer = new TimerComponent(this, customMaxDuration, false);
