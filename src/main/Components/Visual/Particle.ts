@@ -51,7 +51,6 @@ export class ParticleComponent extends DrawDirectiveBase {
         this._spriteData = sd;
         this._particleController = new ParticleController(this._particleData, this._spriteData);
 
-
         // Was curious how it would look as one line. Result was funny to me.
         const pd = this._particleData;
         this._isTranslucent = !pd ? false : (sd.isTranslucent ? true : (pd.opacity !== undefined && pd.opacity < 1 ? true : (pd.fadeInTime || pd.fadeOutStartTime !== undefined) ? true : false));
@@ -159,10 +158,10 @@ export class ParticleComponent extends DrawDirectiveBase {
         if (!Camera.IsInView(origin, instanceBoundingRadius)) return;
 
         let coords: Vec2[] = [
-            [origin[0] + widthHalf, inst.position[1] + heightHalf],
-            [origin[0] - widthHalf, inst.position[1] + heightHalf],
-            [origin[0] - widthHalf, inst.position[1] - heightHalf],
-            [origin[0] + widthHalf, inst.position[1] - heightHalf],
+            [origin[0] + widthHalf, origin[1] + heightHalf],
+            [origin[0] - widthHalf, origin[1] + heightHalf],
+            [origin[0] - widthHalf, origin[1] - heightHalf],
+            [origin[0] + widthHalf, origin[1] - heightHalf],
         ];
 
         // Using Vec2 utils here because the operation is a bit more complex

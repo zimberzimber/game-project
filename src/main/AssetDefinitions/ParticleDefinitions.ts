@@ -74,7 +74,7 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
         size: [9, 9],
         sizeMultiplier: [0.75, 2],
         initialRotation: [0, 360],
-        
+
         emissionRate: 0,
         maxParticles: 30,
         lifeSpan: 2,
@@ -87,7 +87,7 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
         sizeGrowth: -1,
         rotationSpeed: 30
     },
-    
+
     ori_arrow_trail: {
         spriteName: 'flake_white',
         size: [18, 18],
@@ -103,5 +103,62 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
         // Movement
         relativePositioning: false,
         sizeGrowth: -1
+    },
+
+    ori_weapon_ready: {
+        spriteName: 'flake_white',
+        size: [18, 18],
+        sizeMultiplier: [0.75, 1.25],
+
+        emissionRate: 0,
+        maxParticles: 33,
+        lifeSpan: 0.6,
+
+        emissionAngle: [0, 360],
+        emissionForce: [250, 350],
+        forceResistence: 5,
+
+        spawnBox: [[-3, -3], [3, 3]],
+        fadeOutStartTime: 0.3,
+
+        // Movement
+        relativePositioning: false,
+        sizeGrowth: -3
+    },
+
+    ori_hammer_charge: {
+        spriteName: 'flake_white',
+        size: [25, 25],
+
+        emissionRate: 0,
+        maxParticles: 1,
+        lifeSpan: 1000,
+
+        rotationSpeed: 45,
+        fadeInTime: 1,
+
+        relativePositioning: true,
+        sizeGrowth: 9 / 2,
+        maxSize: 9,
+    },
+
+    health_shatter_splash: {
+        spriteName: 'flake_green',
+        size: [15, 15],
+        sizeMultiplier: [0.75, 1.25],
+
+        emissionRate: 0,
+        maxParticles: 33,
+        lifeSpan: 0.6,
+
+        emissionAngle: [0, 360],
+        emissionForce: [100, 300],
+        forceResistence: 5,
+
+        fadeOutStartTime: 0.3,
+
+        // Movement
+        relativePositioning: false,
+        sizeGrowth: -3
     },
 }

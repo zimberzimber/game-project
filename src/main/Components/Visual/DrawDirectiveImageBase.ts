@@ -84,31 +84,34 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
     protected UpdateWebglData() {
         const trans = this._parent.WorldRelativeTransform;
         const origin = trans.Position; // prevent redundant copying from source
+        const scale = trans.Scale; // prevent redundant copying from source
         const f = this._frameData;
 
         let frameSize: Vec2;
         if (typeof this._size == "number")
             frameSize = [
-                f.size[0] * this._size + trans.Scale[0],
-                f.size[1] * this._size + trans.Scale[1],
+                f.size[0] * this._size * scale[0],
+                f.size[1] * this._size * scale[1],
             ]
         else
             frameSize = this._size
 
-        const points: Vec2[] = MiscUtil.CreateAlignmentBasedBox(origin, this._verticalAlignment, this._horizontalAlignment, Vec2Utils.Mult(frameSize, trans.Scale));
+        const points: Vec2[] = MiscUtil.CreateAlignmentBasedBox(origin, this._verticalAlignment, this._horizontalAlignment, frameSize);
 
         // Rotate points around the origin. Keeps alignment in mind.
         if (trans.RotationRadian != 0)
             for (let i = 0; i < points.length; i++)
                 points[i] = Vec2Utils.RotatePointAroundCenter(points[i], trans.RotationRadian, origin)
 
+        const scaledOffset = Vec2Utils.Mult(this._drawOffset, scale);
+
         // Add the draw offset here, after the rotation so that the image is always rotated relative to itself.
         // Sprite coordinates are assigned further ahead
         this._webglData.attributes = [
-            points[0][0] + this._drawOffset[0], points[0][1] + this._drawOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
-            points[1][0] + this._drawOffset[0], points[1][1] + this._drawOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
-            points[2][0] + this._drawOffset[0], points[2][1] + this._drawOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
-            points[3][0] + this._drawOffset[0], points[3][1] + this._drawOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
+            points[0][0] + scaledOffset[0], points[0][1] + scaledOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
+            points[1][0] + scaledOffset[0], points[1][1] + scaledOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
+            points[2][0] + scaledOffset[0], points[2][1] + scaledOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
+            points[3][0] + scaledOffset[0], points[3][1] + scaledOffset[1], trans.Depth + this._depthOffset, 0, 0, this._opacity,
         ];
 
         // Assign sprite coordinates based on whether its flipped or not
@@ -138,7 +141,6 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
 
         // Apply cutoff
         if (this._cutOff) {
-            const scale = this.Parent.WorldRelativeTransform.Scale;
 
             // 0  . . 3  . .
             // 6  . . 9  . .

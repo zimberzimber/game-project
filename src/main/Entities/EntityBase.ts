@@ -48,8 +48,12 @@ export abstract class EntityBase implements ITransformObserver {
     protected OnEnabled(): void { };
     protected OnDisabled(): void { };
     Update(delta: number): void {
-        this._children.forEach(c => { if (c.Enabled) c.Update(delta) });
-        this._components.forEach(c => { if (c.Enabled) c.Update(delta) });
+        // Checking if enabled because this can still be reached udner certain circumstances
+        // i.e an entity deleting/disabling a newer entity in its update method
+        if (this.IsEnabledByHeirarchy) {
+            this._children.forEach(c => { if (c.Enabled) c.Update(delta) });
+            this._components.forEach(c => { if (c.Enabled) c.Update(delta) });
+        }
     }
 
     AddComponent(component: ComponentBase): void {

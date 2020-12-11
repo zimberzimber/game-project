@@ -15,6 +15,12 @@ export interface IAlignmentContainer {
     vertical: VerticalAlignment;
 }
 
+export interface IAlignable {
+    Alignment: IAlignmentContainer;
+    HorizontalAlignment: HorizontalAlignment;
+    VerticalAlignment: VerticalAlignment;
+}
+
 export interface IDebugDrawable {
     readonly DebugDrawData: number[] | null;
 }

@@ -173,42 +173,6 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
             size: [4, 4]
         }
     },
-    health_bar: {
-        sourceImageName: 'sprites',
-        names: ['root', 'full', 'empty'],
-        frames: [
-            {
-                origin: [0, 0],
-                size: [7, 10],
-            },
-            {
-                origin: [7, 0],
-                size: [13, 10],
-            },
-            {
-                origin: [20, 0],
-                size: [13, 10],
-            },
-        ]
-    },
-    energy_bar: {
-        sourceImageName: 'sprites',
-        names: ['root', 'full', 'empty'],
-        frames: [
-            {
-                origin: [0, 10],
-                size: [7, 10],
-            },
-            {
-                origin: [7, 10],
-                size: [13, 10],
-            },
-            {
-                origin: [20, 10],
-                size: [13, 10],
-            },
-        ]
-    },
     ori: {
         sourceImageName: 'sprites',
         names: ['0', '1', '2'],
@@ -349,14 +313,14 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
 
     button_cancel: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         frame: {
             origin: [7, 0],
             size: [11, 11]
         }
     },
     button_accept: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         frame: {
             origin: [18, 0],
             size: [11, 11]
@@ -364,21 +328,21 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
 
     header_1_l: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         frame: {
             origin: [0, 11],
             size: [5, 4]
         }
     },
     header_1_fill: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         frame: {
             origin: [5, 11],
             size: [1, 4]
         }
     },
     header_1_r: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         frame: {
             origin: [6, 11],
             size: [5, 4]
@@ -386,7 +350,7 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
 
     ui_health: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         names: ['empty', 'full'],
         frames: [
             {
@@ -400,7 +364,7 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
         ]
     },
     ui_energy: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         names: ['empty', 'full'],
         frames: [
             {
@@ -414,7 +378,7 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
         ]
     },
     ui_score: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         frame: {
             origin: [23, 11],
             size: [6, 6]
@@ -422,7 +386,7 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
 
     tick_box: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         names: ['unselected', 'selected'],
         frames: [
             {
@@ -437,14 +401,14 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
 
     arrow_small_left: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         frame: {
             origin: [29, 11],
             size: [3, 5]
         }
     },
     arrow_small_right: {
-        sourceImageName: 'uiElements',
+        sourceImageName: 'ui_elements',
         frame: {
             origin: [32, 11],
             size: [3, 5]
@@ -568,11 +532,27 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
         isTranslucent: true,
         frame: {
             origin: [0, 64],
-            size: [32, 32]
+            size: [47, 47]
+        },
+    },
+    flake_green: {
+        sourceImageName: 'particles',
+        isTranslucent: true,
+        frame: {
+            origin: [47, 64],
+            size: [47, 47]
+        },
+    },
+    flake_cyan: {
+        sourceImageName: 'particles',
+        isTranslucent: true,
+        frame: {
+            origin: [94, 64],
+            size: [47, 47]
         },
     },
 
-    
+
     ori_sword_swing: {
         sourceImageName: 'sword_swing',
         isTranslucent: true,
@@ -595,15 +575,143 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
             }
         ]
     },
+    ori_hammer_swing: {
+        sourceImageName: 'hammer_swing',
+        isTranslucent: true,
+        frames: [
+            {
+                origin: [0, 0],
+                size: [131, 119]
+            },
+            {
+                origin: [131, 0],
+                size: [131, 119]
+            },
+            {
+                origin: [262, 0],
+                size: [131, 119]
+            },
+            {
+                origin: [393, 0],
+                size: [131, 119]
+            }
+        ]
+    },
 
-    button_wide: Util.AddButton('uiElements', [0, 23], [33, 7], true),
+    hp_gauge: {
+        sourceImageName: 'hp_gauge',
+        isTranslucent: false,
+        frame: {
+            origin: [0, 0],
+            size: [101, 101]
+        }
+    },
+    hp_gauge_bg: {
+        sourceImageName: 'hp_gauge',
+        isTranslucent: false,
+        frame: {
+            origin: [101, 0],
+            size: [101, 101]
+        }
+    },
 
-    ...Util.AddWindowBox('window_simple', 'uiElements', [0, 0], true, [
+    energy_gauge: {
+        sourceImageName: 'energy_gauge',
+        isTranslucent: false,
+        frame: {
+            origin: [0, 0],
+            size: [101, 101]
+        }
+    },
+    energy_gauge_bg: {
+        sourceImageName: 'energy_gauge',
+        isTranslucent: false,
+        frame: {
+            origin: [101, 0],
+            size: [101, 101]
+        }
+    },
+    resource_container: {
+        sourceImageName: 'resource_container',
+        isTranslucent: false,
+        frame: {
+            origin: [0, 0],
+            size: [120, 120]
+        }
+    },
+    health_bar_root: {
+        sourceImageName: 'ui_elements',
+        names: ['full', 'empty'],
+        frames: [
+            {
+                origin: [52, 32],
+                size: [5, 6],
+            },
+            {
+                origin: [52, 38],
+                size: [5, 6],
+            },
+        ]
+    },
+    health_bar: {
+        sourceImageName: 'ui_elements',
+        names: ['full', 'empty'],
+        frames: [
+            {
+                origin: [57, 32],
+                size: [14, 6],
+            },
+            {
+                origin: [57, 38],
+                size: [14, 6],
+            },
+        ]
+    },
+    energy_bar_root: {
+        sourceImageName: 'ui_elements',
+        names: ['full', 'empty'],
+        frames: [
+            {
+                origin: [47, 32],
+                size: [5, 6],
+            },
+            {
+                origin: [47, 38],
+                size: [5, 6],
+            },
+        ]
+    },
+    energy_bar: {
+        sourceImageName: 'ui_elements',
+        names: ['full', 'empty'],
+        frames: [
+            {
+                origin: [33, 32],
+                size: [14, 6],
+            },
+            {
+                origin: [33, 38],
+                size: [14, 6],
+            },
+        ]
+    },
+    weapon_display: {
+        sourceImageName: 'ui_elements',
+        isTranslucent: true,
+        frame: {
+            origin: [33, 20],
+            size: [12, 12]
+        }
+    },
+
+    button_wide: Util.AddButton('ui_elements', [0, 23], [33, 7], true),
+
+    ...Util.AddWindowBox('window_simple', 'ui_elements', [0, 0], true, [
         [[3, 3], [1, 3], [3, 3]],
         [[3, 1], [1, 1], [3, 1]],
         [[3, 3], [1, 3], [3, 3]]]),
 
-    ...Util.AddSlider('slider_basic', 'uiElements', [32, 0], [3, 5], [35, 0], [1, 5], [36, 0], [3, 5], [29, 0], [3, 5], [39, 0], [3, 5]),
+    ...Util.AddSlider('slider_basic', 'ui_elements', [32, 0], [3, 5], [35, 0], [1, 5], [36, 0], [3, 5], [29, 0], [3, 5], [39, 0], [3, 5]),
 }
 
 export let FontDefinitions: { [key: string]: { font: string, size: number, outlineWidth: number } } = {

@@ -1,18 +1,32 @@
-import { Vec2 } from "../Vectors";
-import { SwordDamageZoneEntity } from "../../Entities/DamageZones/SwordDamageZoneEntity";
-import { WeaponState } from "./WeaponStateBase";
+import { SwordDamageZoneEntity } from "../../Entities/DamageZones/SwordDamageZone";
+import { IWeaponStateHandler, IWeaponStateParams, WeaponState } from "./WeaponStateBase";
+import { ScalarUtil } from "../../Utility/Scalar";
+import { HammerDamageZoneEntity } from "../../Entities/DamageZones/HammerDamageZone";
+import { ParticleFireAndForgetEntity } from "../../Entities/Visual/Particle";
 
 const PreSlashTime = 0.25; // Extra time before the countdown to "resting" starts
 const PostSlashTime = 0.5; // Time until the next slash can occur after slashing
-const MaxSlashes = 3;
+const MaxSlashes = 3; // Max # of slahes you can perform consecutively 
+const restTimePerSlash = 0.75; // This times number of consecutive slashes = Time before you can attack after slashing
 
-const restTimeExtra = 1.5; // Multiplied by # of performed slashes for rest time
+const minHammerChargeTime = 0.25; // Minimum time before the attack is release
+const maxHammerChargeTime = 2; // Time the attack has to be held for maximum effect
+const hammerSwingTime = 1; // Time it takes for the hammer to swing
+const hammerRestTime = 1; // Time before you can attack again after a hammer swing, regardless of charge time
 
 class SwordIdleState extends WeaponState {
-    _nextState: SwordSlashState;
-    
-    OnFire() {
-        this._nextState = new SwordSlashState();
+    constructor(handler:IWeaponStateHandler) {
+        super(handler);
+        this._canFirePrimary = true;
+        this._canFireSecondary = true;
+    }
+
+    PrimaryFire(params: IWeaponStateParams) {
+        this._nextState = new SwordSlashState(this._handler);
+    }
+
+    SecondaryFire(params: IWeaponStateParams) {
+        this._nextState = new HammerChargeState(this._handler);
     }
 }
 
@@ -20,27 +34,19 @@ class SwordSlashState extends WeaponState {
     private _time: number = PreSlashTime + PostSlashTime;
     private _didSlash: boolean = false;
     private _slash: number;
-    _weaponLocked: boolean;
-    _nextState: WeaponState;
 
-    // Can fire if a slash hasn't happened yet
-    get CanFire(): boolean {
-        return !this._didSlash;
-    }
-
-    constructor(slash: number = 1) {
-        super();
+    constructor(handler:IWeaponStateHandler, slash: number = 1) {
+        super(handler);
+        this._canFirePrimary = true;
         this._weaponLocked = true;
         this._slash = slash;
     }
 
-    OnFire(origin: Vec2, angle: number) {
-        // Spawn slash
-
-        const p = new SwordDamageZoneEntity(angle);
-        p.Transform.Position = origin;
+    PrimaryFire(params: IWeaponStateParams) {
+        new SwordDamageZoneEntity(this._handler.Entity, params.angle);
 
         this._didSlash = true;
+        this._canFirePrimary = false;
         this._time = PostSlashTime;
     }
 
@@ -48,30 +54,97 @@ class SwordSlashState extends WeaponState {
         this._time -= delta;
         if (this._time <= 0) {
             if (this._didSlash && this._slash < MaxSlashes)
-                this._nextState = new SwordSlashState(this._slash + 1);
+                this._nextState = new SwordSlashState(this._handler, this._slash + 1);
             else
-                this._nextState = new SwordRestState(this._slash);
+                this._nextState = new MeleeRestState(this._handler, this._slash * restTimePerSlash);
         }
     }
 }
 
-class SwordRestState extends WeaponState {
-    private _duration: number = 0;
-    _weaponLocked: boolean;
-    _nextState: SwordIdleState;
+class MeleeRestState extends WeaponState {
+    private _time: number = 0;
 
-    constructor(multiplier: number) {
-        super();
+    constructor(handler:IWeaponStateHandler, time: number) {
+        super(handler);
         this._weaponLocked = true;
-        this._duration = multiplier * restTimeExtra;
+        this._time = time;
     }
 
     Update(delta: number) {
-        this._duration -= delta;
-        if (this._duration <= 0) {
-            this._nextState = new SwordIdleState();
+        this._time -= delta;
+        if (this._time <= 0) {
+            this._nextState = new SwordIdleState(this._handler);
+            const p = new ParticleFireAndForgetEntity("ori_weapon_ready");
+            p.Transform.Position = this._handler.Position;
+            p.Burst();
         }
     }
 }
 
-export const InitialSwordState = SwordIdleState;
+
+class HammerChargeState extends WeaponState {
+    private _time: number = 0;
+    private _released: boolean = false;
+    private _maxCharge: boolean = false;
+    private _particle: ParticleFireAndForgetEntity;
+
+    constructor(handler:IWeaponStateHandler,) {
+        super(handler);
+        this._canFireSecondary = true;
+        this._weaponLocked = true;
+        this._particle = new ParticleFireAndForgetEntity("ori_hammer_charge");
+    }
+
+    OnInit(){
+        this._particle.Burst();
+    }
+
+    SecondaryFire(params: IWeaponStateParams) {
+        this._released = false;
+    }
+    SecondaryRelease(params: IWeaponStateParams) {
+        this._released = true;
+    }
+
+    Update(delta: number) {
+        this._time += delta;
+        this._particle.Transform.Position = this._handler.Position;
+        this._particle.Transform.Depth = this._handler.Depth;
+
+        if (!this._maxCharge && this._time >= maxHammerChargeTime) {
+            this._maxCharge = true;
+            console.log("maximum charge");
+            // Play VFX/SFX for max charge
+        }
+
+        if (this._released && this._time >= minHammerChargeTime) {
+            const multiplier = 1 + ScalarUtil.Clamp(minHammerChargeTime, this._time, maxHammerChargeTime) / maxHammerChargeTime;
+            this._nextState = new HammerSwingState(this._handler, multiplier);
+            this._particle.Delete();
+        }
+    }
+}
+
+class HammerSwingState extends WeaponState {
+    private _time: number = 0;
+    private _powerMultiplier: number;
+
+    constructor(handler:IWeaponStateHandler, powerMultiplier: number) {
+        super(handler);
+        this._powerMultiplier;
+        this._weaponLocked = true;
+        this._powerMultiplier = powerMultiplier;
+    }
+
+    OnInit(params: IWeaponStateParams) {
+        new HammerDamageZoneEntity(this._handler.Entity, params.angle, this._powerMultiplier);
+    }
+
+    Update(delta: number) {
+        this._time += delta;
+        if (this._time >= hammerSwingTime)
+            this._nextState = new MeleeRestState(this._handler, hammerRestTime);
+    }
+}
+
+export const InitialMeleeState = SwordIdleState;

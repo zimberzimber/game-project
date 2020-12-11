@@ -30,4 +30,16 @@ export class ScalarUtil {
     }
 
     static DiagonalLength = (width: number, height: number): number => Math.sqrt(width * width + height * height);
+
+    static IsAngleFacingRight = (angle: number): boolean => !ScalarUtil.IsAngleFacingLeft(angle);
+    static IsAngleFacingLeft = (angle: number): boolean => {
+        angle %= 360;
+        return (angle >= 90 && angle < 270) || (angle < -90 && angle >= -270);
+    }
+
+    static IsAngleFacingDown = (angle: number): boolean => !ScalarUtil.IsAngleFacingUp(angle);
+    static IsAngleFacingUp = (angle: number): boolean => {
+        angle %= 360;
+        return (angle >= 0 && angle < 180) || (angle < -180 && angle >= -360);
+    }
 }

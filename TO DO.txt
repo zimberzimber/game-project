@@ -10,24 +10,20 @@
 For the worm, Ori jumps off Ku, asks Ku to wait outside.
 She does, and after a few moments a rumbling begins, ori pops out of the side (After the worm escape)
 
+Have component/entity delition only mark it for deletion, and the actual deletion occur at the end of the update loop.
+
         Done:
-- Entities now disable themselves before deletion
-- Components now disable themselves before deletion
-- Added a method for getting all entities of type
-- Corrected generic function getting by type to allow obtaining via abstract classes
-- Entities and components are checked if they're enabled before calling their update
-- Image draw directives (other than tiled) can now accept a number for size for linear image scaling
-- Projectiles are now generated through a configuration. Only need to define new projectile classes when special logic is applied
-- Basic projectiles pull their colission groups and targets defined separetly from the projectiles definition
-- Fixed particle components not calling their OnEnded callback under certain circumstances
-- Fixed fire and forget particle entity not following default OnEnded behavior
-- Added a debug function to pause the game and output entities close to the clicked position to the console
-- Added a player weapon handling system
-- Added a sword as a player weapon
-- Added a polyline changing component, and a time based one
-- Added a deep copy method to MiscUtils
-- Made image draw directives able to be inverted
-- Fixed a typo: "Unitialize" -> "Uninitialize"
-- Renamed "DisableProjectile" to "DeleteProjectile"
-- Polyline colliders can now have their polyline changed via the "Polyline" setter property
-- Polyline colliders now take an array in the contructor instead of a spread of Vec2's
+- Added visual indication for when the melee weapon is ready
+- Added limited access to weapon handlers info
+- Fixed relative particle positioning not following the Y axis
+- Added melee secondary attack
+- Added a circle draw directive
+- Added an alignamble interface
+- Added utility for aligning alignables
+- Made draw directives follow the alignable interface
+- Fixed image draw directive not scaling draw offset
+- Fixed image draw directive scaling issues
+- Added health and energy UI elements
+- Added a UI counterpart to the fire and forget particle entity
+- Gave the health/energy UI an initialization animation
+- Losing health now fires a particle on the health bar

@@ -9,11 +9,12 @@ import { GameplayInteractiveEntityBase } from "../GameplayInteractiveEntity";
 import { Vec2, Vec3 } from "../../Models/Vectors";
 import { SimpleAnimatorComponent } from "../../Components/Mechanics/TimerComponent";
 import { PlayerWeaponHandlerComponent } from "../../Components/Mechanics/PlayerWeaponHandler";
+import { EnergyResourceComponent } from "../../Components/Mechanics/Resource";
 
 const cfg = {
     postDamageInvlunTime: 1,
     fireColldown: 0.1,
-    maxHp: 10,
+    maxHp: 7,
     hitboxType: HitboxType.Rectangular,
     hitboxSize: [15, 45] as Vec2,
 
@@ -39,14 +40,17 @@ const cfg = {
 export class PlayerEntity extends GameplayInteractiveEntityBase {
     private _kuDd: DrawDirectiveAnimatedImage;
     private _kuDdAnimation: SimpleAnimatorComponent;
-
     private _oriEntity: OriEntity;
+
+    private energy: EnergyResourceComponent;
+    get Energy(): [number, number] { return [this.energy.Value, this.energy.MaxValue]; }
 
     private _invulnTime = 0;
     get IsInvuln(): boolean { return this._invulnTime > 0; }
 
     constructor() {
         super(null, cfg.maxHp, cfg.hitboxType, cfg.hitboxSize, CollisionGroup.Player, CollisionGroup.None, TriggerState.NotTrigger);
+        this.energy = new EnergyResourceComponent(this, 5, 2);
 
         this._kuDd = new DrawDirectiveAnimatedImage(this, "ku", cfg.ku_size);
         this._kuDd.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
@@ -89,8 +93,6 @@ export class PlayerEntity extends GameplayInteractiveEntityBase {
 class OriEntity extends GameEntityBase {
     private _dd: DrawDirectiveAnimatedImage;
     private _animator: SimpleAnimatorComponent;
-    private _light: LightComponent;
-    private _weapons: PlayerWeaponHandlerComponent;
 
     constructor(parent: GameEntityBase | void | null) {
         super(parent);
@@ -100,8 +102,7 @@ class OriEntity extends GameEntityBase {
         this._animator = new SimpleAnimatorComponent(this, cfg.ori_frameDelta, true, this._dd, cfg.ori_frames);
         this._animator.Start();
 
-        this._light = new LightComponent(this, cfg.ori_lightColor, cfg.ori_lightRadius, cfg.ori_lightHardness);
-
-        this._weapons = new PlayerWeaponHandlerComponent(this, cfg.weapon_offset);
+        new LightComponent(this, cfg.ori_lightColor, cfg.ori_lightRadius, cfg.ori_lightHardness);
+        new PlayerWeaponHandlerComponent(this, cfg.weapon_offset);
     }
 }

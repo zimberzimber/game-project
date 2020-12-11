@@ -32,6 +32,7 @@ export interface IParticleDefinition {
     forceResistence?: number;
     gravity?: Vec2;
     sizeGrowth?: number;
+    maxSize?: number;
     fadeOutStartTime?: number;
     fadeInTime?: number;
     faceForceDirection?: boolean;
@@ -81,7 +82,7 @@ export class ParticleController {
             this._chain.push(new ParticleManipulatorForceChange(definition.forceResistence || 0, definition.gravity || [0, 0]))
 
         if (definition.sizeGrowth)
-            this._chain.push(new ParticleManipulatorSizeGrowth(definition.sizeGrowth));
+            this._chain.push(new ParticleManipulatorSizeGrowth(definition.sizeGrowth, definition.maxSize));
 
         if (definition.fadeInTime !== undefined || definition.fadeOutStartTime !== undefined)
             this._chain.push(new ParticleManipulatorOpacity(definition.fadeInTime || 0, definition.fadeOutStartTime || 0));
@@ -195,13 +196,20 @@ class ParticleManipulatorForceChange implements IParticleManipulator {
 
 class ParticleManipulatorSizeGrowth implements IParticleManipulator {
     private _growth: number = 0;
+    private _maxSize: number
 
-    constructor(growth: number) {
+    constructor(growth: number, maxSize?: number) {
         this._growth = growth;
+
+        if (maxSize === undefined)
+            this._maxSize = Number.MAX_SAFE_INTEGER;
+        else
+            this._maxSize = Math.max(maxSize, 0);
     }
 
     Manipulate(instance: IParticleInstance, delta: number): void {
         instance.sizeMultiplier = Math.max(instance.sizeMultiplier + this._growth * delta, 0);
+        instance.sizeMultiplier = Math.min(instance.sizeMultiplier, this._maxSize);
     }
 }
 

@@ -4,9 +4,9 @@ import { ITransformObserver, ITransformEventArgs } from "../../Models/Transform"
 import { IAttributesIndexes } from "../../Renderers/_RendererInterfaces";
 import { Vec2 } from "../../Models/Vectors";
 import { Vec2Utils } from "../../Utility/Vec2";
-import { HorizontalAlignment, VerticalAlignment, IAlignmentContainer } from "../../Models/GenericInterfaces";
+import { HorizontalAlignment, VerticalAlignment, IAlignmentContainer, IAlignable } from "../../Models/GenericInterfaces";
 
-export abstract class DrawDirectiveBase extends ComponentBase implements ITransformObserver {
+export abstract class DrawDirectiveBase extends ComponentBase implements ITransformObserver, IAlignable {
     protected _webglData: IAttributesIndexes = { attributes: [], indexes: [] };
     get WebGlData(): IAttributesIndexes { return this._webglData; }
 

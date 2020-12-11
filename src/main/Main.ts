@@ -286,7 +286,7 @@ if (Config.GetConfig('debug', false) === true) {
     //@ts-ignore
     window.closeDbs = () => { for (let name in IDB.dbs) IDB.dbs[name].context.close(); }
 
-    let debugPauseStuff = {
+    const debugPauseStuff = {
         tempUpdateCache: undefined as any,
         mouseObserver: {
             OnObservableNotified: (args: IMouseEvent) => {
