@@ -14,12 +14,9 @@ const maxHammerChargeTime = 2; // Time the attack has to be held for maximum eff
 const hammerSwingTime = 1; // Time it takes for the hammer to swing
 const hammerRestTime = 1; // Time before you can attack again after a hammer swing, regardless of charge time
 
-class SwordIdleState extends WeaponState {
-    constructor(handler:IWeaponStateHandler) {
-        super(handler);
-        this._canFirePrimary = true;
-        this._canFireSecondary = true;
-    }
+export class SwordIdleState extends WeaponState {
+    protected _canFirePrimary = true;
+    protected _canFireSecondary = true;
 
     PrimaryFire(params: IWeaponStateParams) {
         this._nextState = new SwordSlashState(this._handler);
@@ -30,12 +27,12 @@ class SwordIdleState extends WeaponState {
     }
 }
 
-class SwordSlashState extends WeaponState {
+export class SwordSlashState extends WeaponState {
     private _time: number = PreSlashTime + PostSlashTime;
     private _didSlash: boolean = false;
     private _slash: number;
 
-    constructor(handler:IWeaponStateHandler, slash: number = 1) {
+    constructor(handler: IWeaponStateHandler, slash: number = 1) {
         super(handler);
         this._canFirePrimary = true;
         this._weaponLocked = true;
@@ -61,10 +58,10 @@ class SwordSlashState extends WeaponState {
     }
 }
 
-class MeleeRestState extends WeaponState {
+export class MeleeRestState extends WeaponState {
     private _time: number = 0;
 
-    constructor(handler:IWeaponStateHandler, time: number) {
+    constructor(handler: IWeaponStateHandler, time: number) {
         super(handler);
         this._weaponLocked = true;
         this._time = time;
@@ -82,20 +79,21 @@ class MeleeRestState extends WeaponState {
 }
 
 
-class HammerChargeState extends WeaponState {
+export class HammerChargeState extends WeaponState {
     private _time: number = 0;
     private _released: boolean = false;
     private _maxCharge: boolean = false;
     private _particle: ParticleFireAndForgetEntity;
 
-    constructor(handler:IWeaponStateHandler,) {
+    protected _canFireSecondary = true;
+    protected _weaponLocked = true;
+
+    constructor(handler: IWeaponStateHandler,) {
         super(handler);
-        this._canFireSecondary = true;
-        this._weaponLocked = true;
         this._particle = new ParticleFireAndForgetEntity("ori_hammer_charge");
     }
 
-    OnInit(){
+    OnInit() {
         this._particle.Burst();
     }
 
@@ -108,12 +106,10 @@ class HammerChargeState extends WeaponState {
 
     Update(delta: number) {
         this._time += delta;
-        this._particle.Transform.Position = this._handler.Position;
-        this._particle.Transform.Depth = this._handler.Depth;
+        this._particle.Transform.SetTransformParams(this._handler.Position, null, null, this._handler.Depth);
 
         if (!this._maxCharge && this._time >= maxHammerChargeTime) {
             this._maxCharge = true;
-            console.log("maximum charge");
             // Play VFX/SFX for max charge
         }
 
@@ -125,11 +121,11 @@ class HammerChargeState extends WeaponState {
     }
 }
 
-class HammerSwingState extends WeaponState {
+export class HammerSwingState extends WeaponState {
     private _time: number = 0;
     private _powerMultiplier: number;
 
-    constructor(handler:IWeaponStateHandler, powerMultiplier: number) {
+    constructor(handler: IWeaponStateHandler, powerMultiplier: number) {
         super(handler);
         this._powerMultiplier;
         this._weaponLocked = true;

@@ -39,7 +39,6 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
         }
     }
 
-
     protected _size: number | Vec2;
     get Size(): number | Vec2 { return typeof this._size == "number" ? this._size : Vec2Utils.Copy(this._size); }
     set Size(size: number | Vec2) {
@@ -99,9 +98,10 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
         const points: Vec2[] = MiscUtil.CreateAlignmentBasedBox(origin, this._verticalAlignment, this._horizontalAlignment, frameSize);
 
         // Rotate points around the origin. Keeps alignment in mind.
-        if (trans.RotationRadian != 0)
+        const rotRad = trans.RotationRadian + ScalarUtil.ToRadian(this.Rotation);
+        if (rotRad)
             for (let i = 0; i < points.length; i++)
-                points[i] = Vec2Utils.RotatePointAroundCenter(points[i], trans.RotationRadian, origin)
+                points[i] = Vec2Utils.RotatePointAroundCenter(points[i], rotRad, origin)
 
         const scaledOffset = Vec2Utils.Mult(this._drawOffset, scale);
 

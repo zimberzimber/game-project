@@ -2,12 +2,12 @@ import { CollisionGroup, HitboxType, TriggerState } from "../Models/CollisionMod
 import { IProjectileCollisionConfig, IProjectileConfig } from "../Models/ProjectileModels"
 
 export const ProjectileCollisionDictionary: { [key: string]: IProjectileCollisionConfig } = {
-    player_projectile : {
+    player_projectile: {
         collisionGroup: CollisionGroup.Projectile,
         collideWith: CollisionGroup.Enemy
     },
-    
-    enemy_projectile : {
+
+    enemy_projectile: {
         collisionGroup: CollisionGroup.Projectile,
         collideWith: CollisionGroup.Player
     }
@@ -15,7 +15,7 @@ export const ProjectileCollisionDictionary: { [key: string]: IProjectileCollisio
 
 export const ProjectileDictionary: { [key: string]: IProjectileConfig } = {
     ori_arrow: {
-        speed: 600,
+        speed: 1200,
         lifeSpan: 10,
         hitboxType: HitboxType.Rectangular,
         hitboxSize: [50, 10],
@@ -25,6 +25,19 @@ export const ProjectileDictionary: { [key: string]: IProjectileConfig } = {
         spriteSize: [50, 50],
         particle: "ori_arrow_trail",
         damage: 1
+    },
+
+    ori_spike: {
+        speed: 3000,
+        lifeSpan: 3,
+        hitboxType: HitboxType.Rectangular,
+        hitboxSize: [50, 10],
+        triggerState: TriggerState.OneTimeTrigger,
+
+        sprite: "ori_arrow",
+        spriteSize: [100, 50],
+        particle: "ori_spike_trail",
+        damage: 10
     },
 
     spider_spit: {
@@ -49,5 +62,18 @@ export const ProjectileDictionary: { [key: string]: IProjectileConfig } = {
 
         particle: "missile_fire",
         damage: 1
-    }
+    },
+    
+    ori_star: {
+        speed: 1200,
+        lifeSpan: 60,
+        hitboxType: HitboxType.Rectangular,
+        hitboxSize: [50, 50],
+        triggerState: TriggerState.OneTimeTrigger,
+
+        sprite: "ori_star",
+        spriteSize: [50, 50],
+        particle: "ori_arrow_trail",
+        damage: 1
+    },
 }

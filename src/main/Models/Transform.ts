@@ -45,9 +45,10 @@ export class Transform extends Observable<ITransformObserver, ITransformEventArg
     private _rotation: number = 0;
     get Rotation(): number { return this._rotation; }
     set Rotation(angle: number) {
+        angle %= 360;
         if (this._rotation == angle) return;
         const old = this._rotation;
-        this._rotation = angle % 360;
+        this._rotation = angle;
         this.Notify({ rotation: { old, new: this._rotation } });
     };
 

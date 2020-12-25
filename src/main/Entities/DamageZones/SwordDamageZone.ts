@@ -13,7 +13,7 @@ const shape: IPolylineMutatorDictionary = [
 ]
 const config: IPlayerWeaponDamageZoneConfig = {
     damage: 4,
-    lifespan: 0.1,
+    lifespan: 0.2,
     shape,
     flippedShape: shape.slice().reverse(),
     sprite: "ori_sword_swing"

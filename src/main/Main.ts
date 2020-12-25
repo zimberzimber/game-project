@@ -290,8 +290,12 @@ if (Config.GetConfig('debug', false) === true) {
         tempUpdateCache: undefined as any,
         mouseObserver: {
             OnObservableNotified: (args: IMouseEvent) => {
-                if (args.state == ButtonState.Up)
-                    console.log(Game.GetEntitiesInRadius(args.position, 10, true));
+                if (args.state == ButtonState.Up) {
+                    const out = Game.GetEntitiesInRadius(args.position, 10, true);
+                    console.log(out);
+                    //@ts-ignore
+                    window.debugOutput = out;
+                }
             }
         }
     }

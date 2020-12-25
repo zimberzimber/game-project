@@ -13,8 +13,8 @@ const GetDefaultSettings = (): IUserSettings => {
             [ControlKey.left]: 'KeyA',
             [ControlKey.right]: 'KeyD',
             [ControlKey.pause]: 'Escape',
-            [ControlKey.action1]: 'Space',
-            [ControlKey.action2]: 'KeyQ',
+            [ControlKey.nextWeapon]: 'Space',
+            [ControlKey.prevWeapon]: 'KeyQ',
             [ControlKey.action3]: 'KeyE',
             [ControlKey.action4]: 'KeyR',
         }

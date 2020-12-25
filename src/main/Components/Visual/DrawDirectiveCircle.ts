@@ -23,13 +23,6 @@ export class DrawDirectiveCircle extends DrawDirectiveBase {
         this.UpdateWebglData();
     }
 
-    private _rotation: number = 0;
-    get Rotation(): number { return this._rotation; }
-    set Rotation(rotation: number) {
-        this._rotation = rotation;
-        this.UpdateWebglData();
-    }
-
     private _spriteRotation: number = 0;
     get SpriteRotation(): number { return this._spriteRotation; }
     set SpriteRotation(rotation: number) {

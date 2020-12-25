@@ -40,8 +40,9 @@ export class EnemyShooter extends GameplayInteractiveEntityBase {
 
         shootTimer.OnTimesUpCallback = () => {
             fired++;
-            const p = new ProjectileSeeker(Game.GetEntitiesOfType(PlayerEntity, false)[0]);
-            p.Transform.Rotation = Math.random() * 90 + 45;
+
+            const t = this.WorldRelativeTransform
+            new ProjectileSeeker(Game.GetEntitiesOfType(PlayerEntity, false)[0], t.Position, t.Rotation + Math.random() * 90 + 45, t.Depth);
 
             if (fired >= cfg.missiles.count) {
                 shootTimer.Stop();

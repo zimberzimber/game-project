@@ -29,6 +29,8 @@ export class DrawDirectiveAnimatedImage extends DrawDirectiveImageBase {
 
     get FrameId(): number { return this._currentFrame; }
     set Frame(frame: string | number) {
+        if (frame == this._currentFrame) return;
+
         const f = GetFrameFromMultiFrameStorage(this._spriteData, frame);
         if (f > -1) {
             this._currentFrame = f;

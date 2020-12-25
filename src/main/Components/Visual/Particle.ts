@@ -130,11 +130,11 @@ export class ParticleComponent extends DrawDirectiveBase {
 
     private Emit(): void {
         const inst: IParticleInstance = this._particleController.CreateInstance();
+        
+        inst.position = Vec2Utils.Sum(inst.position, this._drawOffset);
 
-        if (!this._particleData.relativePositioning) {
-            inst.position[0] += this.Parent.WorldRelativeTransform.Position[0];
-            inst.position[1] += this.Parent.WorldRelativeTransform.Position[1];
-        }
+        if (!this._particleData.relativePositioning)
+            inst.position = Vec2Utils.Sum(inst.position, this.Parent.WorldRelativeTransform.Position);
 
         this._particleInstances.push(inst);
     }
@@ -201,7 +201,7 @@ export class ParticleComponent extends DrawDirectiveBase {
     }
 
     Burst(): void {
-        const count = this._particleData.maxParticles - this._particleInstances.length;
+        const count = this._particleData.maxParticles;
         for (let i = 0; i < count; i++)
             this.Emit();
     }

@@ -1,3 +1,4 @@
+import { EnergyResourceComponent } from "../../Components/Mechanics/Resource";
 import { EntityBase, GameEntityBase } from "../../Entities/EntityBase";
 import { Vec2 } from "../Vectors";
 
@@ -10,6 +11,8 @@ export interface IWeaponStateHandler {
     Position: Vec2;
     Depth: number;
     Entity: GameEntityBase;
+    GetEnergy(): number;
+    UseEnergy(energy: number): void;
 }
 
 export abstract class WeaponState {

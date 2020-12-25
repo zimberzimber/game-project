@@ -695,13 +695,48 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
             },
         ]
     },
-    weapon_display: {
+    weapon_frame: {
         sourceImageName: 'ui_elements',
         isTranslucent: true,
         frame: {
-            origin: [33, 20],
-            size: [12, 12]
+            origin: [40, 13],
+            size: [18, 18]
         }
+    },
+
+    weapon_icons: {
+        sourceImageName: 'ui_elements',
+        names: ["melee", "ranged", "special"],
+        frames: [
+            {
+                origin: [58, 0],
+                size: [13, 13]
+            },
+            {
+                origin: [58, 13],
+                size: [13, 13]
+            },
+            {
+                origin: [45, 0],
+                size: [13, 13]
+            }
+        ]
+    },
+
+    ori_star: {
+        sourceImageName: 'ui_elements',
+        frame: {
+            origin: [45, 0],
+            size: [13, 13]
+        }
+    },
+    shockwave: {
+        sourceImageName: 'shockwave',
+        isTranslucent: true,
+        frame: {
+            origin: [0, 0],
+            size: [47, 47]
+        },
     },
 
     button_wide: Util.AddButton('ui_elements', [0, 23], [33, 7], true),

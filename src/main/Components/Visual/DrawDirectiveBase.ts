@@ -55,6 +55,13 @@ export abstract class DrawDirectiveBase extends ComponentBase implements ITransf
         this.UpdateWebglData();
     }
 
+    protected _rotation: number = 0;
+    get Rotation(): number { return this._rotation; }
+    set Rotation(rotation: number) {
+        this._rotation = rotation % 360;
+        this.UpdateWebglData();
+    }
+
     abstract get IsTranslucent(): boolean;
     abstract get ImageId(): number;
 

@@ -1,3 +1,4 @@
+import { ProjectileCollisionDictionary, ProjectileDictionary } from "../../AssetDefinitions/BasicProjectileDefinitions";
 import { TimerComponent } from "../../Components/Mechanics/TimerComponent";
 import { DrawDirectiveAnimatedImage } from "../../Components/Visual/DrawDirectiveAnimatedImage";
 import { DrawDirectiveStaticImage } from "../../Components/Visual/DrawDirectiveStaticImage";
@@ -10,7 +11,7 @@ import { Game } from "../../Workers/Game";
 import { GameEntityBase } from "../EntityBase";
 import { GameplayInteractiveEntityBase } from "../GameplayInteractiveEntity";
 import { PlayerEntity } from "../Player/PlayerRoot";
-import { ProjectileSpiderSpit } from "../Projectiles/Enemy/SpiderSpit";
+import { ProjectileBasic, ProjectileBasicWeighted } from "../Projectiles/ProjectileBase";
 import { BasicGibEntity } from "../Visual/Gibs";
 import { ParticleFireAndForgetEntity } from "../Visual/Particle";
 
@@ -54,17 +55,14 @@ export class EnemyHangingSpider extends GameplayInteractiveEntityBase {
 
         const fireTimer = new TimerComponent(this, cfg.fireInterval, true);
         fireTimer.OnTimesUpCallback = () => {
-            const p1 = new ProjectileSpiderSpit();
-            const p2 = new ProjectileSpiderSpit();
-            const p3 = new ProjectileSpiderSpit();
             const pos = Vec2Utils.Sum(this.WorldRelativeTransform.Position, [0, -10]);
             const depth = this.Transform.Depth + 1;
             const player = Game.GetEntitiesOfType(PlayerEntity)[0];
             const angle = player ? Vec2Utils.GetAngle(pos, player.WorldRelativeTransform.Position) : 180;
 
-            p1.Transform.SetTransformParams(pos, angle, null, depth)
-            p2.Transform.SetTransformParams(pos, angle + cfg.projectileSpread, null, depth)
-            p3.Transform.SetTransformParams(pos, angle - cfg.projectileSpread, null, depth)
+            new ProjectileBasic(ProjectileDictionary.spider_spit, ProjectileCollisionDictionary.enemy_projectile, pos, angle, depth);
+            new ProjectileBasic(ProjectileDictionary.spider_spit, ProjectileCollisionDictionary.enemy_projectile, pos, angle + cfg.projectileSpread, depth);
+            new ProjectileBasic(ProjectileDictionary.spider_spit, ProjectileCollisionDictionary.enemy_projectile, pos, angle - cfg.projectileSpread, depth);
         }
 
         let frame = 1; // skipping 0 as it starts there anyways

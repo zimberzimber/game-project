@@ -5,6 +5,9 @@
 - Have the convolver impulse disconnect from nodes when the impulse is removed, or have it connect through initialization instead of when adding an impulse
 - Instead of having the level spawn things based on position, make them spawn when the level has passed a certain length (different for each entity)
 - Timed entities, with a time to live, and an 'on died' callback
+- Fix the bug where energy and health damage burst cannot be on the same depth offset in resource UI
+- Add pickups
+- Fix weapons not preventing you from switching weapons when they should
 
         Ideas:
 For the worm, Ori jumps off Ku, asks Ku to wait outside.
@@ -13,17 +16,15 @@ She does, and after a few moments a rumbling begins, ori pops out of the side (A
 Have component/entity delition only mark it for deletion, and the actual deletion occur at the end of the update loop.
 
         Done:
-- Added visual indication for when the melee weapon is ready
-- Added limited access to weapon handlers info
-- Fixed relative particle positioning not following the Y axis
-- Added melee secondary attack
-- Added a circle draw directive
-- Added an alignamble interface
-- Added utility for aligning alignables
-- Made draw directives follow the alignable interface
-- Fixed image draw directive not scaling draw offset
-- Fixed image draw directive scaling issues
-- Added health and energy UI elements
-- Added a UI counterpart to the fire and forget particle entity
-- Gave the health/energy UI an initialization animation
-- Losing health now fires a particle on the health bar
+- Added a fade in effect for health and energy bars
+- Added draw offset functionality to particle component
+- Particle component burst now creates [maxParticles] instances instead of [maxParticles] - [currently active] instances.
+- Resource UI now reuses a particle component instead of spawning particle entities.
+- Added shatter effect to energy
+- Can now get name of current state from player
+- Mapped icons to weapon states in resource UI
+- DebugPause now adds caught entities to `window.debugOutput`
+- Added special and ranged weapon states
+- Added weapon switching
+- Added rotation to draw directives
+- Added energy interface to weapon handler

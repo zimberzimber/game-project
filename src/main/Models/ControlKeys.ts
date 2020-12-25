@@ -1,7 +1,7 @@
 export enum ControlKey {
     up, down, left, right,
     pause,
-    action1, action2, action3, action4
+    nextWeapon, prevWeapon, action3, action4
 }
 
 // control key : character code
@@ -11,8 +11,8 @@ export interface IKeymap {
     [ControlKey.left]: string;
     [ControlKey.right]: string;
     [ControlKey.pause]: string;
-    [ControlKey.action1]: string;
-    [ControlKey.action2]: string;
+    [ControlKey.nextWeapon]: string;
+    [ControlKey.prevWeapon]: string;
     [ControlKey.action3]: string;
     [ControlKey.action4]: string;
 }

@@ -105,6 +105,21 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
         sizeGrowth: -1
     },
 
+    ori_spike_trail: {
+        spriteName: 'color_white',
+        size: [100, 10],
+
+        emissionRate: 100,
+        maxParticles: 1000,
+        lifeSpan: 0.1,
+
+        fadeOutStartTime: 0,
+
+        // Movement
+        relativePositioning: false,
+        sizeGrowth: -10
+    },
+
     ori_weapon_ready: {
         spriteName: 'flake_white',
         size: [18, 18],
@@ -151,6 +166,7 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
         maxParticles: 33,
         lifeSpan: 0.6,
 
+        spawnBox: [[-5, -1.5], [5, 1.5]],
         emissionAngle: [0, 360],
         emissionForce: [100, 300],
         forceResistence: 5,
@@ -161,4 +177,38 @@ export const particleDefinitions: { [key: string]: IParticleDefinition } = {
         relativePositioning: false,
         sizeGrowth: -3
     },
+    
+    energy_shatter_splash: {
+        spriteName: 'flake_cyan',
+        size: [15, 15],
+        sizeMultiplier: [0.75, 1.25],
+
+        emissionRate: 0,
+        maxParticles: 33,
+        lifeSpan: 0.6,
+
+        spawnBox: [[-5, -1.5], [5, 1.5]],
+        emissionAngle: [0, 360],
+        emissionForce: [100, 300],
+        forceResistence: 5,
+
+        fadeOutStartTime: 0.3,
+
+        // Movement
+        relativePositioning: false,
+        sizeGrowth: -3
+    },
+
+    ori_special_explosion_shockwave: {
+        spriteName: 'shockwave',
+        size: [2, 2],
+
+        emissionRate: 0,
+        maxParticles: 1,
+        lifeSpan: 0.15,
+
+        fadeOutStartTime: 0.05,
+
+        sizeGrowth: 600,
+    }
 }

@@ -8,8 +8,8 @@ import { Settings } from "./SettingsManager";
 import { ISettingsEventArgs, UserSetting } from "../Models/IUserSettings";
 
 const GamepadButtonKeymap = {
-    0: ControlKey.action1,
-    1: ControlKey.action2,
+    0: ControlKey.nextWeapon,
+    1: ControlKey.prevWeapon,
     2: ControlKey.action3,
     3: ControlKey.action4,
     9: ControlKey.pause,

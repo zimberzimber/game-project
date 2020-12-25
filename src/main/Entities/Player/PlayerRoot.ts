@@ -41,6 +41,7 @@ export class PlayerEntity extends GameplayInteractiveEntityBase {
     private _kuDd: DrawDirectiveAnimatedImage;
     private _kuDdAnimation: SimpleAnimatorComponent;
     private _oriEntity: OriEntity;
+    private _weaponHandler: PlayerWeaponHandlerComponent;
 
     private energy: EnergyResourceComponent;
     get Energy(): [number, number] { return [this.energy.Value, this.energy.MaxValue]; }
@@ -48,9 +49,11 @@ export class PlayerEntity extends GameplayInteractiveEntityBase {
     private _invulnTime = 0;
     get IsInvuln(): boolean { return this._invulnTime > 0; }
 
+    get WeaponState() { return this._weaponHandler.CurrentState; }
+
     constructor() {
         super(null, cfg.maxHp, cfg.hitboxType, cfg.hitboxSize, CollisionGroup.Player, CollisionGroup.None, TriggerState.NotTrigger);
-        this.energy = new EnergyResourceComponent(this, 5, 2);
+        this.energy = new EnergyResourceComponent(this, 5);
 
         this._kuDd = new DrawDirectiveAnimatedImage(this, "ku", cfg.ku_size);
         this._kuDd.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
@@ -65,6 +68,8 @@ export class PlayerEntity extends GameplayInteractiveEntityBase {
 
         this._oriEntity = new OriEntity(this);
         this._oriEntity.Transform.SetTransformParams(cfg.ori_offset, null, null, -1);
+
+        this._weaponHandler = new PlayerWeaponHandlerComponent(this, cfg.weapon_offset);
     }
 
     Update(delta: number): void {
@@ -77,6 +82,10 @@ export class PlayerEntity extends GameplayInteractiveEntityBase {
     Damage(damage: number): void {
         if (this.IsInvuln) return;
         super.Damage(damage);
+    }
+
+    UseEnergy(energy: number): void {
+        this.energy.Value -= energy;
     }
 
     protected OnDied(): void {
@@ -103,6 +112,5 @@ class OriEntity extends GameEntityBase {
         this._animator.Start();
 
         new LightComponent(this, cfg.ori_lightColor, cfg.ori_lightRadius, cfg.ori_lightHardness);
-        new PlayerWeaponHandlerComponent(this, cfg.weapon_offset);
     }
 }
