@@ -13,7 +13,6 @@ import { IsPointInPolygon } from "./CollisionChecker";
 import { ISceneDrawData } from "../Renderers/SceneRenderer";
 import { SortedLinkedList } from "../Utility/Misc";
 import { ClassType, IsDebugDrawable } from "../Models/GenericInterfaces";
-import { ScalarUtil } from "../Utility/Scalar";
 
 class GameManager implements IConfigObserver {
     private _entities: EntityBase[] = [];

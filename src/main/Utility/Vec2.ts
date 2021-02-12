@@ -103,5 +103,9 @@ export class Vec2Utils {
         return Vec2Utils.RandomPointInBox(oor[0] as Vec2, oor[1] as Vec2);
     }
 
+    static NumberFromNumberOrArray(nor: number | Vec2, position: number): number {
+        return typeof (nor) == "number" ? nor : nor[position];
+    }
+
     static Copy = (vec: Vec2): Vec2 => [vec[0], vec[1]];
 }

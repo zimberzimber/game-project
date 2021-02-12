@@ -697,11 +697,18 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     },
     weapon_frame: {
         sourceImageName: 'ui_elements',
+        names: ["default", "locked"],
         isTranslucent: true,
-        frame: {
-            origin: [40, 13],
-            size: [18, 18]
-        }
+        frames: [
+            {
+                origin: [42, 0],
+                size: [18, 18]
+            },
+            {
+                origin: [60, 0],
+                size: [18, 18]
+            },
+        ]
     },
 
     weapon_icons: {
@@ -709,15 +716,15 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
         names: ["melee", "ranged", "special"],
         frames: [
             {
-                origin: [58, 0],
+                origin: [33, 19],
                 size: [13, 13]
             },
             {
-                origin: [58, 13],
+                origin: [46, 19],
                 size: [13, 13]
             },
             {
-                origin: [45, 0],
+                origin: [59, 19],
                 size: [13, 13]
             }
         ]
@@ -726,7 +733,7 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
     ori_star: {
         sourceImageName: 'ui_elements',
         frame: {
-            origin: [45, 0],
+            origin: [59, 19],
             size: [13, 13]
         }
     },
@@ -738,6 +745,22 @@ export let SpriteDefinitions: { [key: string]: ISingleFrameSpriteDefinition | IM
             size: [47, 47]
         },
     },
+
+    ui_score_bar_full: {
+        sourceImageName: 'ui_elements',
+        frame: {
+            origin: [0, 44],
+            size: [68, 9]
+        },
+    },
+    ui_score_bar_empty: {
+        sourceImageName: 'ui_elements',
+        frame: {
+            origin: [0, 53],
+            size: [68, 9]
+        },
+    },
+
 
     button_wide: Util.AddButton('ui_elements', [0, 23], [33, 7], true),
 

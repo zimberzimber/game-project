@@ -109,7 +109,7 @@ export class Transform extends Observable<ITransformObserver, ITransformEventArg
     // https://stackoverflow.com/questions/43748418/c-move-2d-point-along-angle
     MoveForward = (distance: number): void => {
         const rad = this.RotationRadian;
-        this.Position = [this._position[0] = Math.cos(rad) * distance, this._position[1] = Math.sin(rad) * distance];
+        this.Position = [this._position[0] + Math.cos(rad) * distance, this._position[1] + Math.sin(rad) * distance];
     }
 
     MoveTowards = (target: Vec2, distance: number, allowOvershoot: boolean = false): void => {

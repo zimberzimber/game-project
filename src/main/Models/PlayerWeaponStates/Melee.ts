@@ -28,6 +28,7 @@ export class SwordIdleState extends WeaponState {
 }
 
 export class SwordSlashState extends WeaponState {
+    protected _weaponLocked: boolean = true;
     private _time: number = PreSlashTime + PostSlashTime;
     private _didSlash: boolean = false;
     private _slash: number;
@@ -59,6 +60,7 @@ export class SwordSlashState extends WeaponState {
 }
 
 export class MeleeRestState extends WeaponState {
+    protected _weaponLocked: boolean = true;
     private _time: number = 0;
 
     constructor(handler: IWeaponStateHandler, time: number) {
@@ -95,6 +97,7 @@ export class HammerChargeState extends WeaponState {
 
     OnInit() {
         this._particle.Burst();
+        this._particle.Transform.SetTransformParams(this._handler.Position, null, null, this._handler.Depth);
     }
 
     SecondaryFire(params: IWeaponStateParams) {
@@ -122,6 +125,7 @@ export class HammerChargeState extends WeaponState {
 }
 
 export class HammerSwingState extends WeaponState {
+    protected _weaponLocked: boolean = true;
     private _time: number = 0;
     private _powerMultiplier: number;
 

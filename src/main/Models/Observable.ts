@@ -23,6 +23,7 @@ export class Observable<ObserverType extends IObserver<ArgType>, ArgType>{
     }
 }
 
+
 export interface IObserver<T> {
     OnObservableNotified(args: T): void;
 }

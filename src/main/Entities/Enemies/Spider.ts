@@ -8,6 +8,7 @@ import { VerticalAlignment, HorizontalAlignment } from "../../Models/GenericInte
 import { Vec2 } from "../../Models/Vectors";
 import { Vec2Utils } from "../../Utility/Vec2";
 import { Game } from "../../Workers/Game";
+import { EnergyCollectibleEntity, HealthCollectibleEntity, ScoreCollectibleEntity } from "../Collectibles/Collectibles";
 import { GameEntityBase } from "../EntityBase";
 import { GameplayInteractiveEntityBase } from "../GameplayInteractiveEntity";
 import { PlayerEntity } from "../Player/PlayerRoot";
@@ -109,6 +110,20 @@ export class EnemyHangingSpider extends GameplayInteractiveEntityBase {
         const stringGib = new ParticleFireAndForgetEntity('spider_string_gib');
         stringGib.Transform.CopyFromTransform(this.WorldRelativeTransform);
         stringGib.Burst();
+
+        const trans = this.WorldRelativeTransform;
+        const tPos = trans.Position;
+        const o = 20;
+        const oh = o / 2;
+
+        const score = new ScoreCollectibleEntity();
+        score.Transform.SetTransformParams([tPos[0] + Math.random() * o - oh, tPos[1] + Math.random() * o - oh], null, null, trans.Depth);
+
+        const hp = new HealthCollectibleEntity();
+        hp.Transform.SetTransformParams([tPos[0] + Math.random() * o - oh, tPos[1] + Math.random() * o - oh], null, null, trans.Depth);
+
+        const energy = new EnergyCollectibleEntity();
+        energy.Transform.SetTransformParams([tPos[0] + Math.random() * o - oh, tPos[1] + Math.random() * o - oh], null, null, trans.Depth);
 
         super.OnDied();
     }

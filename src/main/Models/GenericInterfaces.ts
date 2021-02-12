@@ -39,4 +39,15 @@ export interface IGenericCallback {
     (args?: any): any;
 }
 
+
+export function isDamagable(object: any): object is IDamagable {
+    return object.Damage && typeof (object.Damage) == "function";
+}
+
+export interface IDamagable {
+    Health: [number, number];
+    Damage(damage: number): void;
+    Die(): void;
+}
+
 export type ClassType<T> = Function & { prototype: T }

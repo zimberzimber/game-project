@@ -70,17 +70,30 @@ class SpriteManager {
         return { imageId: 0, frame: { origin: [0, 0], size: [1, 1] }, isTranslucent: false };
     }
 
-    GetStaticSpriteData(name: string): ISingleFrameSpriteStorage | null {
+    GetStaticSpriteDataNoWarning(name: string): ISingleFrameSpriteStorage | null {
         if (this.sprites[name] && (this.sprites[name] as ISingleFrameSpriteStorage).frame)
             return this.sprites[name] as ISingleFrameSpriteStorage;
+        return null;
+    }
+
+    GetStaticSpriteData(name: string): ISingleFrameSpriteStorage | null {
+        const data = this.GetStaticSpriteDataNoWarning(name);
+
+        if (data) return data;
 
         OneTimeLog.Log(`bad_static_sprite_${name}`, `Attempted to get a non-existent or non-static sprite: ${name}`, LogLevel.Warn);
         return null;
     }
 
-    GetAnimatedSpriteData(name: string): IMultiFrameSpriteStorage | null {
+    GetAnimatedSpriteDataNoWarning(name: string): IMultiFrameSpriteStorage | null {
         if (this.sprites[name] && (this.sprites[name] as IMultiFrameSpriteStorage).frames)
             return this.sprites[name] as IMultiFrameSpriteStorage;
+        return null;
+    }
+    GetAnimatedSpriteData(name: string): IMultiFrameSpriteStorage | null {
+        const data = this.GetAnimatedSpriteDataNoWarning(name);
+        
+        if (data) return data;
 
         OneTimeLog.Log(`bad_animated_sprite_${name}`, `Attempted to get a non-existent or non-animated sprite: ${name}`, LogLevel.Warn);
         return null;

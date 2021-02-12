@@ -147,7 +147,7 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
             // 12 . . 15 . .
             // 18 . . 21 . .
             if (this._cutOff[0] < 1) {
-                let pointDiff = this._size[0] * scale[0] * (1 - this._cutOff[0]);
+                let pointDiff = frameSize[0] * (1 - this._cutOff[0]);
                 let frameDiff = this._frameData.size[0] * (1 - this._cutOff[0]);
 
                 switch (this._horizontalAlignment) {
@@ -187,7 +187,7 @@ export abstract class DrawDirectiveImageBase extends DrawDirectiveBase {
             // . 13 . . 16 .
             // . 19 . . 22 .
             if (this._cutOff[1] < 1) {
-                let pointDiff = this._size[1] * scale[1] * (1 - this._cutOff[1]);
+                let pointDiff = frameSize[1] * (1 - this._cutOff[1]);
                 let frameDiff = this._frameData.size[1] * (1 - this._cutOff[1]);
                 switch (this._verticalAlignment) {
                     case VerticalAlignment.Top:

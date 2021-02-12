@@ -12,7 +12,7 @@ export interface IWeaponStateHandler {
     Depth: number;
     Entity: GameEntityBase;
     GetEnergy(): number;
-    UseEnergy(energy: number): void;
+    TryConsumeEnergy(energy: number): boolean;
 }
 
 export abstract class WeaponState {

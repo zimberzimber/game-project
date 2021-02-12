@@ -6,8 +6,8 @@
 - Instead of having the level spawn things based on position, make them spawn when the level has passed a certain length (different for each entity)
 - Timed entities, with a time to live, and an 'on died' callback
 - Fix the bug where energy and health damage burst cannot be on the same depth offset in resource UI
-- Add pickups
-- Fix weapons not preventing you from switching weapons when they should
+- Add a global data storage for things like score, and keeping track of statistics
+- Add collectibles, and score
 
         Ideas:
 For the worm, Ori jumps off Ku, asks Ku to wait outside.
@@ -15,16 +15,28 @@ She does, and after a few moments a rumbling begins, ori pops out of the side (A
 
 Have component/entity delition only mark it for deletion, and the actual deletion occur at the end of the update loop.
 
+Bonus levels with space themes
+Space Rangers music duh
+
+        Potential Visual Styles:
+
+- Doodled + 16bit(?) music/sfx
+The game is "doodled" by either Ku or Ori, and is told like a plan or daydreaming of a future adventure together.
+Intro and outro should be drawn properly, depicting the "before" and "after" the doodling begins.
+
+- Fairytale 
+The game would basically be ori-esque-lite 
+
         Done:
-- Added a fade in effect for health and energy bars
-- Added draw offset functionality to particle component
-- Particle component burst now creates [maxParticles] instances instead of [maxParticles] - [currently active] instances.
-- Resource UI now reuses a particle component instead of spawning particle entities.
-- Added shatter effect to energy
-- Can now get name of current state from player
-- Mapped icons to weapon states in resource UI
-- DebugPause now adds caught entities to `window.debugOutput`
-- Added special and ranged weapon states
-- Added weapon switching
-- Added rotation to draw directives
-- Added energy interface to weapon handler
+- Implemented weapon switch locking
+- UI now displays when weapons witching is locked
+- Added a global data handler
+- Transfered health and energy tracking to global data
+- Player entity is now also stored in global data for easy access
+- Added score
+- Fixed transform MoveForward method
+- Added life, energy, and score pickups
+- Split force component into one with gravity, and one without.
+- Added a method to clear IDB databases
+- Added methods for pulling sprites out of the sprite manager and not getting a warning if the sprite doesn't exist (for particle use mostly)
+- Added a level score goal bar

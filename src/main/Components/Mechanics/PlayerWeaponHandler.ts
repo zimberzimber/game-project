@@ -1,6 +1,7 @@
 import { GameEntityBase } from "../../Entities/EntityBase";
 import { PlayerEntity } from "../../Entities/Player/PlayerRoot";
 import { ControlKey } from "../../Models/ControlKeys";
+import { GlobalDataFields } from "../../Models/GlobalData";
 import { IMouseObserver, IMouseEvent, MouseButton, ButtonState, IKeyboardObserver, IKeyboardEvent } from "../../Models/InputModels";
 import { InitialMeleeState } from "../../Models/PlayerWeaponStates/Melee";
 import { InitialRangedState } from "../../Models/PlayerWeaponStates/Ranged";
@@ -8,13 +9,13 @@ import { InitialSpecialState } from "../../Models/PlayerWeaponStates/Special";
 import { IWeaponStateHandler, IWeaponStateParams, WeaponState } from "../../Models/PlayerWeaponStates/WeaponStateBase";
 import { Vec2 } from "../../Models/Vectors";
 import { Vec2Utils } from "../../Utility/Vec2";
+import { GlobalGameData } from "../../Workers/GlobalGameDataManager";
 import { Input } from "../../Workers/InputHandler";
 import { ComponentBase } from "../ComponentBase";
 
 const initialStates = [InitialMeleeState, InitialRangedState, InitialSpecialState];
 
 export class PlayerWeaponHandlerComponent extends ComponentBase implements IWeaponStateHandler {
-    private _isBlocked: boolean = false;
     private _initialStateIndex = 0;
     private _state: WeaponState = new initialStates[0](this);
     private _offset?: Vec2;
@@ -26,11 +27,18 @@ export class PlayerWeaponHandlerComponent extends ComponentBase implements IWeap
     get Entity(): GameEntityBase { return this._parent as GameEntityBase; }
     get CurrentState(): string { return this._state.constructor.name; }
 
+    get WeaponLocked(): boolean { return this._state.IsWeaponLocked; }
+
     GetEnergy(): number {
-        return this._parent.Energy[0];
+        return GlobalGameData.GetValue(GlobalDataFields.Energy);
     }
-    UseEnergy(energy: number) {
-        this._parent.UseEnergy(energy);
+    TryConsumeEnergy(energy: number): boolean {
+        const e = this.GetEnergy();
+        if (e < energy)
+            return false;
+
+        GlobalGameData.SetValue(GlobalDataFields.Energy, e - energy);
+        return true;
     }
 
     private _primaryFiring: boolean = false;
@@ -63,7 +71,7 @@ export class PlayerWeaponHandlerComponent extends ComponentBase implements IWeap
 
     private _keyboardObserver: IKeyboardObserver = {
         OnObservableNotified: (args: IKeyboardEvent) => {
-            if (this._isBlocked || args.state == ButtonState.Up) return;
+            if (this.WeaponLocked || args.state == ButtonState.Up) return;
 
             if (args.key == ControlKey.nextWeapon) {
                 this._initialStateIndex = (this._initialStateIndex + 1) % initialStates.length;
@@ -84,7 +92,7 @@ export class PlayerWeaponHandlerComponent extends ComponentBase implements IWeap
     }
 
     private FirePrimary() {
-        if (!this._isBlocked && this._state.CanFirePrimary)
+        if (this._state.CanFirePrimary)
             this._state.PrimaryFire(this.GetAim());
     }
 
@@ -93,7 +101,7 @@ export class PlayerWeaponHandlerComponent extends ComponentBase implements IWeap
     }
 
     private FireSecondary() {
-        if (!this._isBlocked && this._state.CanFireSecondary)
+        if (this._state.CanFireSecondary)
             this._state.SecondaryFire(this.GetAim());
     }
 

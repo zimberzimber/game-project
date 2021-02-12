@@ -1,4 +1,4 @@
-import { ForceComponent } from "../../Components/Mechanics/ForceComponent";
+import { ForceComponent, GravityForceComponent } from "../../Components/Mechanics/ForceComponent";
 import { TimerComponent } from "../../Components/Mechanics/TimerComponent";
 import { DrawDirectiveStaticImage } from "../../Components/Visual/DrawDirectiveStaticImage";
 import { HorizontalAlignment, VerticalAlignment } from "../../Models/GenericInterfaces";
@@ -23,7 +23,7 @@ export class BasicGibEntity extends GameEntityBase {
         dd.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
         dd.Size = 2;
 
-        const f = new ForceComponent(this, gibConfig.forceResist);
+        const f = new GravityForceComponent(this, gibConfig.forceResist);
         f.ApplyForceInDirection(gibConfig.baseForce + Math.random() * gibConfig.extraForceMax, angle % 360);
 
         this._isClockwise = angle <= 90 && angle > -90

@@ -140,6 +140,13 @@ class IndexeddbManager {
         Log.Debug(`(IDB) CHECK ${dbName} -> ${storeName} -> ${key} = ${result}`);
         return result;
     }
+
+    async Clear(): Promise<void>{
+        for (let name in this.dbs) {
+            this.dbs[name].context.close();
+            window.indexedDB.deleteDatabase(name);
+        }
+    }
 }
 
 export const IDB = new IndexeddbManager();

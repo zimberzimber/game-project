@@ -4,12 +4,16 @@ import { PlayerMovementComponent } from "../../Components/Mechanics/PlayerMoveme
 import { CollisionGroup, HitboxType, TriggerState } from "../../Models/CollisionModels";
 import { HitboxBase } from "../../Components/Hitboxes/HitboxBase";
 import { LightComponent } from "../../Components/Visual/Light";
-import { HorizontalAlignment, VerticalAlignment } from "../../Models/GenericInterfaces";
+import { HorizontalAlignment, IDamagable, VerticalAlignment } from "../../Models/GenericInterfaces";
 import { GameplayInteractiveEntityBase } from "../GameplayInteractiveEntity";
 import { Vec2, Vec3 } from "../../Models/Vectors";
 import { SimpleAnimatorComponent } from "../../Components/Mechanics/TimerComponent";
 import { PlayerWeaponHandlerComponent } from "../../Components/Mechanics/PlayerWeaponHandler";
-import { EnergyResourceComponent } from "../../Components/Mechanics/Resource";
+import { EnergyResourceComponent, HealthResourceComponent } from "../../Components/Mechanics/Resource";
+import { GlobalDataFields, IGlobalGameDataEventArgs, IGlobalGameDataObserver } from "../../Models/GlobalData";
+import { HitboxPolygon } from "../../Components/Hitboxes/HitboxPolygon";
+import { HitboxRectangle } from "../../Components/Hitboxes/HitboxRectangle";
+import { GlobalGameData } from "../../Workers/GlobalGameDataManager";
 
 const cfg = {
     postDamageInvlunTime: 1,
@@ -37,23 +41,29 @@ const cfg = {
 //      Ori body DD + Ori light + Ori particles
 //          Ori arms + weapon controller
 
-export class PlayerEntity extends GameplayInteractiveEntityBase {
+export class PlayerEntity extends GameEntityBase implements IDamagable {
+    protected _hitbox: HitboxBase;
+    protected _healthObserver: IGlobalGameDataObserver;
+
     private _kuDd: DrawDirectiveAnimatedImage;
     private _kuDdAnimation: SimpleAnimatorComponent;
     private _oriEntity: OriEntity;
     private _weaponHandler: PlayerWeaponHandlerComponent;
 
-    private energy: EnergyResourceComponent;
-    get Energy(): [number, number] { return [this.energy.Value, this.energy.MaxValue]; }
-
     private _invulnTime = 0;
     get IsInvuln(): boolean { return this._invulnTime > 0; }
 
     get WeaponState() { return this._weaponHandler.CurrentState; }
+    get WeaponLocked() { return this._weaponHandler.WeaponLocked; }
 
     constructor() {
-        super(null, cfg.maxHp, cfg.hitboxType, cfg.hitboxSize, CollisionGroup.Player, CollisionGroup.None, TriggerState.NotTrigger);
-        this.energy = new EnergyResourceComponent(this, 5);
+        super();
+
+        this._hitbox = new HitboxRectangle(this, cfg.hitboxSize[0], cfg.hitboxSize[1]);
+        this._hitbox.CollisionGroup = CollisionGroup.Player;
+        this._hitbox.CollisionScript = (e: HitboxBase): void => {
+            // e.Parent.transform.MoveTowards(this.transform.Position, -5);
+        }
 
         this._kuDd = new DrawDirectiveAnimatedImage(this, "ku", cfg.ku_size);
         this._kuDd.Alignment = { vertical: VerticalAlignment.Middle, horizontal: HorizontalAlignment.Middle };
@@ -62,14 +72,27 @@ export class PlayerEntity extends GameplayInteractiveEntityBase {
 
         new PlayerMovementComponent(this);
 
-        this.hitbox.CollisionScript = (e: HitboxBase): void => {
-            // e.Parent.transform.MoveTowards(this.transform.Position, -5);
-        }
-
         this._oriEntity = new OriEntity(this);
         this._oriEntity.Transform.SetTransformParams(cfg.ori_offset, null, null, -1);
 
         this._weaponHandler = new PlayerWeaponHandlerComponent(this, cfg.weapon_offset);
+
+        this._healthObserver = {
+            OnObservableNotified: (args: IGlobalGameDataEventArgs) => {
+                if (args.newValue < args.oldValue)
+                    this.OnDamaged(args.oldValue - args.newValue);
+            }
+        }
+        GlobalGameData.Subscribe(GlobalDataFields.Health, this._healthObserver);
+        GlobalGameData.SetValue(GlobalDataFields.PlayerEntity, this);
+    }
+
+    get Health(): [number, number] {
+        return [GlobalGameData.GetValue(GlobalDataFields.Health), GlobalGameData.GetValue(GlobalDataFields.MaxHealth)]
+    }
+
+    Die(): void {
+        GlobalGameData.SetValue(GlobalDataFields.Health, 0);
     }
 
     Update(delta: number): void {
@@ -81,11 +104,8 @@ export class PlayerEntity extends GameplayInteractiveEntityBase {
 
     Damage(damage: number): void {
         if (this.IsInvuln) return;
-        super.Damage(damage);
-    }
-
-    UseEnergy(energy: number): void {
-        this.energy.Value -= energy;
+        this._invulnTime = cfg.postDamageInvlunTime;
+        GlobalGameData.SetValue(GlobalDataFields.Health, GlobalGameData.GetValue(GlobalDataFields.Health) - damage);
     }
 
     protected OnDied(): void {
@@ -94,8 +114,19 @@ export class PlayerEntity extends GameplayInteractiveEntityBase {
     }
 
     protected OnDamaged(damage: number): void {
-        this._invulnTime = cfg.postDamageInvlunTime;
-        super.OnDamaged(damage);
+        const hp = GlobalGameData.GetValue(GlobalDataFields.Health);
+        if (damage >= hp) {
+            this.OnDied();
+        }
+    }
+
+    Delete(): void {
+        GlobalGameData.Unsubscribe(GlobalDataFields.Health, this._healthObserver);
+
+        if (GlobalGameData.GetValue(GlobalDataFields.PlayerEntity) == this)
+            GlobalGameData.SetValue(GlobalDataFields.PlayerEntity, undefined);
+
+        super.Delete();
     }
 }
 

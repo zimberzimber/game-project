@@ -41,7 +41,7 @@ export class ParticleComponent extends DrawDirectiveBase {
 
         this._particleData = particleDefinitions[particleName];
 
-        let sd: IMultiFrameSpriteStorage | ISingleFrameSpriteStorage | null = Sprites.GetAnimatedSpriteData(this._particleData.spriteName) || Sprites.GetStaticSpriteData(this._particleData.spriteName);
+        let sd: IMultiFrameSpriteStorage | ISingleFrameSpriteStorage | null = Sprites.GetAnimatedSpriteDataNoWarning(this._particleData.spriteName) || Sprites.GetStaticSpriteDataNoWarning(this._particleData.spriteName);
 
         if (sd == null) {
             OneTimeLog.Log(`no_sprite_${this._particleData.spriteName}_for_particle_${particleName}`, `${particleName} particle uses sprite ${this._particleData.spriteName} which doesn't exist.`, LogLevel.Warn);

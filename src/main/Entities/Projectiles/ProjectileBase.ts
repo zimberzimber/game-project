@@ -3,12 +3,12 @@ import { HitboxCircle } from "../../Components/Hitboxes/HitboxCircle";
 import { HitboxPolygon } from "../../Components/Hitboxes/HitboxPolygon";
 import { HitboxRectangle } from "../../Components/Hitboxes/HitboxRectangle";
 import { BasicMovementComponent } from "../../Components/Mechanics/BasicMovementComponent";
-import { ForceComponent } from "../../Components/Mechanics/ForceComponent";
+import { ForceComponent, GravityForceComponent } from "../../Components/Mechanics/ForceComponent";
 import { TimerComponent } from "../../Components/Mechanics/TimerComponent";
 import { DrawDirectiveStaticImage } from "../../Components/Visual/DrawDirectiveStaticImage";
 import { ParticleComponent } from "../../Components/Visual/Particle";
 import { HitboxType } from "../../Models/CollisionModels";
-import { HorizontalAlignment, VerticalAlignment } from "../../Models/GenericInterfaces";
+import { HorizontalAlignment, IDamagable, isDamagable, VerticalAlignment } from "../../Models/GenericInterfaces";
 import { IProjectileConfig, IProjectileCollisionConfig } from "../../Models/ProjectileModels";
 import { IsVec2, Vec2 } from "../../Models/Vectors";
 import { Log } from "../../Workers/Logger";
@@ -87,7 +87,7 @@ export class ProjectileBase extends GameEntityBase {
         this._hitbox.TriggerState = config.triggerState;
 
         this._hitbox.CollisionScript = (trigerredBy: HitboxBase) => {
-            if (config.damage && trigerredBy.Parent instanceof GameplayInteractiveEntityBase)
+            if (config.damage && isDamagable(trigerredBy.Parent))
                 trigerredBy.Parent.Damage(config.damage);
             this.DeleteProjectile();
         }
@@ -136,7 +136,7 @@ export class ProjectileBasicWeighted extends ProjectileBase {
     constructor(config: IProjectileConfig, collisionConfig: IProjectileCollisionConfig, angle: number, faceDirection: boolean, forceMultiplier: number = 1) {
         super(config, collisionConfig);
 
-        this._force = new ForceComponent(this, 0);
+        this._force = new GravityForceComponent(this, 0);
         this._force.ApplyForceInDirection(config.speed * forceMultiplier, angle);
 
         this._faceDirection = faceDirection;
